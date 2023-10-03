@@ -1,0 +1,10 @@
+{
+    "continue": "Continue",
+    "landing": {
+        "welcome": "Welcome to Unisync",
+        "description": "A tool to connect your phone and your PC together."
+    },
+    "devices": {
+        "title": "Unisync Devices"
+    }
+}
