@@ -2,10 +2,10 @@ package com.anhquan.unisync.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.anhquan.unisync.constants.SPKey
-import com.anhquan.unisync.models.ClientInfo
-import com.anhquan.unisync.repository.ConnectionRepository
-import com.anhquan.unisync.repository.ConnectionRepositoryImpl
+import com.anhquan.unisync.repository.ConfigRepository
+import com.anhquan.unisync.repository.PairingRepository
+import com.anhquan.unisync.repository.impl.ConfigRepositoryImpl
+import com.anhquan.unisync.repository.impl.PairingRepositoryImpl
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -19,18 +19,18 @@ import javax.inject.Singleton
 class AppModule {
     @Singleton
     @Provides
-    fun provideConnectionRepository(
-        sharedPreferences: SharedPreferences,
+    fun provideConnectionRepository(config: ConfigRepository): PairingRepository {
+        return PairingRepositoryImpl(config)
+    }
+
+    @Singleton
+    @Provides
+    fun provideConfigRepository(
+        @ApplicationContext context: Context,
+        sp: SharedPreferences,
         gson: Gson
-    ): ConnectionRepository {
-        return ConnectionRepositoryImpl(
-            gson.fromJson(
-                sharedPreferences.getString(
-                    SPKey.clientInfo,
-                    ""
-                ), ClientInfo::class.java
-            )
-        )
+    ): ConfigRepository {
+        return ConfigRepositoryImpl(context, sp, gson)
     }
 
     @Singleton

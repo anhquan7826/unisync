@@ -2,12 +2,15 @@ package com.anhquan.unisync.repository
 
 import com.anhquan.unisync.models.ClientInfo
 
-interface ConnectionRepository {
-    fun initiate()
+interface PairingRepository {
+    fun startDiscoveryService()
 
-    fun addListener(
+    fun addDiscoveryListener(
         onClientAdded: (ClientInfo) -> Unit,
         onClientRemoved: (ClientInfo) -> Unit,
-        onClientChanged: ((List<ClientInfo>) -> Unit)? = null
     )
+
+    fun connectClient(client: ClientInfo)
+
+    fun requestPair(client: ClientInfo)
 }
