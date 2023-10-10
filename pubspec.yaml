@@ -41,6 +41,8 @@ dependencies:
   easy_localization: ^3.0.3
   json_annotation: ^4.8.1
   build_runner: ^2.4.6
+  logger: ^2.0.2+1
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:

@@ -1,16 +1,17 @@
 package com.anhquan.unisync.repository
 
-import com.anhquan.unisync.models.ClientInfo
+import com.anhquan.unisync.models.DeviceInfo
 
 interface PairingRepository {
-    fun startDiscoveryService()
+    fun startService()
 
-    fun addDiscoveryListener(
-        onClientAdded: (ClientInfo) -> Unit,
-        onClientRemoved: (ClientInfo) -> Unit,
+    fun stopService()
+
+    fun getDiscoveredDevices(): List<DeviceInfo>
+
+    fun addListener(
+        onClientAdded: (DeviceInfo) -> Unit,
+        onClientRemoved: (DeviceInfo) -> Unit,
     )
-
-    fun connectClient(client: ClientInfo)
-
-    fun requestPair(client: ClientInfo)
+    fun requestPair(client: DeviceInfo)
 }

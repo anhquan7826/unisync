@@ -2,9 +2,10 @@ package com.anhquan.unisync.plugins
 
 import com.anhquan.unisync.constants.NetworkPorts
 import com.anhquan.unisync.extensions.text
+import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.errorLog
 import com.anhquan.unisync.utils.infoLog
-import com.anhquan.unisync.utils.runSingle
+import java.net.InetAddress
 import javax.jmdns.JmDNS
 import javax.jmdns.ServiceEvent
 import javax.jmdns.ServiceInfo
@@ -12,13 +13,17 @@ import javax.jmdns.ServiceListener
 
 object MdnsPlugin {
     private const val serviceType = "_http._tcp.local."
-    private const val serviceName = "com.anhquan.unisync"
+
+    private lateinit var ip: String
+    private lateinit var name: String
 
     private lateinit var jmdns: JmDNS
     private lateinit var serviceInfo: ServiceInfo
     private lateinit var serviceListener: ServiceListener
 
-    fun addServiceInfo(name: String, info: String) {
+    fun addServiceInfo(ip: String, name: String, info: String) {
+        this.ip = ip
+        this.name = name
         serviceInfo = ServiceInfo.create(
             serviceType,
             name,
@@ -27,7 +32,7 @@ object MdnsPlugin {
         )
     }
 
-    fun addServiceDiscoveryListener(
+    fun addServiceListener(
         onAddService: (info: String) -> Unit,
         onRemoveService: (info: String) -> Unit
     ) {
@@ -36,7 +41,7 @@ object MdnsPlugin {
 
             override fun serviceRemoved(event: ServiceEvent?) {
                 if (event != null) {
-                    if (event.info.name == serviceInfo.name) {
+                    if (event.info.name == serviceInfo.name && event.info.text != serviceInfo.text) {
                         onRemoveService.invoke(event.info.text)
                     }
                 }
@@ -44,7 +49,7 @@ object MdnsPlugin {
 
             override fun serviceResolved(event: ServiceEvent?) {
                 if (event != null) {
-                    if (event.info.name == serviceInfo.name) {
+                    if (event.info.name == serviceInfo.name && event.info.text != serviceInfo.text) {
                         onAddService.invoke(event.info.text)
                     }
                 }
@@ -52,25 +57,45 @@ object MdnsPlugin {
         }
     }
 
+    fun getDiscoveredServices(): List<String> {
+        val result = mutableListOf<String>()
+        for (service in jmdns.list(serviceType)) {
+            result.add(service.text)
+        }
+        return result
+    }
+
     fun start() {
-        runSingle(
-            callback = {
-                if (!this::jmdns.isInitialized) jmdns = JmDNS.create()
-                jmdns.registerService(serviceInfo)
-                jmdns.addServiceListener(serviceType, serviceListener)
-                infoLog("MdnsPlugin: service started.")
-            },
-            onError = {
-                errorLog("mDNSPlugin: cannot create JmDNS instance!\n${it.message}")
+        try {
+            jmdns = JmDNS.create(InetAddress.getByName(ip), name)
+            jmdns.registerService(serviceInfo)
+            debugLog("${this::class.simpleName}: added service info: '$serviceInfo'.")
+            if (this::serviceListener.isInitialized) {
+                jmdns.addServiceListener(
+                    serviceType,
+                    serviceListener
+                )
+                debugLog("${this::class.simpleName}: added service listener.")
             }
-        )
+            infoLog("${this::class.simpleName}: service started.")
+        } catch (e: Exception) {
+            errorLog("${this::class.simpleName}: cannot create JmDNS instance!\n${e.message}")
+            throw e
+        }
     }
 
     fun stop() {
-        runSingle {
+        try {
             jmdns.unregisterAllServices()
-            jmdns.removeServiceListener(serviceType, serviceListener)
-            infoLog("MdnsPlugin: service stopped.")
+            if (this::serviceListener.isInitialized) jmdns.removeServiceListener(
+                serviceType,
+                serviceListener
+            )
+            jmdns.close()
+            infoLog("${this::class.simpleName}: service stopped.")
+        } catch (e: Exception) {
+            errorLog("${this::class.simpleName}: cannot stop service: ${e.message}")
+            throw e
         }
     }
 }

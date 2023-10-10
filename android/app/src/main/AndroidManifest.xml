@@ -3,18 +3,22 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
 
     <application
-        android:name=".MainApplication"
+        android:name=".UnisyncApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="Unisync">
         <service
-            android:name=".services.ConnectionService"
-            android:foregroundServiceType="connectedDevice"
-            android:exported="false" />
+            android:name=".UnisyncService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice|dataSync|mediaPlayback|phoneCall|remoteMessaging" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".UnisyncActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="true"
             android:hardwareAccelerated="true"

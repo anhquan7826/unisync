@@ -3,7 +3,7 @@ package com.anhquan.unisync.repository.impl
 import android.content.Context
 import android.content.SharedPreferences
 import com.anhquan.unisync.constants.SPKey
-import com.anhquan.unisync.models.ClientInfo
+import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.repository.ConfigRepository
 import com.google.gson.Gson
 
@@ -13,13 +13,13 @@ class ConfigRepositoryImpl(
     private val gson: Gson
 ) :
     ConfigRepository {
-    override val clientInfo: ClientInfo
+    override val deviceInfo: DeviceInfo
         get() {
             return gson.fromJson(
                 sp.getString(
-                    SPKey.clientInfo,
+                    SPKey.deviceInfo,
                     ""
-                ), ClientInfo::class.java
+                ), DeviceInfo::class.java
             )
         }
     override val packageName: String

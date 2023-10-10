@@ -2,20 +2,20 @@ package com.anhquan.unisync.utils
 
 import android.util.Log
 
-private const val logTag = "Unisync"
+private const val TAG = "Unisync@Android"
 
 fun debugLog(message: Any?) {
-    Log.d(logTag, message.toString())
+    Log.d(TAG, message.toString())
 }
 
 fun errorLog(message: Any?) {
-    Log.e(logTag, message.toString())
+    Log.e(TAG, message.toString())
 }
 
 fun warningLog(message: Any?) {
-    Log.w(logTag, message.toString())
+    Log.w(TAG, message.toString())
 }
 
 fun infoLog(message: Any?) {
-    Log.i(logTag, message.toString())
+    Log.i(TAG, message.toString())
 }

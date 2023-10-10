@@ -5,6 +5,9 @@
         "description": "A tool to connect your phone and your PC together."
     },
     "devices": {
-        "title": "Unisync Devices"
+        "title": "Unisync Devices",
+        "connected_devices": "Connected devices",
+        "disconnected_devices": "Disconnected devices",
+        "add_device": "Add new device"
     }
 }

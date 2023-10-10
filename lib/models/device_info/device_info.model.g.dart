@@ -7,12 +7,18 @@ part of 'device_info.model.dart';
 // **************************************************************************
 
 DeviceInfo _$DeviceInfoFromJson(Map<String, dynamic> json) => DeviceInfo(
-      deviceId: json['deviceId'] as String,
+      id: json['id'] as String,
+      name: json['name'] as String,
+      ip: json['ip'] as String? ?? '',
+      publicKey: json['publicKey'] as String? ?? '',
       deviceType: json['deviceType'] as String,
     );
 
 Map<String, dynamic> _$DeviceInfoToJson(DeviceInfo instance) =>
     <String, dynamic>{
-      'deviceId': instance.deviceId,
+      'id': instance.id,
+      'name': instance.name,
+      'ip': instance.ip,
+      'publicKey': instance.publicKey,
       'deviceType': instance.deviceType,
     };

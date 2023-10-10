@@ -15,7 +15,7 @@ class _DevicesViewDesktopState extends State<DevicesViewDesktop> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(R.strings.devices.textTitle).tr(),
+        title: Text(R.strings.devices.title).tr(),
       ),
       body: Row(
         children: [

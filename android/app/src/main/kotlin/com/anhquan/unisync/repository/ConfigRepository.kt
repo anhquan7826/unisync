@@ -1,9 +1,9 @@
 package com.anhquan.unisync.repository
 
-import com.anhquan.unisync.models.ClientInfo
+import com.anhquan.unisync.models.DeviceInfo
 
 interface ConfigRepository {
-    val clientInfo: ClientInfo
+    val deviceInfo: DeviceInfo
 
     val packageName: String
 }

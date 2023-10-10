@@ -1,4 +1,6 @@
 class StringResources {
+  final appName = 'Unisync';
+
   final landing = _Landing();
   final devices = _Devices();
 
@@ -6,10 +8,13 @@ class StringResources {
 }
 
 class _Landing {
-  final textWelcome = 'landing.welcome';
-  final textDescription = 'landing.description';
+  final welcome = 'landing.welcome';
+  final description = 'landing.description';
 }
 
 class _Devices {
-  final textTitle = 'devices.title';
+  final title = 'devices.title';
+  final connectedDevice = 'devices.connected_devices';
+  final disconnectedDevice = 'devices.disconnected_devices';
+  final addDevice = 'devices.add_device';
 }

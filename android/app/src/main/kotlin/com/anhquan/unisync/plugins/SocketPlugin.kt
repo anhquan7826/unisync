@@ -10,27 +10,72 @@ import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
 import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.IOException
+import java.net.ServerSocket
 import java.net.Socket
 
 object SocketPlugin {
+    private lateinit var serverSocket: ServerSocket
+    private lateinit var serverListenerDisposable: Disposable
     private val connections = mutableMapOf<String, SocketConnection>()
 
-    fun create(ip: String): SocketConnection {
+    fun getConnection(ip: String): SocketConnection {
         return if (connections.containsKey(ip)) {
-            warningLog("SocketPlugin: connection to $ip has already been established.")
+            infoLog("${this::class.qualifiedName}: connection to $ip has already been established.")
             connections[ip]!!
         } else {
-            infoLog("SocketPlugin: create new connection to $ip.")
+            infoLog("${this::class.qualifiedName}: create new connection to $ip.")
             val connection = SocketConnection(ip)
             connections[ip] = connection
             connection
         }
     }
 
-    class SocketConnection(val ip: String) {
+    fun startServer() {
+        serverListenerDisposable = runTask<Socket>(
+            task = {
+                serverSocket = ServerSocket(NetworkPorts.socketServerPort)
+                while (true) {
+                    try {
+                        val socket = serverSocket.accept()
+                        it.onNext(socket)
+                    } catch (e: Throwable) {
+                        it.onError(e)
+                    }
+                }
+            },
+            onResult = {
+                val ip = it.inetAddress.hostAddress!!
+                if (connections.containsKey(ip)) {
+                    warningLog("${this::class.qualifiedName}: server accepted an already established connection from $ip.")
+                } else {
+                    connections[ip] = SocketConnection(it)
+                }
+            },
+            onError = {
+                errorLog("${this::class.qualifiedName}: server error: ${it.message}")
+            }
+        )
+    }
+
+    fun stopServer() {
+        runSingle(
+            callback = {
+                serverSocket.close()
+                serverListenerDisposable.dispose()
+                infoLog("${this::class.qualifiedName}: server closed.")
+            },
+            onError = {
+                errorLog("${this::class.qualifiedName}: cannot stop server.\n${it.message}")
+            }
+        )
+    }
+
+    class SocketConnection {
+        private var ip: String
         private lateinit var socket: Socket
         private lateinit var reader: BufferedReader
         private lateinit var writer: BufferedWriter
@@ -40,6 +85,15 @@ object SocketPlugin {
         private var incomingMessageListener: ((String) -> Unit)? = null
 
         private val disposables = CompositeDisposable()
+
+        constructor(ip: String) {
+            this.ip = ip
+        }
+
+        constructor(socket: Socket) {
+            this.socket = socket
+            this.ip = socket.inetAddress.hostAddress ?: "null"
+        }
 
         var isConnected: Boolean = false
             private set
@@ -62,17 +116,19 @@ object SocketPlugin {
         fun connect() {
             runSingle(
                 callback = {
-                    socket = Socket(ip, NetworkPorts.socketPort)
+                    if (!this::socket.isInitialized) {
+                        socket = Socket(ip, NetworkPorts.socketClientPort)
+                    }
                     reader = socket.getInputStream().bufferedReader()
                     writer = socket.getOutputStream().bufferedWriter()
-                    infoLog("SocketConnection@$ip: connected.")
+                    infoLog("${this::class.qualifiedName}@$ip: connected.")
                     isConnected = true
                     onConnectListener?.invoke()
                     listenInputStream()
                     listenState()
                 },
                 onError = {
-                    errorLog("SocketConnection@$ip: cannot connect.\n${it.message}")
+                    errorLog("${this::class.qualifiedName}@$ip: cannot connect.\n${it.message}")
                 }
             )
         }
@@ -81,10 +137,10 @@ object SocketPlugin {
             runSingle(
                 callback = {
                     socket.getOutputStream().bufferedWriter().write(message)
-                    debugLog("SocketConnection@$ip: posted message: '$message'.")
+                    debugLog("${this::class.qualifiedName}@$ip: posted message: '$message'.")
                 },
                 onError = {
-                    errorLog("SocketConnection: cannot post message to $ip.\n${it.message}")
+                    errorLog("${this::class.qualifiedName}: cannot post message to $ip.\n${it.message}")
                 }
             )
         }
@@ -98,21 +154,21 @@ object SocketPlugin {
                         disposables.dispose()
                         onDisconnectListener?.invoke()
                         connections.remove(ip)
-                        infoLog("SocketConnection@$ip: disconnected.")
+                        infoLog("${this::class.qualifiedName}@$ip: disconnected.")
                     },
                     onError = {
-                        errorLog("SocketPlugin: cannot close connection to $ip.\n${it.message}")
+                        errorLog("${this::class.qualifiedName}: cannot close connection to $ip.\n${it.message}")
                     }
                 )
             } else {
-                errorLog("SocketPlugin: connection has not been started.")
+                errorLog("${this::class.qualifiedName}: connection has not been started.")
             }
         }
 
         private fun listenInputStream() {
             runTask(
                 task = {
-                    infoLog("SocketConnection@$ip: starting input stream listener.")
+                    infoLog("${this::class.qualifiedName}@$ip: starting input stream listener.")
                     try {
                         val input = socket.getInputStream().bufferedReader()
                         while (true) {
@@ -124,7 +180,7 @@ object SocketPlugin {
                     }
                 },
                 onResult = {
-                    debugLog("SocketConnection@$ip: incoming message: '$it'.")
+                    debugLog("${this::class.qualifiedName}@$ip: incoming message: '$it'.")
                     incomingMessageListener?.invoke(it)
                 },
                 onError = {

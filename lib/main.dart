@@ -1,5 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:unisync/repository/impl/pairing.repository.impl.dart';
+import 'package:unisync/repository/pairing.repository.dart';
 import 'package:unisync/routes/routes.dart';
 import 'package:unisync/themes/app_theme.dart';
 
@@ -34,6 +37,17 @@ class Unisync extends StatelessWidget {
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
+      builder: (context, child) {
+        return MultiRepositoryProvider(
+          providers: [
+            RepositoryProvider<PairingRepository>(
+              create: (context) => PairingRepositoryImpl(),
+              lazy: false,
+            )
+          ],
+          child: child!,
+        );
+      },
     );
   }
 }
