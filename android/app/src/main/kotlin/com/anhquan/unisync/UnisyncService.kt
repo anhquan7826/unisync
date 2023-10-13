@@ -6,137 +6,91 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.wifi.WifiManager
 import android.os.IBinder
-import com.anhquan.unisync.models.ChannelResult
-import com.anhquan.unisync.plugins.MethodChannelPlugin
-import com.anhquan.unisync.repository.ConfigRepository
-import com.anhquan.unisync.repository.PairingRepository
-import com.anhquan.unisync.utils.runTask
-import com.anhquan.unisync.utils.toMap
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import com.anhquan.unisync.plugins.MdnsPlugin
+import com.anhquan.unisync.plugins.SocketPlugin
+import com.anhquan.unisync.plugins.UnisyncPlugin
+import com.anhquan.unisync.utils.infoLog
 
-@AndroidEntryPoint
 class UnisyncService : Service() {
-    @Inject
-    lateinit var pairingRepository: PairingRepository
-
-    @Inject
-    lateinit var configRepository: ConfigRepository
-
-    @Inject
-    lateinit var notificationManager: NotificationManager
-
-    private lateinit var connectivityManager: ConnectivityManager
-    private lateinit var wifiManager: WifiManager
+    private val plugins = mutableMapOf<String, UnisyncPlugin>()
 
     override fun onCreate() {
         super.onCreate()
-        connectivityManager = getSystemService(ConnectivityManager::class.java)
-        wifiManager = getSystemService(WifiManager::class.java)
-
-        MethodChannelPlugin.ConnectionChannel.apply {
-            addCallHandler(NATIVE_START_DISCOVERY_SERVICE) { _, result ->
-                runTask<Unit>(
-                    task = {
-                        try {
-                            pairingRepository.startService()
-                            it.onComplete()
-                        } catch (e: Exception) {
-                            it.onError(e)
-                        }
-                    },
-                    onComplete = {
-                        result.success(
-                            toMap(
-                                ChannelResult(
-                                    method = NATIVE_START_DISCOVERY_SERVICE,
-                                    resultCode = ChannelResult.SUCCESS
-                                )
-                            )
-                        )
-                    },
-                    onError = {
-                        // TODO: Define error codes.
-                        result.success(
-                            toMap(
-                                ChannelResult(
-                                    method = NATIVE_START_DISCOVERY_SERVICE,
-                                    resultCode = ChannelResult.FAILED,
-                                    error = it.message
-                                )
-                            )
-                        )
-                    }
-                )
-            }
-            addCallHandler(NATIVE_STOP_DISCOVERY_SERVICE) { _, result ->
-                runTask<Unit>(
-                    task = {
-                        try {
-                            pairingRepository.stopService()
-                            it.onComplete()
-                        } catch (e: Exception) {
-                            it.onError(e)
-                        }
-                    },
-                    onComplete = {
-                        result.success(
-                            toMap(
-                                ChannelResult(
-                                    method = NATIVE_STOP_DISCOVERY_SERVICE,
-                                    resultCode = ChannelResult.SUCCESS
-                                )
-                            )
-                        )
-                    },
-                    onError = {
-                        result.success(
-                            toMap(
-                                ChannelResult(
-                                    method = NATIVE_STOP_DISCOVERY_SERVICE,
-                                    resultCode = ChannelResult.FAILED,
-                                    error = it.message
-                                )
-                            )
-                        )
-                    }
-                )
-            }
-            addCallHandler(NATIVE_GET_DISCOVERED_DEVICES) { _, result ->
-                runTask(
-                    task = {
-                        it.onNext(pairingRepository.getDiscoveredDevices())
-                    },
-                    onResult = {
-                        result.success(
-                            toMap(
-                                ChannelResult(
-                                    method = NATIVE_GET_DISCOVERED_DEVICES,
-                                    resultCode = ChannelResult.SUCCESS,
-                                    result = it.map { device -> toMap(device) }
-                                )
-                            )
-                        )
-                    }
-                )
-            }
-        }
+        initiatePlugins()
+        configureFeatures()
+        infoLog("${this::class.simpleName}: service created.")
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        configureNotificationChannel()
+        startPlugins()
+        startForeground(1, buildPersistentNotification())
+        infoLog("${this::class.simpleName}: service started.")
+        return START_STICKY
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopPlugins()
+    }
+
+    private fun initiatePlugins() {
+        plugins[UnisyncPlugin.MDNS_PLUGIN] = MdnsPlugin()
+        plugins[UnisyncPlugin.SOCKET_PLUGIN] = SocketPlugin()
+    }
+
+    private fun startPlugins() {
+        plugins.values.forEach {
+            it.start(this)
+        }
+    }
+
+    private fun stopPlugins() {
+        plugins.values.forEach {
+            it.stop()
+        }
+    }
+
+    private fun configureFeatures() {
+//        ChannelUtil.ConnectionChannel.apply {
+//            addCallHandler(NATIVE_GET_DISCOVERED_DEVICES) { _, result ->
+//                runTask(
+//                    task = {
+//                        it.onNext(pairingRepository.getDiscoveredDevices())
+//                    },
+//                    onResult = {
+//                        result.success(
+//                            toMap(
+//                                ChannelResult(
+//                                    method = NATIVE_GET_DISCOVERED_DEVICES,
+//                                    resultCode = ChannelResult.SUCCESS,
+//                                    result = it.map { device -> toMap(device) }
+//                                )
+//                            )
+//                        )
+//                    }
+//                )
+//            }
+//        }
+    }
+
+    private fun configureNotificationChannel() {
         val notificationChannel = NotificationChannel(
             "$packageName.service",
             "Persistent Notification",
             NotificationManager.IMPORTANCE_LOW
         )
         notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-        notificationManager.createNotificationChannel(notificationChannel)
-        val notification = Notification.Builder(this, "$packageName.service")
+        getSystemService(NotificationManager::class.java).createNotificationChannel(
+            notificationChannel
+        )
+    }
+
+    private fun buildPersistentNotification(): Notification {
+        return Notification.Builder(this, "$packageName.service")
             .setOngoing(true)
             .setContentTitle("Unisync")
             .setContentText("Unisync is running in the background.")
@@ -149,7 +103,5 @@ class UnisyncService : Service() {
                 )
             )
             .build()
-        startForeground(1, notification)
-        return START_STICKY
     }
 }

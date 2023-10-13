@@ -14,9 +14,10 @@ fun runSingle(
     onError: (e: Throwable) -> Unit = { errorLog("runSingle: error:\n${it.stackTrace.joinToString("\n")}\n$it") },
     callback: () -> Unit,
 ): Disposable {
-    return Single.create<Unit> {
+    return Single.create {
         try {
             callback.invoke()
+            it.onSuccess(Unit)
         } catch (e: Throwable) {
             it.onError(e)
         }

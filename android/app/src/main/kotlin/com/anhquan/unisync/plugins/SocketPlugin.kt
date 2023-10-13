@@ -1,11 +1,11 @@
 package com.anhquan.unisync.plugins
 
+import android.content.Context
 import com.anhquan.unisync.constants.NetworkPorts
 import com.anhquan.unisync.extensions.addTo
 import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.errorLog
 import com.anhquan.unisync.utils.infoLog
-import com.anhquan.unisync.utils.runPeriodic
 import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
@@ -17,27 +17,173 @@ import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 
-object SocketPlugin {
-    private lateinit var serverSocket: ServerSocket
-    private lateinit var serverListenerDisposable: Disposable
-    private val connections = mutableMapOf<String, SocketConnection>()
+class SocketPlugin(
+    override val pluginConnection: UnisyncPluginConnection = object : UnisyncPluginConnection {
+        override fun onPluginStarted(handler: UnisyncPluginHandler) {
+            infoLog("${this::class.simpleName}: Socket plugin started.")
+        }
 
-    fun getConnection(ip: String): SocketConnection {
-        return if (connections.containsKey(ip)) {
-            infoLog("${this::class.qualifiedName}: connection to $ip has already been established.")
-            connections[ip]!!
-        } else {
-            infoLog("${this::class.qualifiedName}: create new connection to $ip.")
-            val connection = SocketConnection(ip)
-            connections[ip] = connection
-            connection
+        override fun onPluginError(error: Exception) {
+            infoLog("${this::class.simpleName}: Socket plugin error:\n${error.message}")
+        }
+
+        override fun onPluginStopped() {
+            infoLog("${this::class.simpleName}: Socket plugin stopped.")
+        }
+
+    }
+) : UnisyncPlugin() {
+    enum class ConnectionState {
+        STATE_ERROR, STATE_DISCONNECTED
+    }
+
+    inner class SocketConnection {
+        inner class SocketConnectionException : Exception() {
+            override val message: String
+                get() = "${this@SocketConnection}@$ip: connection has closed!"
+        }
+
+        private var ip: String
+        private lateinit var socket: Socket
+        private lateinit var reader: BufferedReader
+        private lateinit var writer: BufferedWriter
+
+        private var stateListener: ((ConnectionState, String?) -> Unit)? = null
+        private var messageListener: ((String) -> Unit)? = null
+
+        private val disposables = CompositeDisposable()
+
+        constructor(ip: String) {
+            this.ip = ip
+            connect()
+        }
+
+        constructor(socket: Socket) {
+            this.socket = socket
+            ip = socket.inetAddress.hostAddress ?: "null"
+            connect()
+        }
+
+        var isConnected: Boolean = false
+            private set
+
+        fun addMessageListener(callback: (String) -> Unit) {
+            messageListener = callback
+        }
+
+        fun addStateListener(callback: (ConnectionState, String?) -> Unit) {
+            stateListener = callback
+        }
+
+        private fun connect() {
+            runSingle(
+                callback = {
+                    if (!this::socket.isInitialized) {
+                        socket = Socket(ip, NetworkPorts.serverPort)
+                    }
+                    reader = socket.getInputStream().bufferedReader()
+                    writer = socket.getOutputStream().bufferedWriter()
+                    infoLog("${this::class.simpleName}@$ip: connected.")
+                    isConnected = true
+                    listenInputStream()
+                },
+                onError = {
+                    errorLog("${this::class.simpleName}@$ip: cannot connect.\n${it.message}")
+                    isConnected = false
+                }
+            )
+        }
+
+        fun sendMessage(message: String) {
+            if (isConnected) {
+                runSingle(
+                    callback = {
+                        socket.getOutputStream().bufferedWriter().write(message)
+                        debugLog("${this::class.simpleName}@$ip: posted message: '$message'.")
+                    },
+                    onError = {
+                        errorLog("${this::class.simpleName}: cannot post message to $ip.\n${it.message}")
+                        stateListener?.invoke(ConnectionState.STATE_ERROR, it.message)
+                    }
+                )
+            } else {
+                throw SocketConnectionException()
+            }
+        }
+
+        fun disconnect() {
+            if (isConnected) {
+                runSingle(
+                    callback = {
+                        socket.close()
+                        isConnected = false
+                        disposables.dispose()
+                        stateListener?.invoke(ConnectionState.STATE_DISCONNECTED, null)
+                        connections.remove(ip)
+                        infoLog("${this::class.simpleName}@$ip: disconnected.")
+                    },
+                    onError = {
+                        errorLog("${this::class.simpleName}: cannot close connection to $ip.\n${it.message}")
+                        stateListener?.invoke(ConnectionState.STATE_ERROR, it.message)
+                    }
+                )
+            } else {
+                errorLog("${this::class.simpleName}: connection has not been started.")
+            }
+        }
+
+        private fun listenInputStream() {
+            runTask(
+                task = {
+                    infoLog("${this::class.simpleName}@$ip: starting input stream listener.")
+                    while (true) {
+                        try {
+                            val message = reader.readLine() ?: continue
+                            it.onNext(message)
+                        } catch (e: IOException) {
+                            it.onError(e)
+                        }
+                    }
+
+                },
+                onResult = {
+                    debugLog("${this::class.simpleName}@$ip: incoming message: '$it'.")
+                    messageListener?.invoke(it)
+                },
+                onError = {
+                    disconnect()
+                }
+            ).addTo(disposables)
         }
     }
 
-    fun startServer() {
-        serverListenerDisposable = runTask<Socket>(
+    inner class SocketPluginHandler : UnisyncPluginHandler {
+        fun getConnection(ip: String): SocketConnection {
+            return if (connections.containsKey(ip)) {
+                infoLog("${this::class.simpleName}: connection to $ip has already been established.")
+                connections[ip]!!
+            } else {
+                infoLog("${this::class.simpleName}: create new connection to $ip.")
+                val connection = SocketConnection(ip)
+                connections[ip] = connection
+                connection
+            }
+        }
+    }
+
+    override val pluginHandler: UnisyncPluginHandler = SocketPluginHandler()
+
+    private lateinit var serverSocket: ServerSocket
+    private val connections = mutableMapOf<String, SocketConnection>()
+
+    private lateinit var disposable: Disposable
+
+    override fun start(context: Context) {
+        infoLog("${this::class.simpleName}: starting Socket plugin.")
+        disposable = runTask<Socket>(
             task = {
-                serverSocket = ServerSocket(NetworkPorts.socketServerPort)
+                serverSocket = ServerSocket(NetworkPorts.serverPort)
+                pluginConnection.onPluginStarted(pluginHandler)
                 while (true) {
                     try {
                         val socket = serverSocket.accept()
@@ -50,151 +196,35 @@ object SocketPlugin {
             onResult = {
                 val ip = it.inetAddress.hostAddress!!
                 if (connections.containsKey(ip)) {
-                    warningLog("${this::class.qualifiedName}: server accepted an already established connection from $ip.")
+                    warningLog("${this::class.simpleName}: server accepted an already established connection from $ip.")
                 } else {
                     connections[ip] = SocketConnection(it)
                 }
             },
             onError = {
-                errorLog("${this::class.qualifiedName}: server error: ${it.message}")
+                errorLog("${this::class.simpleName}: server error: ${it.message}")
+                pluginConnection.onPluginError(Exception(it))
             }
         )
     }
 
-    fun stopServer() {
+    override fun stop() {
         runSingle(
             callback = {
+                disposable.dispose()
+                connections.apply {
+                    values.forEach {
+                        it.disconnect()
+                    }
+                    clear()
+                }
                 serverSocket.close()
-                serverListenerDisposable.dispose()
-                infoLog("${this::class.qualifiedName}: server closed.")
+                pluginConnection.onPluginStopped()
             },
             onError = {
-                errorLog("${this::class.qualifiedName}: cannot stop server.\n${it.message}")
+                errorLog("${this::class.simpleName}: server error: ${it.message}")
+                pluginConnection.onPluginError(Exception(it))
             }
         )
-    }
-
-    class SocketConnection {
-        private var ip: String
-        private lateinit var socket: Socket
-        private lateinit var reader: BufferedReader
-        private lateinit var writer: BufferedWriter
-
-        private var onConnectListener: (() -> Unit)? = null
-        private var onDisconnectListener: (() -> Unit)? = null
-        private var incomingMessageListener: ((String) -> Unit)? = null
-
-        private val disposables = CompositeDisposable()
-
-        constructor(ip: String) {
-            this.ip = ip
-        }
-
-        constructor(socket: Socket) {
-            this.socket = socket
-            this.ip = socket.inetAddress.hostAddress ?: "null"
-        }
-
-        var isConnected: Boolean = false
-            private set
-
-        fun addOnConnectListener(callback: () -> Unit): SocketConnection {
-            onConnectListener = callback
-            return this
-        }
-
-        fun addOnDisconnectListener(callback: () -> Unit): SocketConnection {
-            onDisconnectListener = callback
-            return this
-        }
-
-        fun addOnIncomingMessageListener(callback: (String) -> Unit): SocketConnection {
-            incomingMessageListener = callback
-            return this
-        }
-
-        fun connect() {
-            runSingle(
-                callback = {
-                    if (!this::socket.isInitialized) {
-                        socket = Socket(ip, NetworkPorts.socketClientPort)
-                    }
-                    reader = socket.getInputStream().bufferedReader()
-                    writer = socket.getOutputStream().bufferedWriter()
-                    infoLog("${this::class.qualifiedName}@$ip: connected.")
-                    isConnected = true
-                    onConnectListener?.invoke()
-                    listenInputStream()
-                    listenState()
-                },
-                onError = {
-                    errorLog("${this::class.qualifiedName}@$ip: cannot connect.\n${it.message}")
-                }
-            )
-        }
-
-        fun postMessage(message: String) {
-            runSingle(
-                callback = {
-                    socket.getOutputStream().bufferedWriter().write(message)
-                    debugLog("${this::class.qualifiedName}@$ip: posted message: '$message'.")
-                },
-                onError = {
-                    errorLog("${this::class.qualifiedName}: cannot post message to $ip.\n${it.message}")
-                }
-            )
-        }
-
-        fun disconnect() {
-            if (isConnected) {
-                runSingle(
-                    callback = {
-                        socket.close()
-                        isConnected = false
-                        disposables.dispose()
-                        onDisconnectListener?.invoke()
-                        connections.remove(ip)
-                        infoLog("${this::class.qualifiedName}@$ip: disconnected.")
-                    },
-                    onError = {
-                        errorLog("${this::class.qualifiedName}: cannot close connection to $ip.\n${it.message}")
-                    }
-                )
-            } else {
-                errorLog("${this::class.qualifiedName}: connection has not been started.")
-            }
-        }
-
-        private fun listenInputStream() {
-            runTask(
-                task = {
-                    infoLog("${this::class.qualifiedName}@$ip: starting input stream listener.")
-                    try {
-                        val input = socket.getInputStream().bufferedReader()
-                        while (true) {
-                            val message = input.readLine() ?: continue
-                            it.onNext(message)
-                        }
-                    } catch (e: IOException) {
-                        it.onError(e)
-                    }
-                },
-                onResult = {
-                    debugLog("${this::class.qualifiedName}@$ip: incoming message: '$it'.")
-                    incomingMessageListener?.invoke(it)
-                },
-                onError = {
-                    disconnect()
-                }
-            ).addTo(disposables)
-        }
-
-        private fun listenState() {
-            runPeriodic(2500) {
-                if (!socket.isConnected) {
-                    disconnect()
-                }
-            }.addTo(disposables)
-        }
     }
 }

@@ -41,18 +41,6 @@ class PairingRepositoryImpl extends PairingRepository {
   }
 
   @override
-  Future<bool> startDiscoveryService() async {
-    final result = await UnisyncChannels.connection.invokeMethod(ConnectionChannel.nativeStartDiscoveryService);
-    return result.resultCode == ChannelResultCode.success;
-  }
-
-  @override
-  Future<bool> stopDiscoveryService() async {
-    final result = await UnisyncChannels.connection.invokeMethod(ConnectionChannel.nativeStopDiscoveryService);
-    return result.resultCode == ChannelResultCode.success;
-  }
-
-  @override
   Future<List<DeviceInfo>?> getDiscoveredDevices() async {
     final result = await UnisyncChannels.connection.invokeMethod(ConnectionChannel.nativeGetDiscoveredDevices);
     if (result.resultCode == ChannelResultCode.success) {

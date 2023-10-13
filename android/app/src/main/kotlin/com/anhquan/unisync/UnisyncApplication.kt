@@ -9,10 +9,8 @@ import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.IDUtil
 import com.anhquan.unisync.utils.debugLog
 import com.google.gson.Gson
-import dagger.hilt.android.HiltAndroidApp
 import io.flutter.app.FlutterApplication
 
-@HiltAndroidApp
 class UnisyncApplication : FlutterApplication() {
     override fun onCreate() {
         super.onCreate()

@@ -8,6 +8,7 @@
         "title": "Unisync Devices",
         "connected_devices": "Connected devices",
         "disconnected_devices": "Disconnected devices",
-        "add_device": "Add new device"
+        "add_device": "Add new device",
+        "no_devices_found": "No devices found!"
     }
 }

@@ -1,16 +1,14 @@
-package com.anhquan.unisync.plugins
+package com.anhquan.unisync.utils
 
-import com.anhquan.unisync.utils.debugLog
-import com.anhquan.unisync.utils.errorLog
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
-object MethodChannelPlugin {
+object ChannelUtil {
     private const val authority = "com.anhquan.unisync.channel"
     private lateinit var engine: FlutterEngine
 
     fun setup(engine: FlutterEngine) {
-        this.engine = engine
+        ChannelUtil.engine = engine
     }
 
     open class ChannelHandler(private val path: String) {

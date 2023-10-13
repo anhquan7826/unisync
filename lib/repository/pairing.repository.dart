@@ -1,10 +1,6 @@
 import 'package:unisync/models/device_info/device_info.model.dart';
 
 abstract class PairingRepository {
-  Future<bool> startDiscoveryService();
-
-  Future<bool> stopDiscoveryService();
-
   Future<List<DeviceInfo>?> getDiscoveredDevices();
 
   void deviceDiscoveryListener(void Function(DeviceInfo) onClientAdded, void Function(DeviceInfo) onClientRemoved);

@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:unisync/models/channel_result/channel_result.model.dart';
+import 'package:unisync/utils/logger.dart';
 
 class UnisyncChannels {
   UnisyncChannels._();
@@ -20,8 +21,10 @@ abstract class _ChannelHandler {
   final _callHandlers = <String, dynamic Function(Map<String, dynamic>? arguments)>{};
 
   Future<ChannelResult> invokeMethod(String method, {Map<String, dynamic>? arguments}) async {
-    final result = await _methodChannel.invokeMethod<ChannelResult>(method, arguments);
-    return result!;
+    final result = (await _methodChannel.invokeMethod<Map>(method, arguments))!.cast<String, dynamic>();
+    debugLog('Invoke method channel finished with result:');
+    debugLog(result);
+    return ChannelResult.fromJson(result);
   }
 
   void addCallHandler(String call, void Function(Map<String, dynamic>? arguments) handler) {

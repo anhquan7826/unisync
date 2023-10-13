@@ -11,22 +11,22 @@ class AddDeviceInitialState extends AddDeviceState {
   List<Object?> get props => [];
 }
 
-class StartingDiscoveryService extends AddDeviceState {
-  const StartingDiscoveryService();
+class AddDeviceLoading extends AddDeviceState {
+  const AddDeviceLoading();
 
   @override
   List<Object?> get props => [];
 }
 
-class StartedDiscoveryService extends AddDeviceState {
-  const StartedDiscoveryService();
+class AddDeviceLoaded extends AddDeviceState {
+  const AddDeviceLoaded();
 
   @override
   List<Object?> get props => [];
 }
 
-class DiscoveryServiceError extends AddDeviceState {
-  const DiscoveryServiceError(this.message);
+class AddDeviceError extends AddDeviceState {
+  const AddDeviceError(this.message);
 
   final String message;
 
