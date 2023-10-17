@@ -11,7 +11,7 @@ class DevicesView extends StatelessWidget {
     if (context.isPortrait) {
       return const DevicesViewMobile();
     } else {
-      return const DevicesViewDesktop();
+      return const DevicesViewMobile();
     }
   }
 }

@@ -62,8 +62,8 @@ object ChannelUtil {
         }
     }
 
-    object ConnectionChannel : ChannelHandler("/connection") {
-        const val FLUTTER_ON_DEVICE_ADD = "on_device_added"
+    object PairingChannel : ChannelHandler("/connection") {
+        const val FLUTTER_ON_DEVICE_ADDED = "on_device_added"
         const val FLUTTER_ON_DEVICE_REMOVED = "on_device_removed"
         const val NATIVE_START_DISCOVERY_SERVICE = "start_discovery_service"
         const val NATIVE_STOP_DISCOVERY_SERVICE = "stop_discovery_service"

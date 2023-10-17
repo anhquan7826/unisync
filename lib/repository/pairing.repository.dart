@@ -10,4 +10,6 @@ abstract class PairingRepository {
   Future<void> acceptPair(DeviceInfo device);
 
   Future<bool> requestPair(DeviceInfo device);
+
+  void clearListener();
 }

@@ -51,4 +51,11 @@ class PairingRepositoryImpl extends PairingRepository {
       return null;
     }
   }
+
+  @override
+  void clearListener() {
+    UnisyncChannels.connection
+      ..removeHandler(ConnectionChannel.flutterOnDeviceAdded)
+      ..removeHandler(ConnectionChannel.flutterOnDeviceRemoved);
+  }
 }

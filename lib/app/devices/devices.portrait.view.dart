@@ -39,6 +39,13 @@ class _DevicesViewMobileState extends State<DevicesViewMobile> {
                     textAlign: TextAlign.center,
                   ),
                 ),
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    context.go('${AppRoute.device}/${AppRoute.addDevice}');
+                  },
+                  icon: const Icon(Icons.add),
+                  label: Text(R.strings.devices.addDevice).tr(),
+                ),
                 Text(
                   R.strings.devices.connectedDevice,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
@@ -47,14 +54,6 @@ class _DevicesViewMobileState extends State<DevicesViewMobile> {
                   R.strings.devices.disconnectedDevice,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
                 ).tr(),
-                const Spacer(),
-                FilledButton.tonalIcon(
-                  onPressed: () {
-                    context.go('${AppRoute.device}/${AppRoute.addDevice}');
-                  },
-                  icon: const Icon(Icons.add),
-                  label: Text(R.strings.devices.addDevice).tr(),
-                ),
               ],
             ),
           ),

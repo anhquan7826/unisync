@@ -5,9 +5,25 @@
     "tasks": [
         {
             "label": "flutter json serializable",
-            "type": "shell",
+            "type": "flutter",
             "command": "dart run build_runner build --delete-conflicting-outputs",
             "problemMatcher": []
+        },
+        {
+            "type": "flutter",
+            "command": "flutter",
+            "args": [
+                "pub",
+                "get"
+            ],
+            "problemMatcher": [],
+            "label": "flutter: flutter pub get",
+            "detail": ""
+        },
+        {
+            "type": "shell",
+            "command": "cd assets/avahi_dbus/; for file in *.xml; do dart-dbus generate-remote-object $file -o ../../lib/dbus/${file%.*}.dart; done",
+            "label": "generate dbus",
         }
     ]
 }

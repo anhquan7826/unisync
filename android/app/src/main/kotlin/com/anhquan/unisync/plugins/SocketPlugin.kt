@@ -17,22 +17,7 @@ import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 
-class SocketPlugin(
-    override val pluginConnection: UnisyncPluginConnection = object : UnisyncPluginConnection {
-        override fun onPluginStarted(handler: UnisyncPluginHandler) {
-            infoLog("${this::class.simpleName}: Socket plugin started.")
-        }
-
-        override fun onPluginError(error: Exception) {
-            infoLog("${this::class.simpleName}: Socket plugin error:\n${error.message}")
-        }
-
-        override fun onPluginStopped() {
-            infoLog("${this::class.simpleName}: Socket plugin stopped.")
-        }
-
-    }
-) : UnisyncPlugin() {
+class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : UnisyncPlugin() {
     enum class ConnectionState {
         STATE_ERROR, STATE_DISCONNECTED
     }
@@ -40,7 +25,7 @@ class SocketPlugin(
     inner class SocketConnection {
         inner class SocketConnectionException : Exception() {
             override val message: String
-                get() = "${this@SocketConnection}@$ip: connection has closed!"
+                get() = "${this@SocketConnection::class.simpleName}@$ip: connection has closed!"
         }
 
         private var ip: String
@@ -196,6 +181,7 @@ class SocketPlugin(
             onResult = {
                 val ip = it.inetAddress.hostAddress!!
                 if (connections.containsKey(ip)) {
+                    // TODO: handle sub-connection from connected devices
                     warningLog("${this::class.simpleName}: server accepted an already established connection from $ip.")
                 } else {
                     connections[ip] = SocketConnection(it)

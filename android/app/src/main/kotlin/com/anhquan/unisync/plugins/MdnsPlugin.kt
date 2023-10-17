@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.MulticastLock
+import com.anhquan.unisync.constants.DeviceType
 import com.anhquan.unisync.constants.NetworkPorts
 import com.anhquan.unisync.extensions.text
 import com.anhquan.unisync.models.DeviceInfo
@@ -18,29 +19,15 @@ import javax.jmdns.ServiceEvent
 import javax.jmdns.ServiceInfo
 import javax.jmdns.ServiceListener
 
-class MdnsPlugin(
-    override val pluginConnection: UnisyncPluginConnection = object : UnisyncPluginConnection {
-        override fun onPluginStarted(handler: UnisyncPluginHandler) {
-            infoLog("${this::class.simpleName}: mDNS plugin started.")
-        }
-
-        override fun onPluginError(error: Exception) {
-            infoLog("${this::class.simpleName}: mDNS plugin error:\n${error.message}")
-        }
-
-        override fun onPluginStopped() {
-            infoLog("${this::class.simpleName}: mDNS plugin stopped.")
-        }
-    },
-) : UnisyncPlugin() {
+class MdnsPlugin(override val pluginConnection: UnisyncPluginConnection) : UnisyncPlugin() {
     inner class MdnsPluginHandler : UnisyncPluginHandler {
         var onServiceAdded: ((ServiceInfo) -> Unit)? = null
         var onServiceRemoved: ((ServiceInfo) -> Unit)? = null
 
         fun getDiscoveredServices(onResult: (List<ServiceInfo>) -> Unit) {
             runSingle {
-                jmdns.list(serviceType).filter {
-                    it.text != toJson(deviceInfo)
+                jmdns.list("${serviceType}local.").toList().filter {
+                    it.name.contains("unisync@") && !it.name.contains("android")
                 }.let { list ->
                     onResult.invoke(list)
                 }
@@ -50,10 +37,10 @@ class MdnsPlugin(
 
     override val pluginHandler: MdnsPluginHandler = MdnsPluginHandler()
 
-    private val serviceType = "_http._tcp.local."
+    private val serviceType = "_unisync._tcp."
+    private var serviceName: String = "unisync@android"
 
     private lateinit var deviceInfo: DeviceInfo
-    private lateinit var serviceName: String
     private lateinit var ip: String
 
     private lateinit var jmdns: JmDNS
@@ -69,7 +56,6 @@ class MdnsPlugin(
             try {
                 connectivityManager = context.getSystemService(ConnectivityManager::class.java)
                 wifiManager = context.getSystemService(WifiManager::class.java)
-                serviceName = context.packageName
                 deviceInfo = ConfigUtil.getDeviceInfo(context)
 
                 acquireMulticastLock()
@@ -119,27 +105,31 @@ class MdnsPlugin(
 
     private fun configureJmDNS() {
         debugLog("${this::class.simpleName}: creating JmDNS instance.")
-        jmdns = JmDNS.create(InetAddress.getByName(ip), serviceName)
+        jmdns = JmDNS.create(InetAddress.getByName(ip))
         debugLog("${this::class.simpleName}: JmDNS instance created.")
         jmdns.registerService(
             ServiceInfo.create(
                 serviceType,
                 serviceName,
+                "local",
                 NetworkPorts.discoveryPort,
                 toJson(deviceInfo)
             )
         )
         debugLog("${this::class.simpleName}: registered JmDNS service.")
-        jmdns.addServiceListener(serviceType, object : ServiceListener {
+        jmdns.addServiceListener("${serviceType}local.", object : ServiceListener {
             override fun serviceAdded(event: ServiceEvent?) {}
 
             override fun serviceRemoved(event: ServiceEvent?) {
                 if (event != null) {
                     if (
-                        event.info.name == serviceName &&
-                        event.info.text != toJson(deviceInfo)
+                        event.info.name.contains("unisync@") &&
+                        !event.info.name.contains(DeviceType.android)
                     ) {
-                        pluginHandler.onServiceAdded?.invoke(event.info)
+                        if (event.info.inet4Addresses.isNotEmpty()) {
+                            infoLog("${this@MdnsPlugin::class.simpleName}: service removed: ${event.info.text}")
+                            pluginHandler.onServiceAdded?.invoke(event.info)
+                        }
                     }
                 }
             }
@@ -147,10 +137,13 @@ class MdnsPlugin(
             override fun serviceResolved(event: ServiceEvent?) {
                 if (event != null) {
                     if (
-                        event.info.name == serviceName &&
-                        event.info.text != toJson(deviceInfo)
+                        event.info.name.contains("unisync@") &&
+                        !event.info.name.contains(DeviceType.android)
                     ) {
-                        pluginHandler.onServiceRemoved?.invoke(event.info)
+                        if (event.info.inet4Addresses.isNotEmpty()) {
+                            infoLog("${this@MdnsPlugin::class.simpleName}: service resolved: ${event.info.text}")
+                            pluginHandler.onServiceRemoved?.invoke(event.info)
+                        }
                     }
                 }
             }

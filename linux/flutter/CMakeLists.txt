@@ -57,8 +57,7 @@ list(APPEND FLUTTER_LIBRARY_HEADERS
   "flutter_linux.h"
 )
 list_prepend(FLUTTER_LIBRARY_HEADERS "${EPHEMERAL_DIR}/flutter_linux/")
-add_library(flutter INTERFACE
-        ../channels/socket_channel.h)
+add_library(flutter INTERFACE)
 target_include_directories(flutter INTERFACE
   "${EPHEMERAL_DIR}"
 )

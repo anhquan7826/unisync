@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import com.anhquan.unisync.features.PairingFeature
+import com.anhquan.unisync.features.UnisyncFeature
 import com.anhquan.unisync.plugins.MdnsPlugin
 import com.anhquan.unisync.plugins.SocketPlugin
 import com.anhquan.unisync.plugins.UnisyncPlugin
@@ -14,11 +16,12 @@ import com.anhquan.unisync.utils.infoLog
 
 class UnisyncService : Service() {
     private val plugins = mutableMapOf<String, UnisyncPlugin>()
+    private val features = mutableMapOf<String, UnisyncFeature>()
 
     override fun onCreate() {
         super.onCreate()
+        initiateFeatures()
         initiatePlugins()
-        configureFeatures()
         infoLog("${this::class.simpleName}: service created.")
     }
 
@@ -38,8 +41,21 @@ class UnisyncService : Service() {
     }
 
     private fun initiatePlugins() {
-        plugins[UnisyncPlugin.MDNS_PLUGIN] = MdnsPlugin()
-        plugins[UnisyncPlugin.SOCKET_PLUGIN] = SocketPlugin()
+        plugins[UnisyncPlugin.PLUGIN_MDNS] = UnisyncPlugin.Builder.buildPlugin(
+            MdnsPlugin::class.java,
+            onStart = {
+                features[UnisyncFeature.FEATURE_PAIRING]!!.addHandler(UnisyncPlugin.PLUGIN_MDNS, it)
+            }
+        )
+        plugins[UnisyncPlugin.PLUGIN_SOCKET] = UnisyncPlugin.Builder.buildPlugin(
+            SocketPlugin::class.java,
+            onStart = {
+                features[UnisyncFeature.FEATURE_PAIRING]!!.addHandler(
+                    UnisyncPlugin.PLUGIN_SOCKET,
+                    it
+                )
+            }
+        )
     }
 
     private fun startPlugins() {
@@ -54,27 +70,8 @@ class UnisyncService : Service() {
         }
     }
 
-    private fun configureFeatures() {
-//        ChannelUtil.ConnectionChannel.apply {
-//            addCallHandler(NATIVE_GET_DISCOVERED_DEVICES) { _, result ->
-//                runTask(
-//                    task = {
-//                        it.onNext(pairingRepository.getDiscoveredDevices())
-//                    },
-//                    onResult = {
-//                        result.success(
-//                            toMap(
-//                                ChannelResult(
-//                                    method = NATIVE_GET_DISCOVERED_DEVICES,
-//                                    resultCode = ChannelResult.SUCCESS,
-//                                    result = it.map { device -> toMap(device) }
-//                                )
-//                            )
-//                        )
-//                    }
-//                )
-//            }
-//        }
+    private fun initiateFeatures() {
+        features[UnisyncFeature.FEATURE_PAIRING] = PairingFeature()
     }
 
     private fun configureNotificationChannel() {

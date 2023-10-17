@@ -24,4 +24,10 @@ class AddDeviceCubit extends Cubit<AddDeviceState> {
       emit(const AddDeviceLoaded());
     }
   }
+
+  @override
+  Future<void> close() {
+    _pairingRepository.clearListener();
+    return super.close();
+  }
 }
