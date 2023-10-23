@@ -11,7 +11,15 @@ import java.util.concurrent.TimeUnit
 fun runSingle(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
-    onError: (e: Throwable) -> Unit = { errorLog("runSingle: error:\n${it.stackTrace.joinToString("\n")}\n$it") },
+    onError: (e: Throwable) -> Unit = {
+        errorLog(
+            "runSingle: error: ${it.message}\n${
+                it.stackTrace.joinToString(
+                    "\n"
+                )
+            }\n$it"
+        )
+    },
     callback: () -> Unit,
 ): Disposable {
     return Single.create {
@@ -53,4 +61,19 @@ fun <T : Any> runTask(
             onError,
             onComplete
         )
+}
+
+fun <T : Any> Observable<T>.listen(
+    subscribeOn: Scheduler = Schedulers.io(),
+    observeOn: Scheduler = Schedulers.io(),
+    onError: (Throwable) -> Unit = { errorLog(it) },
+    onNext: (T) -> Unit
+): Disposable {
+    return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onNext, onError)
+}
+
+fun delay(timeMillis: Long = 500, callback: () -> Unit): Disposable {
+    return Observable.timer(timeMillis, TimeUnit.MILLISECONDS).subscribe {
+        callback.invoke()
+    }
 }

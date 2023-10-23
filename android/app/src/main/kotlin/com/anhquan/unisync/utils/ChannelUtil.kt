@@ -5,20 +5,27 @@ import io.flutter.plugin.common.MethodChannel
 
 object ChannelUtil {
     private const val authority = "com.anhquan.unisync.channel"
-    private lateinit var engine: FlutterEngine
+    private var engine: FlutterEngine? = null
 
     fun setup(engine: FlutterEngine) {
-        ChannelUtil.engine = engine
+        this.engine = engine
+        PairingChannel.setup()
+    }
+
+    fun destroy() {
+        engine = null
+        PairingChannel.destroy()
     }
 
     open class ChannelHandler(private val path: String) {
-        private val channel = MethodChannel(engine.dartExecutor.binaryMessenger, authority + path)
+        private var channel: MethodChannel? = null
 
         private val callHandlers =
             mutableMapOf<String, (Map<String, Any?>?, MethodChannel.Result) -> Unit>()
 
-        init {
-            channel.setMethodCallHandler { call, result ->
+        internal fun setup() {
+            channel = MethodChannel(engine!!.dartExecutor.binaryMessenger, authority + path)
+            channel?.setMethodCallHandler { call, result ->
                 if (callHandlers.containsKey(call.method)) {
                     callHandlers[call.method]!!.invoke(call.arguments as Map<String, Any?>?, result)
                 } else {
@@ -27,13 +34,17 @@ object ChannelUtil {
             }
         }
 
+        internal fun destroy() {
+            channel = null
+        }
+
         fun invoke(
             method: String,
             args: Map<String, Any?>? = null,
             onError: (String?) -> Unit = { errorLog("${this::class.simpleName}: error: $it") },
             onResult: ((Any?) -> Unit)? = null,
         ) {
-            channel.invokeMethod(method, args, object : MethodChannel.Result {
+            channel?.invokeMethod(method, args, object : MethodChannel.Result {
                 override fun success(result: Any?) {
                     onResult?.invoke(result)
                 }
@@ -62,11 +73,7 @@ object ChannelUtil {
         }
     }
 
-    object PairingChannel : ChannelHandler("/connection") {
-        const val FLUTTER_ON_DEVICE_ADDED = "on_device_added"
-        const val FLUTTER_ON_DEVICE_REMOVED = "on_device_removed"
-        const val NATIVE_START_DISCOVERY_SERVICE = "start_discovery_service"
-        const val NATIVE_STOP_DISCOVERY_SERVICE = "stop_discovery_service"
+    object PairingChannel : ChannelHandler("/pairing") {
         const val NATIVE_GET_DISCOVERED_DEVICES = "get_discovered_devices"
     }
 }

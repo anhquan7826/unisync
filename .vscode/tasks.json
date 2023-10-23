@@ -5,7 +5,7 @@
     "tasks": [
         {
             "label": "flutter json serializable",
-            "type": "flutter",
+            "type": "shell",
             "command": "dart run build_runner build --delete-conflicting-outputs",
             "problemMatcher": []
         },

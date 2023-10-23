@@ -37,15 +37,6 @@ abstract class _ChannelHandler {
 }
 
 class ConnectionChannel extends _ChannelHandler {
-  ConnectionChannel() : super(const MethodChannel('${UnisyncChannels._authority}/connection'));
-
-  static const nativeStartDiscoveryService = 'start_discovery_service';
-
-  static const nativeStopDiscoveryService = 'stop_discovery_service';
-
+  ConnectionChannel() : super(const MethodChannel('${UnisyncChannels._authority}/pairing'));
   static const nativeGetDiscoveredDevices = 'get_discovered_devices';
-
-  static const flutterOnDeviceAdded = 'on_device_added';
-
-  static const flutterOnDeviceRemoved = 'on_device_removed';
 }

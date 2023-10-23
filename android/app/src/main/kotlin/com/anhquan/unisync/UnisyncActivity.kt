@@ -18,4 +18,9 @@ class UnisyncActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         ChannelUtil.setup(flutterEngine)
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ChannelUtil.destroy()
+    }
 }

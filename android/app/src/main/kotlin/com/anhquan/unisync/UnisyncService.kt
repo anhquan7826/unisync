@@ -38,6 +38,7 @@ class UnisyncService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stopPlugins()
+        infoLog("${this::class.simpleName}: service destroyed.")
     }
 
     private fun initiatePlugins() {

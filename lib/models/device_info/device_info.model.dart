@@ -20,4 +20,14 @@ class DeviceInfo {
   final String publicKey;
   final String deviceType;
   Map<String, dynamic> toJson() => _$DeviceInfoToJson(this);
+
+  DeviceInfo copy({String? id, String? name, String? ip, String? publicKey, String? deviceType}) {
+    return DeviceInfo(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      ip: ip ?? this.ip,
+      publicKey: publicKey ?? this.publicKey,
+      deviceType: deviceType ?? this.deviceType,
+    );
+  }
 }
