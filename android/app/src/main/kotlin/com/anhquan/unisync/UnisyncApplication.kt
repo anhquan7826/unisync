@@ -17,9 +17,9 @@ class UnisyncApplication : FlutterApplication() {
     private fun initialSetupClientInfo() {
         ConfigUtil.setup(applicationContext)
         try {
-            ConfigUtil.getDeviceInfo()
+            ConfigUtil.Device.getDeviceInfo()
         } catch (e: Exception) {
-            ConfigUtil.setDeviceInfo(
+            ConfigUtil.Device.setDeviceInfo(
                 DeviceInfo(
                     id = IDUtil.generateId(),
                     name = Settings.System.getString(contentResolver, Settings.Global.DEVICE_NAME)

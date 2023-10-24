@@ -33,7 +33,7 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
         socket.connectionState.listen {
             when (it) {
                 STATE_CONNECTED -> {
-                    socket.send(toJson(ConfigUtil.getDeviceInfo()))
+                    socket.send(toJson(ConfigUtil.Device.getDeviceInfo()))
                     socket.inputStream.listen(onNext = ::onInputData)
                 }
                 STATE_DISCONNECTED -> {
@@ -61,6 +61,8 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
                 socket.disconnect()
                 connectedDevices.remove(this)
             }
+        } else {
+
         }
     }
 }

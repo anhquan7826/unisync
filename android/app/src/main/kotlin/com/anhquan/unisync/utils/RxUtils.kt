@@ -72,6 +72,15 @@ fun <T : Any> Observable<T>.listen(
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onNext, onError)
 }
 
+fun <T : Any> Single<T>.listen(
+    subscribeOn: Scheduler = Schedulers.io(),
+    observeOn: Scheduler = Schedulers.io(),
+    onError: (Throwable) -> Unit = { errorLog(it) },
+    onResult: (T) -> Unit
+): Disposable {
+    return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onResult, onError)
+}
+
 fun delay(timeMillis: Long = 500, callback: () -> Unit): Disposable {
     return Observable.timer(timeMillis, TimeUnit.MILLISECONDS).subscribe {
         callback.invoke()
