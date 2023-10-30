@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:unisync/backend/device_connection/device_connection.dart';
@@ -12,17 +11,14 @@ class PairingRepositoryImpl extends PairingRepository {
   Future<void> acceptPair(DeviceInfo device) async {}
 
   @override
-  void deviceDiscoveryListener(void Function(DeviceInfo device) onClientAdded, void Function(DeviceInfo device) onClientRemoved) {}
+  Future<bool> requestPair(DeviceInfo device) async {
+    // TODO: implement requestPair
+    return true;
+  }
 
   @override
   void pairRequestListener(void Function(DeviceInfo p1) incomingDevice) {
     // TODO: implement pairRequestListener
-  }
-
-  @override
-  Future<bool> requestPair(DeviceInfo device) async {
-    // TODO: implement requestPair
-    return true;
   }
 
   @override
@@ -40,7 +36,4 @@ class PairingRepositoryImpl extends PairingRepository {
       return DeviceConnection.getUnpairedDevice();
     }
   }
-
-  @override
-  void clearListener() {}
 }

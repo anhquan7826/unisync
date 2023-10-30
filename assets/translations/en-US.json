@@ -9,6 +9,7 @@
         "connected_devices": "Connected devices",
         "disconnected_devices": "Disconnected devices",
         "add_device": "Add new device",
-        "no_devices_found": "No devices found!"
+        "no_devices_found": "No devices found!",
+        "no_connected_devices": "No devices connected!"
     }
 }

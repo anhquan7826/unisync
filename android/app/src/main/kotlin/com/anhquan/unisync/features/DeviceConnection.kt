@@ -1,6 +1,9 @@
 package com.anhquan.unisync.features
 
+import com.anhquan.unisync.constants.MessageType
 import com.anhquan.unisync.models.DeviceInfo
+import com.anhquan.unisync.models.DeviceRequest
+import com.anhquan.unisync.models.DeviceResponse
 import com.anhquan.unisync.plugins.SocketPlugin
 import com.anhquan.unisync.plugins.SocketPlugin.ConnectionState.STATE_CONNECTED
 import com.anhquan.unisync.plugins.SocketPlugin.ConnectionState.STATE_DISCONNECTED
@@ -62,7 +65,12 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
                 connectedDevices.remove(this)
             }
         } else {
-
+            if (input.contains("\"type\":\"${MessageType.request}\"")) {
+                val request = fromJson(input, DeviceRequest::class.java)
+            }
+            if (input.contains("\"type\":\"${MessageType.response}\"")) {
+                val response = fromJson(input, DeviceResponse::class.java)
+            }
         }
     }
 }

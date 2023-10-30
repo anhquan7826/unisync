@@ -1,32 +1,28 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:unisync/app/devices/common/device_action.view.dart';
+import 'package:unisync/app/devices/common/devices_sidebar.view.dart';
 import 'package:unisync/resources/resources.dart';
 
-class DevicesViewDesktop extends StatefulWidget {
-  const DevicesViewDesktop({super.key});
+class DevicesViewLandscape extends StatefulWidget {
+  const DevicesViewLandscape({super.key});
 
   @override
-  State<DevicesViewDesktop> createState() => _DevicesViewDesktopState();
+  State<DevicesViewLandscape> createState() => _DevicesViewLandscapeState();
 }
 
-class _DevicesViewDesktopState extends State<DevicesViewDesktop> {
+class _DevicesViewLandscapeState extends State<DevicesViewLandscape> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(R.strings.devices.title).tr(),
-      ),
+    return const Scaffold(
       body: Row(
         children: [
           SizedBox(
             width: 300,
-            child: Column(
-              children: [],
-            ),
+            child: DevicesSidebar(),
           ),
           Expanded(
-            child: Placeholder(),
+            child: DeviceAction(),
           ),
         ],
       ),

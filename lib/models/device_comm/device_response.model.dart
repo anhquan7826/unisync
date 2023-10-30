@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:unisync/constants/message_types.dart';
 
 part 'device_response.model.g.dart';
 
@@ -14,6 +15,7 @@ class DeviceResponse {
 
   factory DeviceResponse.fromJson(Map<String, dynamic> json) => _$DeviceResponseFromJson(json);
 
+  final String type = MessageTypes.response;
   final int request;
   final int result;
   final Map<String, dynamic> data;

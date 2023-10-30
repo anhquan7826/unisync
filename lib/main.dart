@@ -42,6 +42,7 @@ class Unisync extends StatelessWidget {
       darkTheme: AppThemes.dark,
       themeMode: ThemeMode.dark,
       routerConfig: AppRoute.routerConfigs,
+      debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,

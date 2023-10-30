@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:unisync/backend/socket/socket.dart';
-import 'package:unisync/extensions/map.ext.dart';
+import 'package:unisync/utils/extensions/map.ext.dart';
+import 'package:unisync/models/device_comm/device_request.model.dart';
+import 'package:unisync/models/device_comm/device_response.model.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/configs.dart';
+import 'package:unisync/utils/logger.dart';
 
 class DeviceConnection {
   DeviceConnection._(this._socket) {
@@ -20,8 +23,16 @@ class DeviceConnection {
     return _connections.map((e) => e._info).whereType<DeviceInfo>().toList();
   }
 
+  static bool isDeviceOnline(DeviceInfo info) {
+    return getConnectedDevices().any((element) => element.id == info.id);
+  }
+
   static List<DeviceInfo> getUnpairedDevice() {
     return _connections.where((element) => !element.isPaired).map((e) => e._info).whereType<DeviceInfo>().toList();
+  }
+
+  static List<DeviceInfo> getPairedDevice() {
+    return _connections.where((element) => element.isPaired).map((e) => e._info).whereType<DeviceInfo>().toList();
   }
 
   Future<void> inititalize() async {
@@ -44,6 +55,19 @@ class DeviceConnection {
   bool get isPaired => _paired;
 
   void _onInputData(String input) {
-    _info ??= DeviceInfo.fromJson(jsonDecode(input)).copy(ip: _socket.address);
+    if (_info == null) {
+      try {
+        _info = DeviceInfo.fromJson(jsonDecode(input)).copy(ip: _socket.address);
+      } catch (_) {
+        errorLog('DeviceConnection@${_socket.address}: Invalid initial message.');
+      }
+    } else {
+      if (input.contains('"type":"request"')) {
+        final request = DeviceRequest.fromJson(jsonDecode(input));
+      }
+      if (input.contains('"type":"response"')) {
+        final response = DeviceResponse.fromJson(jsonDecode(input));
+      }
+    }
   }
 }

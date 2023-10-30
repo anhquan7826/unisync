@@ -5,7 +5,6 @@ import 'package:unisync/backend/socket/socket.dart';
 import 'package:unisync/constants/device_types.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/configs.dart';
-import 'package:unisync/utils/converters.dart';
 import 'package:unisync/utils/id_gen.dart';
 import 'package:unisync/utils/logger.dart';
 

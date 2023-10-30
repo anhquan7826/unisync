@@ -7,7 +7,7 @@ import 'package:pointycastle/pointycastle.dart';
 import 'package:pointycastle/random/fortuna_random.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unisync/constants/sp_key.dart';
-import 'package:unisync/extensions/map.ext.dart';
+import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/converters.dart';
 
 import '../models/device_info/device_info.model.dart';

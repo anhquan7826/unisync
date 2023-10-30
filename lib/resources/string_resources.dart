@@ -18,4 +18,5 @@ class _Devices {
   final disconnectedDevice = 'devices.disconnected_devices';
   final addDevice = 'devices.add_device';
   final noDeviceFound = 'devices.no_devices_found';
+  final noConnectedDevices = 'devices.no_connected_devices';
 }
