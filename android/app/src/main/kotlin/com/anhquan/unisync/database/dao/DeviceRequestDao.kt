@@ -10,8 +10,8 @@ import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface DeviceRequestDao {
-    @Insert(entity = DeviceRequestEntity::class)
-    fun push(id: String, request: DeviceRequest): Completable
+    @Insert
+    fun push(value: DeviceRequestEntity): Completable
 
     @Query("SELECT request FROM device_request WHERE `order` = (SELECT MIN(id) FROM device_request) AND `id` = :id LIMIT 1")
     fun pop(id: String) : Single<DeviceRequest>

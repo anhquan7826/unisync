@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "420419796226",
+    "project_id": "oxygen-mobile20",
+    "storage_bucket": "oxygen-mobile20.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420419796226:android:855cf8ac2bdb35e42a561b",
+        "android_client_info": {
+          "package_name": "com.nhom1.oxygen"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSve3IUYUzvu6hND2Wqk4h5HZIx7_TzHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -28,7 +28,7 @@ class DeviceConnection {
     _socket.getConnectionState().listen((event) async {
       switch (event) {
         case SocketConnectionState.STATE_CONNECTED:
-          _socket.send((await AppConfig.getDeviceInfo()).toJson().toJsonString());
+          _socket.send((await AppConfig.device.getDeviceInfo()).toJson().toJsonString());
           _socket.getInputStream().listen(_onInputData);
           break;
         case SocketConnectionState.STATE_DISCONNECTED:

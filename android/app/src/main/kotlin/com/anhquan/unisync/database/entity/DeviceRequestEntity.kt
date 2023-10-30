@@ -6,7 +6,7 @@ import com.anhquan.unisync.models.DeviceRequest
 
 @Entity(tableName = "device_request")
 data class DeviceRequestEntity(
-    @PrimaryKey(autoGenerate = true) val order: Int,
+    @PrimaryKey(autoGenerate = true) val order: Int = -1,
     val id: String,
     val request: DeviceRequest
 )

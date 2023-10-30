@@ -7,12 +7,12 @@ import com.anhquan.unisync.utils.toJson
 
 class DeviceRequestConverter {
     @TypeConverter
-    fun fromObject(request: DeviceRequest): String {
-        return toJson(request)
+    fun fromObject(request: DeviceRequest?): String? {
+        return request?.let { toJson(it) }
     }
 
     @TypeConverter
-    fun toObject(data: String): DeviceRequest? {
-        return fromJson(data, DeviceRequest::class.java)
+    fun toObject(data: String?): DeviceRequest? {
+        return data?.let { fromJson(it, DeviceRequest::class.java) }
     }
 }
