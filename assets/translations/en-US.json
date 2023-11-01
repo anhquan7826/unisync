@@ -4,12 +4,19 @@
         "welcome": "Welcome to Unisync",
         "description": "A tool to connect your phone and your PC together."
     },
-    "devices": {
+    "devices_status": {
         "title": "Unisync Devices",
         "connected_devices": "Connected devices",
         "disconnected_devices": "Disconnected devices",
         "add_device": "Add new device",
         "no_devices_found": "No devices found!",
-        "no_connected_devices": "No devices connected!"
+        "no_connected_devices": "No devices connected!",
+        "available_devices": "Available devices",
+        "paired_devices": "Paired devices",
+        "rescan": "Rescan"
+    },
+    "status": {
+        "connected": "Connected",
+        "disconnected": "Disconnected"
     }
 }

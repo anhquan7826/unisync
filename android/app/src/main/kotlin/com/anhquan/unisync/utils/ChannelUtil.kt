@@ -1,5 +1,6 @@
 package com.anhquan.unisync.utils
 
+import com.anhquan.unisync.models.ChannelResult
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
@@ -10,24 +11,45 @@ object ChannelUtil {
     fun setup(engine: FlutterEngine) {
         this.engine = engine
         PairingChannel.setup()
+        PreferencesChannel.setup()
     }
 
     fun destroy() {
         engine = null
         PairingChannel.destroy()
+        PreferencesChannel.destroy()
     }
 
     open class ChannelHandler(private val path: String) {
+        inner class ResultEmitter(private val method: String, private val r: MethodChannel.Result) {
+            fun success(result: Any? = null) {
+                r.success(
+                    toMap(
+                        ChannelResult(
+                            method = method,
+                            resultCode = ChannelResult.SUCCESS,
+                            result = result
+                        )
+                    )
+                )
+            }
+
+            fun error(message: String?) {
+                r.error("", message, null)
+            }
+        }
+
         private var channel: MethodChannel? = null
 
         private val callHandlers =
-            mutableMapOf<String, (Map<String, Any?>?, MethodChannel.Result) -> Unit>()
+            mutableMapOf<String, (Map<String, Any?>?, ResultEmitter) -> Unit>()
 
         internal fun setup() {
             channel = MethodChannel(engine!!.dartExecutor.binaryMessenger, authority + path)
             channel?.setMethodCallHandler { call, result ->
                 if (callHandlers.containsKey(call.method)) {
-                    callHandlers[call.method]!!.invoke(call.arguments as Map<String, Any?>?, result)
+                    val emitter = ResultEmitter(call.method, result)
+                    callHandlers[call.method]!!.invoke(call.arguments as Map<String, Any?>?, emitter)
                 } else {
                     errorLog("${this::class.simpleName}@${call.method}: not implemented.")
                 }
@@ -61,7 +83,7 @@ object ChannelUtil {
 
         fun addCallHandler(
             call: String,
-            handler: (Map<String, Any?>?, MethodChannel.Result) -> Unit
+            handler: (Map<String, Any?>?, ResultEmitter) -> Unit
         ) {
             callHandlers[call] = handler
             debugLog("${this::class.simpleName}@$call: added handler.")
@@ -74,6 +96,15 @@ object ChannelUtil {
     }
 
     object PairingChannel : ChannelHandler("/pairing") {
-        const val NATIVE_GET_DISCOVERED_DEVICES = "get_discovered_devices"
+        const val GET_DISCOVERED_DEVICES = "get_discovered_devices"
+    }
+
+    object PreferencesChannel : ChannelHandler("/preferences") {
+        const val PUT_STRING = "put_string"
+        const val PUT_INT = "put_int"
+        const val PUT_BOOL = "put_bool"
+        const val GET_STRING = "get_string"
+        const val GET_INT = "get_int"
+        const val GET_BOOL = "get_bool"
     }
 }

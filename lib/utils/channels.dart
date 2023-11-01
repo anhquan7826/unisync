@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/services.dart';
 import 'package:unisync/models/channel_result/channel_result.model.dart';
 import 'package:unisync/utils/logger.dart';
@@ -7,7 +9,8 @@ class UnisyncChannels {
 
   static const _authority = 'com.anhquan.unisync.channel';
 
-  static final connection = ConnectionChannel();
+  static final connection = PairingChannel._();
+  static final preferences = PreferencesChannel._();
 }
 
 abstract class _ChannelHandler {
@@ -36,7 +39,17 @@ abstract class _ChannelHandler {
   }
 }
 
-class ConnectionChannel extends _ChannelHandler {
-  ConnectionChannel() : super(const MethodChannel('${UnisyncChannels._authority}/pairing'));
-  static const nativeGetDiscoveredDevices = 'get_discovered_devices';
+class PairingChannel extends _ChannelHandler {
+  PairingChannel._() : super(const MethodChannel('${UnisyncChannels._authority}/pairing'));
+  static const GET_DISCOVERED_DEVICES = 'get_discovered_devices';
+}
+
+class PreferencesChannel extends _ChannelHandler {
+  PreferencesChannel._() : super(const MethodChannel('${UnisyncChannels._authority}/preferences'));
+  static const PUT_STRING = 'put_string';
+  static const PUT_INT = 'put_int';
+  static const PUT_BOOL = 'put_bool';
+  static const GET_STRING = 'get_string';
+  static const GET_INT = 'get_int';
+  static const GET_BOOL = 'get_bool';
 }

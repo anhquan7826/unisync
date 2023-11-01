@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unisync/constants/sp_key.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/converters.dart';
+import 'package:unisync/utils/preferences.dart';
 
 import '../models/device_info/device_info.model.dart';
 
@@ -27,15 +28,15 @@ class _DeviceConfig {
   _DeviceConfig._();
 
   Future<bool> hasSetDeviceInfo() async {
-    return (await SharedPreferences.getInstance()).getString(SPKey.deviceInfo) != null;
+    return await AppPreferences.getString(SPKey.deviceInfo) != null;
   }
 
   Future<DeviceInfo> getDeviceInfo() async {
-    return DeviceInfo.fromJson(jsonDecode((await SharedPreferences.getInstance()).getString(SPKey.deviceInfo)!));
+    return DeviceInfo.fromJson(jsonDecode((await AppPreferences.getString(SPKey.deviceInfo))!));
   }
 
   Future<void> setDeviceInfo(DeviceInfo info) async {
-    (await SharedPreferences.getInstance()).setString(SPKey.deviceInfo, info.toJson().toJsonString());
+    await AppPreferences.putString(SPKey.deviceInfo, info.toJson().toJsonString());
   }
 }
 

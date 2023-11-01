@@ -1,6 +1,5 @@
 package com.anhquan.unisync.features
 
-import com.anhquan.unisync.models.ChannelResult
 import com.anhquan.unisync.plugins.MdnsPlugin
 import com.anhquan.unisync.plugins.SocketPlugin
 import com.anhquan.unisync.plugins.UnisyncPlugin
@@ -34,12 +33,8 @@ class PairingFeature : UnisyncFeature() {
 
     override fun handleMethodChannelCall() {
         ChannelUtil.PairingChannel.apply {
-            addCallHandler(NATIVE_GET_DISCOVERED_DEVICES) { _, result ->
-                result.success(toMap(ChannelResult(
-                    method = NATIVE_GET_DISCOVERED_DEVICES,
-                    resultCode = ChannelResult.SUCCESS,
-                    result = DeviceConnection.getUnpairedDevices().map { toMap(it) }
-                )))
+            addCallHandler(GET_DISCOVERED_DEVICES) { _, result ->
+                result.success(DeviceConnection.getUnpairedDevices().map { toMap(it) })
             }
         }
     }

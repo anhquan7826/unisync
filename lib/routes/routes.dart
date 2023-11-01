@@ -1,33 +1,28 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:unisync/app/add_device/add_device.cubit.dart';
-import 'package:unisync/app/add_device/add_device.view.dart';
-import 'package:unisync/app/devices/devices.view.dart';
+import 'package:unisync/app/overview/devices_status/devices_status.cubit.dart';
+import 'package:unisync/app/overview/overview.view.dart';
 
 class AppRoute {
   AppRoute._();
-  static const device = '/devices';
+  static const overview = '/';
   static const addDevice = 'add';
 
   static final routerConfigs = GoRouter(
-    initialLocation: device,
+    initialLocation: overview,
     routes: [
       GoRoute(
-        path: device,
+        path: overview,
         builder: (context, state) {
-          return const DevicesView();
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider<DevicesStatusCubit>(
+                create: (context) => DevicesStatusCubit(),
+              )
+            ],
+            child: const OverviewView(),
+          );
         },
-        routes: [
-          GoRoute(
-            path: addDevice,
-            builder: (context, state) {
-              return BlocProvider<AddDeviceCubit>(
-                create: (context) => AddDeviceCubit(context),
-                child: const AddDeviceView(),
-              );
-            },
-          )
-        ],
       ),
     ],
   );

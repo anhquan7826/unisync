@@ -22,15 +22,15 @@ class PairingRepositoryImpl extends PairingRepository {
   }
 
   @override
-  Future<List<DeviceInfo>?> getDiscoveredDevices() async {
+  Future<List<DeviceInfo>> getDiscoveredDevices() async {
     if (Platform.isAndroid) {
-      final result = await UnisyncChannels.connection.invokeMethod(ConnectionChannel.nativeGetDiscoveredDevices);
+      final result = await UnisyncChannels.connection.invokeMethod(PairingChannel.GET_DISCOVERED_DEVICES);
       if (result.resultCode == ChannelResultCode.success) {
         return (result.result as List).map((e) {
           return DeviceInfo.fromJson((e as Map).cast<String, dynamic>());
         }).toList();
       } else {
-        return null;
+        return [];
       }
     } else {
       return DeviceConnection.getUnpairedDevice();
