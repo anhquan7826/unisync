@@ -14,6 +14,7 @@ abstract class UnisyncFeature {
         checkAvailability()
         if (isAvailable) {
             infoLog("${this::class.simpleName}: feature is ready.")
+            onFeatureReady()
             handle()
         }
     }
@@ -22,6 +23,8 @@ abstract class UnisyncFeature {
         handleMethodChannelCall()
         handlePluginData()
     }
+
+    protected open fun onFeatureReady() {}
 
     protected abstract fun checkAvailability()
 

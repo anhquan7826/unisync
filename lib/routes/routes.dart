@@ -17,7 +17,7 @@ class AppRoute {
           return MultiBlocProvider(
             providers: [
               BlocProvider<DevicesStatusCubit>(
-                create: (context) => DevicesStatusCubit(),
+                create: (context) => DevicesStatusCubit(context),
               )
             ],
             child: const OverviewView(),

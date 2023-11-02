@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:unisync/backend/linux_process.dart';
+import 'package:unisync/database/unisync_database.dart';
 import 'package:unisync/repository/impl/pairing.repository.impl.dart';
 import 'package:unisync/repository/pairing.repository.dart';
 import 'package:unisync/routes/routes.dart';
@@ -12,6 +15,9 @@ import 'package:unisync/themes/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  if (!Platform.isAndroid) {
+    await UnisyncDatabase.initialize();
+  }
   if (Platform.isLinux) {
     final process = LinuxProcess();
     await process.initialize();

@@ -24,6 +24,15 @@ fun <T : Any> toMap(obj: T): Map<String, Any?> {
     }
 }
 
+fun <T: Any> fromMap(map: Map<String, Any?>, type: Class<T>): T? {
+    return try {
+        val jsonString = gson.toJson(map)
+        gson.fromJson(jsonString, type)
+    } catch (_: Exception) {
+        null
+    }
+}
+
 fun toJson(obj: Any): String {
     return if (obj::class.isData) {
         gson.toJson(obj)

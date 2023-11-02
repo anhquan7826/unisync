@@ -55,10 +55,10 @@ class Avahi {
       0,
       0,
       'unisync@linux',
-      AppConfig.serviceType,
-      AppConfig.serviceDomain,
+      ConfigUtil.serviceType,
+      ConfigUtil.serviceDomain,
       '$hostname.$domainName',
-      AppConfig.discoveryPort,
+      ConfigUtil.discoveryPort,
       [],
     );
     await _entryGroup.callCommit();

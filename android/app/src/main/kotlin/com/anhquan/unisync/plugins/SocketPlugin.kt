@@ -11,7 +11,6 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.ReplaySubject
 import java.io.BufferedReader
 import java.io.BufferedWriter
-import java.io.IOException
 import java.net.Socket
 
 class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : UnisyncPlugin() {
@@ -37,6 +36,7 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
                 callback = {
                     if (!this::socket.isInitialized) {
                         socket = Socket(address, NetworkPorts.serverPort)
+                        socket.keepAlive = true
                     }
                     reader = socket.getInputStream().bufferedReader()
                     writer = socket.getOutputStream().bufferedWriter()
@@ -100,20 +100,18 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
                 task = {
                     infoLog("${this::class.simpleName}@$address: starting input stream listener.")
                     while (true) {
-                        try {
-                            val message = reader.readLine() ?: continue
+                        val message = reader.readLine()
+                        if (message != null) {
                             it.onNext(message)
-                        } catch (e: IOException) {
-                            it.onError(e)
+                        } else {
+                            disconnect()
+                            break
                         }
                     }
                 },
                 onResult = {
-                    debugLog("${this::class.simpleName}@$address: Incoming message: '$it'.")
+                    debugLog("${this::class.simpleName}@$address: Received message: '$it'.")
                     if (isConnected) inputStream.onNext(it)
-                },
-                onError = {
-                    disconnect()
                 }
             )
         }

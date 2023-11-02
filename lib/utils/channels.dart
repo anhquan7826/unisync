@@ -41,7 +41,53 @@ abstract class _ChannelHandler {
 
 class PairingChannel extends _ChannelHandler {
   PairingChannel._() : super(const MethodChannel('${UnisyncChannels._authority}/pairing'));
-  static const GET_DISCOVERED_DEVICES = 'get_discovered_devices';
+  static const GET_CONNECTED_DEVICES = 'get_connected_devices';
+  static const GET_PAIRED_DEVICES = 'get_paired_devices';
+  static const GET_UNPAIRED_DEVICES = 'get_unpaired_devices';
+
+  /// Argument format is:
+  /// {
+  ///   "device": {
+  ///     "id": _id,
+  ///     "name": _name,
+  ///     ...
+  ///   }
+  /// }
+  /// with value of "device" is DeviceInfo converted to map.
+  static const IS_DEVICE_ONLINE = 'is_device_online';
+
+  /// Argument format is:
+  /// {
+  ///   "device": {
+  ///     "id": _id,
+  ///     "name": _name,
+  ///     ...
+  ///   }
+  /// }
+  /// with value of "device" is DeviceInfo converted to map.
+  static const IS_DEVICE_PAIRED = 'is_device_paired';
+
+  /// Argument format is:
+  /// {
+  ///   "device": {
+  ///     "id": _id,
+  ///     "name": _name,
+  ///     ...
+  ///   }
+  /// }
+  /// with value of "device" is DeviceInfo converted to map.
+  static const ON_DEVICE_CONNECTED = 'on_device_connected';
+
+  /// Argument format is:
+  /// {
+  ///   "device": {
+  ///     "id": _id,
+  ///     "name": _name,
+  ///     ...
+  ///   }
+  /// }
+  /// with value of "device" is DeviceInfo converted to map.
+  static const ON_DEVICE_DISCONNECTED = 'on_device_disconnected';
 }
 
 class PreferencesChannel extends _ChannelHandler {

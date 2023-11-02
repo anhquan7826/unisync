@@ -24,13 +24,12 @@ class LinuxProcess {
 
   Future<void> initialize() async {
     infoLog('Initializing Linux process.');
-    if (!(await AppConfig.device.hasSetDeviceInfo())) {
-      await AppConfig.device.setDeviceInfo(DeviceInfo(
-        id: generateId(),
-        name: Platform.localHostname,
-        deviceType: DeviceTypes.linux,
-        publicKey: await AppConfig.authentication.getPublicKeyString()
-      ));
+    if (!(await ConfigUtil.device.hasSetDeviceInfo())) {
+      await ConfigUtil.device.setDeviceInfo(DeviceInfo(
+          id: generateId(),
+          name: Platform.localHostname,
+          deviceType: DeviceTypes.linux,
+          publicKey: await ConfigUtil.authentication.getPublicKeyString()));
     }
     _avahi = Avahi();
     _socket = AppSocket();

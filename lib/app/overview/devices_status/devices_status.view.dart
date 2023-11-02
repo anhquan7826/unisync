@@ -8,7 +8,6 @@ import 'package:unisync/app/overview/devices_status/devices_status.cubit.dart';
 import 'package:unisync/app/overview/devices_status/devices_status.state.dart';
 import 'package:unisync/constants/device_types.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
-import 'package:unisync/repository/pairing.repository.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/conveniences.ext.dart';
 
@@ -25,15 +24,8 @@ class DevicesStatusView extends StatefulWidget {
 
 class _DevicesStatusViewState extends State<DevicesStatusView> {
   @override
-  void initState() {
-    super.initState();
-    BlocProvider.of<DevicesStatusCubit>(context).initialize(RepositoryProvider.of<PairingRepository>(context));
-  }
-
-  @override
   Widget build(BuildContext context) {
     return BlocBuilder<DevicesStatusCubit, DevicesStatusState>(
-      buildWhen: (_, state) => state is DevicesStatusInitialized || state is DevicesStatusInitializing,
       builder: (context, state) {
         if (state is DevicesStatusInitializing) {
           return const Center(
@@ -51,8 +43,13 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      buildPairedDevices(),
-                      buildUnpairedDevices(),
+                      buildPairedDevices(
+                        connectedDevices: BlocProvider.of<DevicesStatusCubit>(context).connectedDevices,
+                        disconnectedDevices: BlocProvider.of<DevicesStatusCubit>(context).disconnectedDevices,
+                      ),
+                      buildUnpairedDevices(
+                        BlocProvider.of<DevicesStatusCubit>(context).unpairedDevices,
+                      ),
                     ],
                   ),
                 ),
@@ -120,7 +117,10 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
     );
   }
 
-  Widget buildPairedDevices() {
+  Widget buildPairedDevices({
+    required List<DeviceInfo> connectedDevices,
+    required List<DeviceInfo> disconnectedDevices,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -139,7 +139,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
           ).tr(),
         ),
-        ...BlocProvider.of<DevicesStatusCubit>(context).connectedDevices.map((device) {
+        ...connectedDevices.map((device) {
           return buildDeviceTile(device);
         }),
         Padding(
@@ -153,47 +153,41 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
           ).tr(),
         ),
-        ...BlocProvider.of<DevicesStatusCubit>(context).disconnectedDevices.map((device) {
+        ...disconnectedDevices.map((device) {
           return buildDeviceTile(device);
         }),
       ],
     );
   }
 
-  Widget buildUnpairedDevices() {
-    return BlocBuilder<DevicesStatusCubit, DevicesStatusState>(
-      buildWhen: (_, state) => state is DevicesStatusAvailableDevicesFetched,
-      builder: (context, state) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      R.strings.devicesStatus.availableDevices,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
-                    ).tr(),
-                  ),
-                  TextButton.icon(
-                    onPressed: () {
-                      BlocProvider.of<DevicesStatusCubit>(context).loadDevices();
-                    },
-                    icon: const Icon(Icons.replay_rounded),
-                    label: Text(R.strings.devicesStatus.rescan).tr(),
-                  ),
-                ],
+  Widget buildUnpairedDevices(List<DeviceInfo> disconnectedDevices) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  R.strings.devicesStatus.availableDevices,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+                ).tr(),
               ),
-            ),
-            if (state is DevicesStatusAvailableDevicesFetched)
-              ...state.devices.map((device) {
-                return buildDeviceTile(device);
-              })
-          ],
-        );
-      },
+              TextButton.icon(
+                onPressed: () {
+                  BlocProvider.of<DevicesStatusCubit>(context).loadDevices();
+                },
+                icon: const Icon(Icons.replay_rounded),
+                label: Text(R.strings.devicesStatus.rescan).tr(),
+              ),
+            ],
+          ),
+        ),
+        ...disconnectedDevices.map((device) {
+          return buildDeviceTile(device);
+        })
+      ],
     );
   }
 

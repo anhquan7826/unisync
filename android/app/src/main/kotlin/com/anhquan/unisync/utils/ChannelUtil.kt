@@ -96,7 +96,57 @@ object ChannelUtil {
     }
 
     object PairingChannel : ChannelHandler("/pairing") {
-        const val GET_DISCOVERED_DEVICES = "get_discovered_devices"
+        const val GET_CONNECTED_DEVICES = "get_connected_devices"
+        const val GET_UNPAIRED_DEVICES = "get_unpaired_devices"
+        const val GET_PAIRED_DEVICES = "get_paired_devices"
+
+        /**
+         * DeviceInfo to JSON:
+         * {
+         *      "device": {
+         *          "id": <id>,
+         *          "name": <name>,
+         *          ...
+         *      }
+         * }
+         */
+        const val IS_DEVICE_ONLINE = "is_device_online"
+
+        /**
+         * DeviceInfo to JSON:
+         * {
+         *      "device": {
+         *          "id": <id>,
+         *          "name": <name>,
+         *          ...
+         *      }
+         * }
+         */
+        const val IS_DEVICE_PAIRED = "is_device_paired"
+
+        /**
+         * DeviceInfo to JSON:
+         * {
+         *      "device": {
+         *          "id": _id,
+         *          "name": _name,
+         *          ...
+         *      }
+         * }
+         */
+        const val ON_DEVICE_CONNECTED = "on_device_connected"
+
+        /**
+         * DeviceInfo to JSON:
+         * {
+         *      "device": {
+         *          "id": <id>,
+         *          "name": <name>,
+         *          ...
+         *      }
+         * }
+         */
+        const val ON_DEVICE_DISCONNECTED = "on_device_disconnected"
     }
 
     object PreferencesChannel : ChannelHandler("/preferences") {

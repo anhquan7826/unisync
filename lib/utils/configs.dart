@@ -7,14 +7,15 @@ import 'package:pointycastle/pointycastle.dart';
 import 'package:pointycastle/random/fortuna_random.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unisync/constants/sp_key.dart';
-import 'package:unisync/utils/extensions/map.ext.dart';
+import 'package:unisync/database/unisync_database.dart';
 import 'package:unisync/utils/converters.dart';
+import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/preferences.dart';
 
 import '../models/device_info/device_info.model.dart';
 
-class AppConfig {
-  AppConfig._();
+class ConfigUtil {
+  ConfigUtil._();
 
   static const serviceType = '_unisync._tcp';
   static const serviceDomain = 'local';
@@ -37,6 +38,18 @@ class _DeviceConfig {
 
   Future<void> setDeviceInfo(DeviceInfo info) async {
     await AppPreferences.putString(SPKey.deviceInfo, info.toJson().toJsonString());
+  }
+
+  Future<List<DeviceInfo>> getPairedDevices() async {
+    return UnisyncDatabase.pairedDeviceDao.getAll();
+  }
+
+  Future<void> addPairedDevice(DeviceInfo device) async {
+    await UnisyncDatabase.pairedDeviceDao.add(device);
+  }
+
+  Future<void> removePairedDevice(DeviceInfo device) async {
+    await UnisyncDatabase.pairedDeviceDao.remove(device);
   }
 }
 

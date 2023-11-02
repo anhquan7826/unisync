@@ -11,15 +11,7 @@ import java.util.concurrent.TimeUnit
 fun runSingle(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
-    onError: (e: Throwable) -> Unit = {
-        errorLog(
-            "runSingle: error: ${it.message}\n${
-                it.stackTrace.joinToString(
-                    "\n"
-                )
-            }\n$it"
-        )
-    },
+    onError: (e: Throwable) -> Unit = { errorLog(it); it.printStackTrace() },
     callback: () -> Unit,
 ): Disposable {
     return Single.create {
@@ -47,7 +39,7 @@ fun <T : Any> runTask(
     observeOn: Scheduler = Schedulers.io(),
     task: (ObservableEmitter<T>) -> Unit,
     onResult: (T) -> Unit = {},
-    onError: (Throwable) -> Unit = { errorLog("runTask: error:\n${it.stackTrace.joinToString("\n")}\n$it") },
+    onError: (Throwable) -> Unit = { errorLog(it); it.printStackTrace() },
     onComplete: () -> Unit = {}
 ): Disposable {
     return Observable
@@ -66,7 +58,7 @@ fun <T : Any> runTask(
 fun <T : Any> Observable<T>.listen(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
-    onError: (Throwable) -> Unit = { errorLog(it) },
+    onError: (Throwable) -> Unit = { errorLog(it.message); it.printStackTrace() },
     onNext: (T) -> Unit
 ): Disposable {
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onNext, onError)
@@ -75,7 +67,7 @@ fun <T : Any> Observable<T>.listen(
 fun <T : Any> Single<T>.listen(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
-    onError: (Throwable) -> Unit = { errorLog(it) },
+    onError: (Throwable) -> Unit = { errorLog(it); it.printStackTrace() },
     onResult: (T) -> Unit
 ): Disposable {
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onResult, onError)

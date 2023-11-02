@@ -1,9 +1,6 @@
 package com.anhquan.unisync.features
 
-import com.anhquan.unisync.constants.MessageType
 import com.anhquan.unisync.models.DeviceInfo
-import com.anhquan.unisync.models.DeviceRequest
-import com.anhquan.unisync.models.DeviceResponse
 import com.anhquan.unisync.plugins.SocketPlugin
 import com.anhquan.unisync.plugins.SocketPlugin.ConnectionState.STATE_CONNECTED
 import com.anhquan.unisync.plugins.SocketPlugin.ConnectionState.STATE_DISCONNECTED
@@ -13,21 +10,28 @@ import com.anhquan.unisync.utils.fromJson
 import com.anhquan.unisync.utils.infoLog
 import com.anhquan.unisync.utils.listen
 import com.anhquan.unisync.utils.toJson
+import io.reactivex.rxjava3.subjects.ReplaySubject
 
 class DeviceConnection private constructor(private val socket: SocketPlugin.SocketConnection) {
+    enum class DeviceState {
+        ONLINE, OFFLINE, MESSAGE_RECEIVED, MESSAGE_SENT
+    }
+
+    data class ConnectionNotifierValue(
+        val state: DeviceState,
+        val deviceInfo: DeviceInfo,
+    )
+
     companion object {
-        private val connectedDevices = mutableListOf<DeviceConnection>()
+        private val connections = mutableListOf<DeviceConnection>()
+        val connectionNotifier = ReplaySubject.create<ConnectionNotifierValue>()
 
-        fun getConnectedDevices(): List<DeviceInfo> {
-            return connectedDevices.map { it.info }
-        }
-
-        fun getUnpairedDevices(): List<DeviceInfo> {
-            return connectedDevices.filter { !it.isPaired }.map { it.info }
+        fun getConnections(): List<DeviceConnection> {
+            return connections.filter { it::info.isInitialized }.toList()
         }
 
         fun createConnection(socket: SocketPlugin.SocketConnection) {
-            connectedDevices.add(DeviceConnection(socket))
+            connections.add(DeviceConnection(socket))
         }
     }
 
@@ -39,16 +43,23 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
                     socket.send(toJson(ConfigUtil.Device.getDeviceInfo()))
                     socket.inputStream.listen(onNext = ::onInputData)
                 }
-                STATE_DISCONNECTED -> {
 
+                STATE_DISCONNECTED -> {
+                    if (::info.isInitialized) connectionNotifier.onNext(
+                        ConnectionNotifierValue(
+                            DeviceState.OFFLINE,
+                            info
+                        )
+                    )
                 }
+
                 else -> {}
             }
         }
     }
 
-    private lateinit var info: DeviceInfo
-    var isPaired: Boolean = false
+    private val messageNotifier = ReplaySubject.create<String>()
+    lateinit var info: DeviceInfo
         private set
 
     private fun onInputData(input: String) {
@@ -57,20 +68,27 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
                 info = fromJson(input, DeviceInfo::class.java)!!.copy(
                     ip = socket.address
                 )
+                connectionNotifier.onNext(
+                    ConnectionNotifierValue(
+                        DeviceState.ONLINE,
+                        info
+                    )
+                )
                 infoLog("Connected:")
                 infoLog(info)
             } catch (e: Exception) {
                 errorLog("${this::class.simpleName}@${socket.address}: Invalid initial message.")
                 socket.disconnect()
-                connectedDevices.remove(this)
+                connections.remove(this)
             }
         } else {
-            if (input.contains("\"type\":\"${MessageType.request}\"")) {
-                val request = fromJson(input, DeviceRequest::class.java)
-            }
-            if (input.contains("\"type\":\"${MessageType.response}\"")) {
-                val response = fromJson(input, DeviceResponse::class.java)
-            }
+            messageNotifier.onNext(input)
+//            if (input.contains("\"type\":\"${MessageType.request}\"")) {
+//                val request = fromJson(input, DeviceRequest::class.java)
+//            }
+//            if (input.contains("\"type\":\"${MessageType.response}\"")) {
+//                val response = fromJson(input, DeviceResponse::class.java)
+//            }
         }
     }
 }

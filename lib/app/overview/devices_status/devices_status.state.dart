@@ -19,11 +19,20 @@ class DevicesStatusInitialized extends DevicesStatusState {
   List<Object?> get props => [];
 }
 
-class DevicesStatusAvailableDevicesFetched extends DevicesStatusState {
-  const DevicesStatusAvailableDevicesFetched(this.devices);
+class OnDeviceConnectedState extends DevicesStatusState {
+  const OnDeviceConnectedState(this.device);
 
-  final List<DeviceInfo> devices;
+  final DeviceInfo device;
 
   @override
-  List<Object?> get props => [...devices];
+  List<Object?> get props => [device];
+}
+
+class OnDeviceDisconnectedState extends DevicesStatusState {
+  const OnDeviceDisconnectedState(this.device);
+
+  final DeviceInfo device;
+
+  @override
+  List<Object?> get props => [device];
 }
