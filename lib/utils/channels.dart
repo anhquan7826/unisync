@@ -15,8 +15,9 @@ class UnisyncChannels {
 
 abstract class _ChannelHandler {
   _ChannelHandler(this._methodChannel) {
-    _methodChannel.setMethodCallHandler((call) {
-      return _callHandlers[call.method]?.call((call.arguments as Map).cast<String, dynamic>());
+    _methodChannel.setMethodCallHandler((call) async {
+      final args = (call.arguments as Map?)?.map((key, value) => MapEntry(key.toString(), value));
+      return _callHandlers[call.method]?.call(args);
     });
   }
 
@@ -25,8 +26,6 @@ abstract class _ChannelHandler {
 
   Future<ChannelResult> invokeMethod(String method, {Map<String, dynamic>? arguments}) async {
     final result = (await _methodChannel.invokeMethod<Map>(method, arguments))!.cast<String, dynamic>();
-    debugLog('Invoke method channel finished with result:');
-    debugLog(result);
     return ChannelResult.fromJson(result);
   }
 

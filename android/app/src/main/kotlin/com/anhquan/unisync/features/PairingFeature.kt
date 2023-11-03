@@ -8,6 +8,7 @@ import com.anhquan.unisync.plugins.SocketPlugin
 import com.anhquan.unisync.plugins.UnisyncPlugin
 import com.anhquan.unisync.utils.ChannelUtil
 import com.anhquan.unisync.utils.ConfigUtil
+import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.fromMap
 import com.anhquan.unisync.utils.listen
 import com.anhquan.unisync.utils.toMap
@@ -33,6 +34,7 @@ class PairingFeature : UnisyncFeature() {
         DeviceConnection.connectionNotifier.listen(observeOn = AndroidSchedulers.mainThread()) {
             when (it.state) {
                 ONLINE -> {
+                    debugLog("${this::class.simpleName}: ONLINE: ${it.deviceInfo.name}")
                     ChannelUtil.PairingChannel.invoke(
                         ChannelUtil.PairingChannel.ON_DEVICE_CONNECTED,
                         args = mapOf(
@@ -42,6 +44,7 @@ class PairingFeature : UnisyncFeature() {
                 }
 
                 OFFLINE -> {
+                    debugLog("${this::class.simpleName}: OFFLINE: ${it.deviceInfo.name}")
                     ChannelUtil.PairingChannel.invoke(
                         ChannelUtil.PairingChannel.ON_DEVICE_DISCONNECTED,
                         args = mapOf(

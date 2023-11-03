@@ -12,13 +12,15 @@ class PairingRepositoryImpl extends PairingRepository {
     if (Platform.isAndroid) {
       UnisyncChannels.connection
         ..addCallHandler(PairingChannel.ON_DEVICE_CONNECTED, (arguments) {
-          final device = DeviceInfo.fromJson(arguments!['device']);
+          final value = (arguments!['device'] as Map).map((key, value) => MapEntry(key.toString(), value));
+          final device = DeviceInfo.fromJson(value);
           for (final callback in _callbacks) {
             callback.onDeviceConnected.call(device);
           }
         })
         ..addCallHandler(PairingChannel.ON_DEVICE_DISCONNECTED, (arguments) {
-          final device = DeviceInfo.fromJson(arguments!['device']);
+          final value = (arguments!['device'] as Map).map((key, value) => MapEntry(key.toString(), value));
+          final device = DeviceInfo.fromJson(value);
           for (final callback in _callbacks) {
             callback.onDeviceDisconnected.call(device);
           }

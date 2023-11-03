@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:unisync/app/overview/devices_status/devices_status.cubit.dart';
 import 'package:unisync/app/overview/devices_status/devices_status.state.dart';
+import 'package:unisync/app/overview/overview.cubit.dart';
 import 'package:unisync/constants/device_types.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
@@ -23,9 +24,22 @@ class DevicesStatusView extends StatefulWidget {
 }
 
 class _DevicesStatusViewState extends State<DevicesStatusView> {
+  late final DevicesStatusCubit cubit;
+
+  @override
+  void initState() {
+    super.initState();
+    cubit = BlocProvider.of<DevicesStatusCubit>(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DevicesStatusCubit, DevicesStatusState>(
+    return BlocConsumer<DevicesStatusCubit, DevicesStatusState>(
+      buildWhen: (_, state) => state is DevicesStatusInitializing || state is DevicesStatusInitialized,
+      listenWhen: (_, state) => state is! DevicesStatusInitializing && state is! DevicesStatusInitialized,
+      listener: (context, state) {
+        setState(() {});
+      },
       builder: (context, state) {
         if (state is DevicesStatusInitializing) {
           return const Center(
@@ -43,12 +57,16 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      buildPairedDevices(
-                        connectedDevices: BlocProvider.of<DevicesStatusCubit>(context).connectedDevices,
-                        disconnectedDevices: BlocProvider.of<DevicesStatusCubit>(context).disconnectedDevices,
-                      ),
+                      if (cubit.connectedDevices.isNotEmpty || cubit.disconnectedDevices.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: buildPairedDevices(
+                            connectedDevices: cubit.connectedDevices,
+                            disconnectedDevices: cubit.disconnectedDevices,
+                          ),
+                        ),
                       buildUnpairedDevices(
-                        BlocProvider.of<DevicesStatusCubit>(context).unpairedDevices,
+                        cubit.unpairedDevices,
                       ),
                     ],
                   ),
@@ -95,7 +113,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
-                Text(BlocProvider.of<DevicesStatusCubit>(context).info.name)
+                Text(cubit.info.name)
               ],
             ),
           ),
@@ -125,37 +143,41 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          R.strings.devicesStatus.availableDevices,
+          R.strings.devicesStatus.pairedDevices,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
         ).tr(),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: 16,
-            top: 16,
-            bottom: 16,
+        if (connectedDevices.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 16,
+              top: 16,
+              bottom: 16,
+            ),
+            child: Text(
+              R.strings.devicesStatus.connectedDevice,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+            ).tr(),
           ),
-          child: Text(
-            R.strings.devicesStatus.connectedDevice,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
-          ).tr(),
-        ),
-        ...connectedDevices.map((device) {
-          return buildDeviceTile(device);
-        }),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: 16,
-            top: 16,
-            bottom: 16,
+          ...connectedDevices.map((device) {
+            return buildDeviceTile(device);
+          }),
+        ],
+        if (disconnectedDevices.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 16,
+              top: 16,
+              bottom: 16,
+            ),
+            child: Text(
+              R.strings.devicesStatus.disconnectedDevice,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+            ).tr(),
           ),
-          child: Text(
-            R.strings.devicesStatus.disconnectedDevice,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
-          ).tr(),
-        ),
-        ...disconnectedDevices.map((device) {
-          return buildDeviceTile(device);
-        }),
+          ...disconnectedDevices.map((device) {
+            return buildDeviceTile(device);
+          }),
+        ],
       ],
     );
   }
@@ -164,25 +186,22 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  R.strings.devicesStatus.availableDevices,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
-                ).tr(),
-              ),
-              TextButton.icon(
-                onPressed: () {
-                  BlocProvider.of<DevicesStatusCubit>(context).loadDevices();
-                },
-                icon: const Icon(Icons.replay_rounded),
-                label: Text(R.strings.devicesStatus.rescan).tr(),
-              ),
-            ],
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                R.strings.devicesStatus.availableDevices,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
+              ).tr(),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                cubit.loadDevices();
+              },
+              icon: const Icon(Icons.replay_rounded),
+              label: Text(R.strings.devicesStatus.rescan).tr(),
+            ),
+          ],
         ),
         ...disconnectedDevices.map((device) {
           return buildDeviceTile(device);
@@ -193,6 +212,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
 
   Widget buildDeviceTile(DeviceInfo device) {
     return ListTile(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: SvgPicture.asset(
         device.deviceType == DeviceTypes.android
             ? R.icons.android
@@ -207,7 +227,9 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
       ),
       title: Text(device.name),
       subtitle: Text(device.ip),
-      onTap: () {},
+      onTap: () {
+        BlocProvider.of<OverviewCubit>(context).changeDevice(device);
+      },
     );
   }
 }

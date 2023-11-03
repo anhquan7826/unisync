@@ -20,6 +20,8 @@ class DevicesStatusCubit extends Cubit<DevicesStatusState> {
     onDeviceConnected: (device) async {
       if (await pairingRepository.isDevicePaired(device)) {
         connectedDevices.add(device);
+      } else {
+        unpairedDevices.add(device);
       }
       emit(OnDeviceConnectedState(device));
     },
@@ -34,9 +36,9 @@ class DevicesStatusCubit extends Cubit<DevicesStatusState> {
     },
   );
 
-  late final List<DeviceInfo> connectedDevices;
-  late final List<DeviceInfo> disconnectedDevices;
-  late final List<DeviceInfo> unpairedDevices;
+  late List<DeviceInfo> connectedDevices;
+  late List<DeviceInfo> disconnectedDevices;
+  late List<DeviceInfo> unpairedDevices;
 
   Future<void> initialize() async {
     info = await ConfigUtil.device.getDeviceInfo();

@@ -49,7 +49,10 @@ object ChannelUtil {
             channel?.setMethodCallHandler { call, result ->
                 if (callHandlers.containsKey(call.method)) {
                     val emitter = ResultEmitter(call.method, result)
-                    callHandlers[call.method]!!.invoke(call.arguments as Map<String, Any?>?, emitter)
+                    callHandlers[call.method]!!.invoke(
+                        call.arguments as Map<String, Any?>?,
+                        emitter
+                    )
                 } else {
                     errorLog("${this::class.simpleName}@${call.method}: not implemented.")
                 }
@@ -72,7 +75,7 @@ object ChannelUtil {
                 }
 
                 override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                    onError.invoke("${this::class.simpleName}@$method: error: $errorMessage")
+                    onError.invoke("$errorMessage\nDetails: $errorDetails")
                 }
 
                 override fun notImplemented() {
