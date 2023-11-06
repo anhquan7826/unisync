@@ -11,12 +11,12 @@ import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/logger.dart';
 
 class DeviceConnection {
-  static final List<DeviceConnection> _connections = [];
+  static final Map<String, DeviceConnection> _connections = {};
 
-  static List<DeviceConnection> get connections => _connections.where((element) => element.info != null).toList();
+  static List<DeviceConnection> get connections => _connections.values.toList();
 
   static void createConnection(SocketConnection socket) {
-    _connections.add(DeviceConnection._(socket));
+    DeviceConnection._(socket);
   }
 
   // ignore: close_sinks
@@ -35,7 +35,7 @@ class DeviceConnection {
           break;
         case SocketConnectionState.STATE_DISCONNECTED:
           if (info != null) {
-            connectionNotifier.add(ConnectionNotifierValue(DeviceState.OFFLINE, info!));
+            _onDeviceOffline();
           }
           break;
       }
@@ -51,19 +51,28 @@ class DeviceConnection {
     if (info == null) {
       try {
         info = DeviceInfo.fromJson(jsonDecode(input)).copy(ip: _socket.address);
-        connectionNotifier.add(ConnectionNotifierValue(DeviceState.ONLINE, info!));
+        _onDeviceOnline();
       } catch (_) {
-        errorLog('DeviceConnection@${_socket.address}: Invalid initial message.');
+        _socket.disconnect();
       }
     } else {
       messageNotifier.add(input);
-      // if (input.contains('"type":"request"')) {
-      //   final request = DeviceRequest.fromJson(jsonDecode(input));
-      // }
-      // if (input.contains('"type":"response"')) {
-      //   final response = DeviceResponse.fromJson(jsonDecode(input));
-      // }
     }
+  }
+
+  void _onDeviceOnline() {
+    if (_connections.containsKey(info!.id)) {
+      debugLog('Found duplicate connection to device: ${info!.name} (${info!.ip})');
+      _socket.disconnect();
+    } else {
+      _connections[info!.id] = this;
+      connectionNotifier.add(ConnectionNotifierValue(DeviceState.ONLINE, info!));
+    }
+  }
+
+  void _onDeviceOffline() {
+    _connections.remove(info!.id);
+    connectionNotifier.add(ConnectionNotifierValue(DeviceState.OFFLINE, info!));
   }
 }
 

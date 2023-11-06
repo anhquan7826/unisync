@@ -1,7 +1,6 @@
 package com.anhquan.unisync
 
 import android.os.Build
-import android.provider.Settings
 import com.anhquan.unisync.constants.DeviceType
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.ConfigUtil
@@ -22,8 +21,7 @@ class UnisyncApplication : FlutterApplication() {
             ConfigUtil.Device.setDeviceInfo(
                 DeviceInfo(
                     id = IDUtil.generateId(),
-                    name = Settings.System.getString(contentResolver, Settings.Global.DEVICE_NAME)
-                        ?: Build.DEVICE,
+                    name = Build.MODEL,
                     deviceType = DeviceType.android,
                 )
             )

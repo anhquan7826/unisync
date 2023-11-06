@@ -49,7 +49,6 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
                     errorLog("${this::class.simpleName}@$address: cannot connect.\n${it.message}")
                     isConnected = false
                     connectionState.onNext(ConnectionState.STATE_DISCONNECTED)
-                    connections.remove(address)
                 }
             )
         }
@@ -75,7 +74,6 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
         }
 
         fun disconnect() {
-            connections.remove(address)
             if (isConnected) {
                 isConnected = false
                 runSingle(
@@ -119,20 +117,12 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
 
     inner class SocketPluginHandler : UnisyncPluginHandler {
         fun getConnection(ip: String): SocketConnection {
-            return if (connections.containsKey(ip)) {
-                infoLog("${this::class.simpleName}: connection to $ip has already been established.")
-                connections[ip]!!
-            } else {
-                infoLog("${this::class.simpleName}: create new connection to $ip.")
-                val connection = SocketConnection(ip)
-                connections[ip] = connection
-                connection
-            }
+            infoLog("${this::class.simpleName}: create new connection to $ip.")
+            return SocketConnection(ip)
         }
     }
 
     override val pluginHandler: UnisyncPluginHandler = SocketPluginHandler()
-    private val connections = mutableMapOf<String, SocketConnection>()
 
     override fun start(context: Context) {
         infoLog("${this::class.simpleName}: starting Socket plugin.")
@@ -140,12 +130,6 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
     }
 
     override fun stop() {
-        connections.apply {
-            values.forEach {
-                it.disconnect()
-            }
-            clear()
-        }
         pluginConnection.onPluginStopped()
     }
 }

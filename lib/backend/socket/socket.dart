@@ -8,8 +8,6 @@ import 'package:unisync/backend/device_connection/device_connection.dart';
 import 'package:unisync/constants/network_ports.dart';
 import 'package:unisync/utils/logger.dart';
 
-final Map<String, SocketConnection> _connections = {};
-
 class AppSocket {
   final Map<String, ServerSocket> _serverSockets = {};
   Future<void> start() async {
@@ -28,8 +26,7 @@ class AppSocket {
     infoLog('AppSocket: Created server socket on $address.');
     _serverSockets[address]?.listen((socket) {
       infoLog('AppSocket: New connection established to ${socket.address.address}.');
-      _connections[socket.address.address] = SocketConnection(socket);
-      DeviceConnection.createConnection(_connections[socket.address.address]!);
+      DeviceConnection.createConnection(SocketConnection(socket));
     });
   }
 }
@@ -64,11 +61,15 @@ class SocketConnection {
         _stateStream.add(SocketConnectionState.STATE_DISCONNECTED);
         _inputStream.close();
         _stateStream.close();
-        _connections.remove(_address);
       },
       cancelOnError: true,
     );
     _stateStream.add(SocketConnectionState.STATE_CONNECTED);
+  }
+
+  Future<void> disconnect() async {
+    await _socket.flush();
+    await _socket.close();
   }
 
   Stream<String> getInputStream() {

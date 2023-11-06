@@ -5,9 +5,8 @@ import com.anhquan.unisync.plugins.SocketPlugin
 import com.anhquan.unisync.plugins.SocketPlugin.ConnectionState.STATE_CONNECTED
 import com.anhquan.unisync.plugins.SocketPlugin.ConnectionState.STATE_DISCONNECTED
 import com.anhquan.unisync.utils.ConfigUtil
-import com.anhquan.unisync.utils.errorLog
+import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.fromJson
-import com.anhquan.unisync.utils.infoLog
 import com.anhquan.unisync.utils.listen
 import com.anhquan.unisync.utils.toJson
 import io.reactivex.rxjava3.subjects.ReplaySubject
@@ -23,15 +22,15 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
     )
 
     companion object {
-        private val connections = mutableListOf<DeviceConnection>()
+        private val connections = mutableMapOf<String, DeviceConnection>()
         val connectionNotifier = ReplaySubject.create<ConnectionNotifierValue>()
 
         fun getConnections(): List<DeviceConnection> {
-            return connections.filter { it::info.isInitialized }.toList()
+            return connections.values.toList()
         }
 
         fun createConnection(socket: SocketPlugin.SocketConnection) {
-            connections.add(DeviceConnection(socket))
+            DeviceConnection(socket)
         }
     }
 
@@ -45,12 +44,9 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
                 }
 
                 STATE_DISCONNECTED -> {
-                    if (::info.isInitialized) connectionNotifier.onNext(
-                        ConnectionNotifierValue(
-                            DeviceState.OFFLINE,
-                            info
-                        )
-                    )
+                    if (::info.isInitialized) {
+                        onDeviceOffline()
+                    }
                 }
 
                 else -> {}
@@ -68,27 +64,37 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
                 info = fromJson(input, DeviceInfo::class.java)!!.copy(
                     ip = socket.address
                 )
-                connectionNotifier.onNext(
-                    ConnectionNotifierValue(
-                        DeviceState.ONLINE,
-                        info
-                    )
-                )
-                infoLog("Connected:")
-                infoLog(info)
+                onDeviceOnline()
             } catch (e: Exception) {
-                errorLog("${this::class.simpleName}@${socket.address}: Invalid initial message.")
                 socket.disconnect()
-                connections.remove(this)
             }
         } else {
             messageNotifier.onNext(input)
-//            if (input.contains("\"type\":\"${MessageType.request}\"")) {
-//                val request = fromJson(input, DeviceRequest::class.java)
-//            }
-//            if (input.contains("\"type\":\"${MessageType.response}\"")) {
-//                val response = fromJson(input, DeviceResponse::class.java)
-//            }
         }
+    }
+
+    private fun onDeviceOnline() {
+        if (connections.containsKey(info.id)) {
+            debugLog("Found duplicate connection to device: ${info.name} (${info.ip})")
+            socket.disconnect()
+        } else {
+            connections[info.id] = this
+            connectionNotifier.onNext(
+                ConnectionNotifierValue(
+                    DeviceState.ONLINE,
+                    info
+                )
+            )
+        }
+    }
+
+    private fun onDeviceOffline() {
+        connections.remove(info.id)
+        connectionNotifier.onNext(
+            ConnectionNotifierValue(
+                DeviceState.OFFLINE,
+                info
+            )
+        )
     }
 }

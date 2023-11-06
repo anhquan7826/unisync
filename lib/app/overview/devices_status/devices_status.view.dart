@@ -38,6 +38,11 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
       buildWhen: (_, state) => state is DevicesStatusInitializing || state is DevicesStatusInitialized,
       listenWhen: (_, state) => state is! DevicesStatusInitializing && state is! DevicesStatusInitialized,
       listener: (context, state) {
+        if (state is OnDeviceDisconnectedState) {
+          if (BlocProvider.of<OverviewCubit>(context).currentDevice?.id == state.device.id) {
+            BlocProvider.of<OverviewCubit>(context).changeDevice(null);
+          }
+        }
         setState(() {});
       },
       builder: (context, state) {
@@ -120,13 +125,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
           if (widget.scaffoldKey != null)
             IconButton(
               onPressed: () {
-                widget.scaffoldKey?.currentState?.isDrawerOpen.let((it) {
-                  if (it) {
-                    widget.scaffoldKey?.currentState?.closeDrawer();
-                  } else {
-                    widget.scaffoldKey?.currentState?.openDrawer();
-                  }
-                });
+                closeDrawer();
               },
               icon: const Icon(Icons.close_rounded),
             ),
@@ -229,7 +228,16 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
       subtitle: Text(device.ip),
       onTap: () {
         BlocProvider.of<OverviewCubit>(context).changeDevice(device);
+        closeDrawer();
       },
     );
+  }
+
+  void closeDrawer() {
+    widget.scaffoldKey?.currentState?.isDrawerOpen.let((it) {
+      if (it) {
+        widget.scaffoldKey?.currentState?.closeDrawer();
+      }
+    });
   }
 }
