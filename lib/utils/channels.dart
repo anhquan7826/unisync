@@ -2,7 +2,6 @@
 
 import 'package:flutter/services.dart';
 import 'package:unisync/models/channel_result/channel_result.model.dart';
-import 'package:unisync/utils/logger.dart';
 
 class UnisyncChannels {
   UnisyncChannels._();

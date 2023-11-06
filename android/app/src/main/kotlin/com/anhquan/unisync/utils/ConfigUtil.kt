@@ -9,7 +9,7 @@ import com.anhquan.unisync.database.entity.DeviceRequestEntity
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceRequest
-import java.security.KeyPairGenerator
+import com.anhquan.unisync.utils.cryptography.RSAHelper
 import java.security.PrivateKey
 import java.security.PublicKey
 
@@ -39,18 +39,15 @@ object ConfigUtil {
             if (sharedPreferences.getString(SPKey.publicKey, "")?.isNotEmpty() == true) {
                 publicKeyString = sharedPreferences.getString(SPKey.publicKey, "")!!
                 privateKeyString = sharedPreferences.getString(SPKey.privateKey, "")!!
-                publicKey = stringToKey(publicKeyString) as PublicKey
-                privateKey = stringToKey(privateKeyString, isPrivate = true) as PrivateKey
+                publicKey = RSAHelper.decodeRSAKey(publicKeyString) as PublicKey
+                privateKey = RSAHelper.decodeRSAKey(privateKeyString, isPrivate = true) as PrivateKey
                 return
             }
-            val keyGen = KeyPairGenerator.getInstance("RSA").apply {
-                initialize(2048)
-            }
-            val keypair = keyGen.genKeyPair()
+            val keypair = RSAHelper.generateKeypair()
             privateKey = keypair.private
-            privateKeyString = keyToString(privateKey)
+            privateKeyString = RSAHelper.encodeRSAKey(privateKey, isPrivate = true)
             publicKey = keypair.public
-            publicKeyString = keyToString(publicKey)
+            publicKeyString = RSAHelper.encodeRSAKey(publicKey)
             sharedPreferences
                 .edit()
                 .putString(SPKey.privateKey, privateKeyString)

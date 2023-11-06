@@ -1,14 +1,10 @@
 import 'dart:convert';
-import 'dart:math';
-import 'dart:typed_data';
 
-import 'package:pointycastle/key_generators/rsa_key_generator.dart';
 import 'package:pointycastle/pointycastle.dart';
-import 'package:pointycastle/random/fortuna_random.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unisync/constants/sp_key.dart';
 import 'package:unisync/database/unisync_database.dart';
-import 'package:unisync/utils/converters.dart';
+import 'package:unisync/utils/cryptography/rsa.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/preferences.dart';
 
@@ -69,31 +65,18 @@ class _AuthenticationConfig {
     if (sp.getString(SPKey.publicKey)?.isNotEmpty == true) {
       _publicKeyString = sp.getString(SPKey.publicKey);
       _privateKeyString = sp.getString(SPKey.privateKey);
-      _publicKey = publicKeyFromPEM(_publicKeyString!);
-      _privateKey = privateKeyFromPEM(_privateKeyString!);
+      _publicKey = RSAHelper.decodeRSAKey(_publicKeyString!) as RSAPublicKey;
+      _privateKey = RSAHelper.decodeRSAKey(_privateKeyString!, isPrivate: true) as RSAPrivateKey;
       return;
     }
-    final keyParams = RSAKeyGeneratorParameters(BigInt.from(65537), 2048, 64);
-    final keyGenerator = RSAKeyGenerator()..init(ParametersWithRandom(keyParams, _getSecureRandom()));
-    final keyPair = keyGenerator.generateKeyPair();
-    _privateKey = keyPair.privateKey as RSAPrivateKey;
-    _privateKeyString = rsaKeyToPEM(privateKey: _privateKey);
-    _publicKey = keyPair.publicKey as RSAPublicKey;
-    _publicKeyString = rsaKeyToPEM(publicKey: _publicKey);
+    final keyPair = RSAHelper.generateKeypair();
+    _privateKey = keyPair.privateKey;
+    _privateKeyString = RSAHelper.encodeRSAKey(_privateKey!, isPrivate: true);
+    _publicKey = keyPair.publicKey;
+    _publicKeyString = RSAHelper.encodeRSAKey(_publicKey!);
     sp
       ..setString(SPKey.publicKey, _publicKeyString!)
       ..setString(SPKey.privateKey, _privateKeyString!);
-  }
-
-  SecureRandom _getSecureRandom() {
-    final secureRandom = FortunaRandom();
-    final random = Random.secure();
-    final List<int> seeds = [];
-    for (int i = 0; i < 32; i++) {
-      seeds.add(random.nextInt(255));
-    }
-    secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
-    return secureRandom;
   }
 
   Future<RSAPublicKey> getPublicKey() async {
