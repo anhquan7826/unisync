@@ -11,7 +11,10 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.ReplaySubject
 import java.io.BufferedReader
 import java.io.BufferedWriter
-import java.net.Socket
+import javax.net.ssl.SSLContext
+import javax.net.ssl.SSLSocket
+import javax.net.ssl.SSLSocketFactory
+
 
 class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : UnisyncPlugin() {
     enum class ConnectionState {
@@ -19,7 +22,7 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
     }
 
     inner class SocketConnection(val address: String) {
-        private lateinit var socket: Socket
+        private lateinit var socket: SSLSocket
         private lateinit var reader: BufferedReader
         private lateinit var writer: BufferedWriter
 
@@ -35,11 +38,12 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
             runSingle(
                 callback = {
                     if (!this::socket.isInitialized) {
-                        socket = Socket(address, NetworkPorts.serverPort)
+                        socket = sslSocketFactory.createSocket(address, NetworkPorts.serverPort) as SSLSocket
+                        socket.startHandshake()
                         socket.keepAlive = true
                     }
-                    reader = socket.getInputStream().bufferedReader()
-                    writer = socket.getOutputStream().bufferedWriter()
+                    reader = socket.inputStream.bufferedReader()
+                    writer = socket.outputStream.bufferedWriter()
                     infoLog("${this::class.simpleName}@$address: connected.")
                     isConnected = true
                     connectionState.onNext(ConnectionState.STATE_CONNECTED)
@@ -120,6 +124,10 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
             infoLog("${this::class.simpleName}: create new connection to $ip.")
             return SocketConnection(ip)
         }
+    }
+
+    companion object {
+        var sslSocketFactory: SSLSocketFactory = SSLContext.getInstance("TLS").socketFactory
     }
 
     override val pluginHandler: UnisyncPluginHandler = SocketPluginHandler()

@@ -2,6 +2,7 @@ package com.anhquan.unisync.models
 
 import com.anhquan.unisync.constants.MessageType
 
+@Deprecated("Use DeviceMessage instead.")
 data class DeviceRequest(
     val request: Int,
     val extras: Map<String, Any> = mapOf()
@@ -10,5 +11,7 @@ data class DeviceRequest(
 
     companion object {
         const val REQUEST_PAIR = 0
+
+
     }
 }

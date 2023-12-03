@@ -20,6 +20,7 @@ class UnisyncService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        configureNotificationChannel()
         initiateFeatures()
         initiatePlugins()
         infoLog("${this::class.simpleName}: service created.")
@@ -28,7 +29,6 @@ class UnisyncService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        configureNotificationChannel()
         startPlugins()
         startForeground(1, buildPersistentNotification())
         infoLog("${this::class.simpleName}: service started.")
@@ -41,6 +41,9 @@ class UnisyncService : Service() {
         infoLog("${this::class.simpleName}: service destroyed.")
     }
 
+    /**
+     * Creates plugin instances and add handlers to features.
+     */
     private fun initiatePlugins() {
         plugins[UnisyncPlugin.PLUGIN_MDNS] = UnisyncPlugin.Builder.buildPlugin(
             MdnsPlugin::class.java,

@@ -65,6 +65,18 @@ class PairingChannel extends _ChannelHandler {
   /// with value of "device" is DeviceInfo converted to map.
   static const IS_DEVICE_PAIRED = 'is_device_paired';
 
+  /// Argument:
+  /// {
+  ///   "id": _id
+  /// }
+  static const SET_ACCEPT_PAIR = 'set_accept_pair';
+
+  /// Argument:
+  /// {
+  ///   "id": _id
+  /// }
+  static const SET_REJECT_PAIR = 'set_reject_pair';
+
   /// Argument format is:
   /// {
   ///   "device": {
@@ -86,6 +98,19 @@ class PairingChannel extends _ChannelHandler {
   /// }
   /// with value of "device" is DeviceInfo converted to map.
   static const ON_DEVICE_DISCONNECTED = 'on_device_disconnected';
+
+  /// Argument:
+  /// {
+  ///   "id": _id,
+  /// }
+  static const ON_DEVICE_PAIR_REQUEST = 'on_device_pair_request';
+
+  /// Argument:
+  /// {
+  ///   "id": _id,
+  ///   "response": true|false
+  /// }
+  static const ON_DEVICE_PAIR_RESPONSE = 'on_device_pair_response';
 }
 
 class PreferencesChannel extends _ChannelHandler {

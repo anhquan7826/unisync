@@ -9,7 +9,8 @@ import 'package:unisync/constants/network_ports.dart';
 import 'package:unisync/utils/logger.dart';
 
 class AppSocket {
-  final Map<String, ServerSocket> _serverSockets = {};
+  final Map<String, SecureServerSocket> _serverSockets = {};
+
   Future<void> start() async {
     final interfaces = await NetworkInterface.list(type: InternetAddressType.IPv4);
     for (final interface in interfaces) {
@@ -22,7 +23,7 @@ class AppSocket {
   }
 
   Future<void> _createServerSocket(String address) async {
-    _serverSockets[address] = await ServerSocket.bind(address, NetworkPorts.socketPort);
+    _serverSockets[address] = await SecureServerSocket.bind(address, NetworkPorts.socketPort, SecurityContext.defaultContext);
     infoLog('AppSocket: Created server socket on $address.');
     _serverSockets[address]?.listen((socket) {
       infoLog('AppSocket: New connection established to ${socket.address.address}.');
@@ -43,9 +44,11 @@ class SocketConnection {
   final ReplaySubject<SocketConnectionState> _stateStream = ReplaySubject();
 
   bool _isConnected = true;
+
   bool get isConnected => _isConnected;
 
   late final String _address = _socket.address.address;
+
   String get address => _address;
 
   void _initialize() {

@@ -3,16 +3,20 @@ package com.anhquan.unisync.features
 import com.anhquan.unisync.features.DeviceConnection.DeviceState.OFFLINE
 import com.anhquan.unisync.features.DeviceConnection.DeviceState.ONLINE
 import com.anhquan.unisync.models.DeviceInfo
+import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.plugins.MdnsPlugin
 import com.anhquan.unisync.plugins.SocketPlugin
 import com.anhquan.unisync.plugins.UnisyncPlugin
 import com.anhquan.unisync.utils.ChannelUtil
 import com.anhquan.unisync.utils.ConfigUtil
-import com.anhquan.unisync.utils.debugLog
+import com.anhquan.unisync.utils.cryptography.AESHelper
+import com.anhquan.unisync.utils.cryptography.RSAHelper
 import com.anhquan.unisync.utils.fromMap
 import com.anhquan.unisync.utils.listen
 import com.anhquan.unisync.utils.toMap
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
+import java.security.PublicKey
 
 class PairingFeature : UnisyncFeature() {
     private val socketPluginHandler: SocketPlugin.SocketPluginHandler
@@ -30,27 +34,41 @@ class PairingFeature : UnisyncFeature() {
         )
     }
 
+    private val inputObservers = mutableMapOf<String, Disposable>()
+
     override fun onFeatureReady() {
         DeviceConnection.connectionNotifier.listen(observeOn = AndroidSchedulers.mainThread()) {
             when (it.state) {
                 ONLINE -> {
-                    debugLog("${this::class.simpleName}: ONLINE: ${it.deviceInfo.name}")
-                    ChannelUtil.PairingChannel.invoke(
-                        ChannelUtil.PairingChannel.ON_DEVICE_CONNECTED,
-                        args = mapOf(
-                            "device" to toMap(it.deviceInfo)
-                        )
-                    )
+                    onDeviceConnected(it.deviceInfo)
+                    inputObservers[it.deviceInfo.id] = DeviceConnection
+                        .getConnection(it.deviceInfo.id)
+                        .messageNotifier.listen { message ->
+                            if (message.information == DeviceMessage.MessageInformation.DEVICE_PAIR_REQUEST) {
+                                when (message.messageType) {
+                                    DeviceMessage.REQUEST -> {
+                                        onDevicePairRequest(message.data["id"]!!.toString())
+                                    }
+
+                                    DeviceMessage.RESPONSE -> {
+                                        onDevicePairResponse(
+                                            message.data["id"]!!.toString(),
+                                            accepted = message.data["accepted"]!! == true
+                                        )
+                                    }
+
+                                    DeviceMessage.STATUS -> {
+
+                                    }
+                                }
+                            }
+                        }
                 }
 
                 OFFLINE -> {
-                    debugLog("${this::class.simpleName}: OFFLINE: ${it.deviceInfo.name}")
-                    ChannelUtil.PairingChannel.invoke(
-                        ChannelUtil.PairingChannel.ON_DEVICE_DISCONNECTED,
-                        args = mapOf(
-                            "device" to toMap(it.deviceInfo)
-                        )
-                    )
+                    onDeviceDisconnected(it.deviceInfo)
+                    inputObservers[it.deviceInfo.id]!!.dispose()
+                    inputObservers.remove(it.deviceInfo.id)
                 }
 
                 else -> {}
@@ -99,7 +117,33 @@ class PairingFeature : UnisyncFeature() {
                     }
                 }
             }
+            addCallHandler(SET_ACCEPT_PAIR) { args, emitter ->
+                acceptPairRequest(args!!["id"].toString())
+                emitter.success()
+            }
+            addCallHandler(SET_REJECT_PAIR) { args, emitter ->
+                rejectPairRequest(args!!["id"].toString())
+                emitter.success()
+            }
         }
+    }
+
+    private fun onDeviceConnected(device: DeviceInfo) {
+        ChannelUtil.PairingChannel.invoke(
+            ChannelUtil.PairingChannel.ON_DEVICE_CONNECTED,
+            args = mapOf(
+                "device" to toMap(device)
+            )
+        )
+    }
+
+    private fun onDeviceDisconnected(device: DeviceInfo) {
+        ChannelUtil.PairingChannel.invoke(
+            ChannelUtil.PairingChannel.ON_DEVICE_DISCONNECTED,
+            args = mapOf(
+                "device" to toMap(device)
+            )
+        )
     }
 
     private fun getConnectedDevices(): List<DeviceInfo> {
@@ -142,5 +186,64 @@ class PairingFeature : UnisyncFeature() {
         ConfigUtil.Device.getPairedDevices {
             result.invoke(it.any { persistedDevice -> persistedDevice.id == device.id })
         }
+    }
+
+    private fun onDevicePairRequest(deviceID: String) {
+        ChannelUtil.PairingChannel.invoke(
+            ChannelUtil.PairingChannel.ON_DEVICE_PAIR_REQUEST,
+            args = mapOf("id" to deviceID)
+        )
+    }
+
+    private fun onDevicePairResponse(deviceID: String, accepted: Boolean) {
+        ChannelUtil.PairingChannel.invoke(
+            ChannelUtil.PairingChannel.ON_DEVICE_PAIR_RESPONSE,
+            args = mapOf(
+                "id" to deviceID,
+                "accepted" to accepted
+            )
+        )
+        if (accepted) {
+            exchangeSharedSecretKey(DeviceConnection.getConnection(deviceID))
+        }
+    }
+
+    private fun acceptPairRequest(deviceID: String) {
+        DeviceConnection.getConnection(deviceID).sendMessage(
+            DeviceMessage(
+                messageType = DeviceMessage.RESPONSE,
+                information = DeviceMessage.MessageInformation.DEVICE_PAIR_RESULT,
+                data = mapOf("accepted" to true)
+            )
+        )
+        exchangeSharedSecretKey(DeviceConnection.getConnection(deviceID))
+    }
+
+    private fun rejectPairRequest(deviceID: String) {
+        DeviceConnection.getConnection(deviceID).sendMessage(
+            DeviceMessage(
+                messageType = DeviceMessage.RESPONSE,
+                information = DeviceMessage.MessageInformation.DEVICE_PAIR_RESULT,
+                data = mapOf("accepted" to true)
+            )
+        )
+    }
+
+    private fun exchangeSharedSecretKey(connection: DeviceConnection) {
+        val secretKey = AESHelper.generateSecretKey()
+        connection.secretKey = secretKey
+        val encodedSecretKey = AESHelper.encodeSecretKey(secretKey)
+        val encryptedSecretKey = RSAHelper.encrypt(
+            encodedSecretKey.toByteArray(), RSAHelper.decodeRSAKey(
+                connection.info.publicKey
+            ) as PublicKey
+        )
+        connection.sendMessage(
+            DeviceMessage(
+                messageType = DeviceMessage.STATUS,
+                information = DeviceMessage.MessageInformation.SHARED_SECRET,
+                data = mapOf("key" to encryptedSecretKey)
+            )
+        )
     }
 }

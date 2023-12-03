@@ -107,8 +107,8 @@ object ChannelUtil {
          * DeviceInfo to JSON:
          * {
          *      "device": {
-         *          "id": <id>,
-         *          "name": <name>,
+         *          "id": _id,
+         *          "name": _name,
          *          ...
          *      }
          * }
@@ -119,13 +119,29 @@ object ChannelUtil {
          * DeviceInfo to JSON:
          * {
          *      "device": {
-         *          "id": <id>,
-         *          "name": <name>,
+         *          "id": _id,
+         *          "name": _name,
          *          ...
          *      }
          * }
          */
         const val IS_DEVICE_PAIRED = "is_device_paired"
+
+        /**
+         * Param:
+         * {
+         *      "id": _id
+         * }
+         */
+        const val SET_ACCEPT_PAIR = "set_accept_pair"
+
+        /**
+         * Param:
+         * {
+         *      "id": _id
+         * }
+         */
+        const val SET_REJECT_PAIR = "set_reject_pair"
 
         /**
          * DeviceInfo to JSON:
@@ -143,13 +159,30 @@ object ChannelUtil {
          * DeviceInfo to JSON:
          * {
          *      "device": {
-         *          "id": <id>,
-         *          "name": <name>,
+         *          "id": _id,
+         *          "name": _name,
          *          ...
          *      }
          * }
          */
         const val ON_DEVICE_DISCONNECTED = "on_device_disconnected"
+
+        /**
+         * Param:
+         * {
+         *      "id": _id,
+         * }
+         */
+        const val ON_DEVICE_PAIR_REQUEST = "on_device_pair_request"
+
+        /**
+         * Param:
+         * {
+         *      "id": _id,
+         *      "response": true|false
+         * }
+         */
+        const val ON_DEVICE_PAIR_RESPONSE = "on_device_pair_response"
     }
 
     object PreferencesChannel : ChannelHandler("/preferences") {
