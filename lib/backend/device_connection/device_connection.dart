@@ -23,10 +23,10 @@ class DeviceConnection {
   static final ReplaySubject<ConnectionNotifierValue> connectionNotifier = ReplaySubject();
 
   DeviceConnection._(this._socket) {
-    inititalize();
+    initialize();
   }
 
-  Future<void> inititalize() async {
+  Future<void> initialize() async {
     _socket.getConnectionState().listen((event) async {
       switch (event) {
         case SocketConnectionState.STATE_CONNECTED:

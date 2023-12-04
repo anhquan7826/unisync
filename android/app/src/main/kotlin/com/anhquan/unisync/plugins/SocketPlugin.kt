@@ -127,7 +127,10 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
     }
 
     companion object {
-        var sslSocketFactory: SSLSocketFactory = SSLContext.getInstance("TLS").socketFactory
+        var sslSocketFactory: SSLSocketFactory = SSLContext.getInstance("TLS").let {
+            it.init(null, null, null)
+            it.socketFactory
+        }
     }
 
     override val pluginHandler: UnisyncPluginHandler = SocketPluginHandler()
