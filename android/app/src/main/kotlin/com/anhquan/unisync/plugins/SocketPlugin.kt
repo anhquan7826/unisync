@@ -11,9 +11,11 @@ import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.ReplaySubject
 import java.io.BufferedReader
 import java.io.BufferedWriter
+import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
+import javax.net.ssl.X509TrustManager
 
 
 class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : UnisyncPlugin() {
@@ -39,7 +41,6 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
                 callback = {
                     if (!this::socket.isInitialized) {
                         socket = sslSocketFactory.createSocket(address, NetworkPorts.serverPort) as SSLSocket
-                        socket.startHandshake()
                         socket.keepAlive = true
                     }
                     reader = socket.inputStream.bufferedReader()
@@ -127,8 +128,20 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
     }
 
     companion object {
+        // TODO: Create app trust manager.
+
+        val trustAllManager = object: X509TrustManager {
+            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+
+            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> {
+                return arrayOf()
+            }
+        }
+
         var sslSocketFactory: SSLSocketFactory = SSLContext.getInstance("TLS").let {
-            it.init(null, null, null)
+            it.init(null, arrayOf(trustAllManager), null)
             it.socketFactory
         }
     }

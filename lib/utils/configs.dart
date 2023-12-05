@@ -4,6 +4,7 @@ import 'package:pointycastle/pointycastle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unisync/constants/sp_key.dart';
 import 'package:unisync/database/unisync_database.dart';
+import 'package:unisync/utils/cryptography/cert.dart';
 import 'package:unisync/utils/cryptography/rsa.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/preferences.dart';
@@ -52,12 +53,13 @@ class _DeviceConfig {
 class _AuthenticationConfig {
   _AuthenticationConfig._();
 
+  String? certificate;
   RSAPrivateKey? _privateKey;
   String? _privateKeyString;
   RSAPublicKey? _publicKey;
   String? _publicKeyString;
 
-  Future<void> _generateKeypair() async {
+  Future<void> prepareCryptography() async {
     final sp = await SharedPreferences.getInstance();
     if (_publicKey != null) {
       return;
@@ -77,25 +79,27 @@ class _AuthenticationConfig {
     sp
       ..setString(SPKey.publicKey, _publicKeyString!)
       ..setString(SPKey.privateKey, _privateKeyString!);
+    certificate = await generateSelfSignedCertificate();
+    sp.setString(SPKey.certificate, certificate!);
   }
 
-  Future<RSAPublicKey> getPublicKey() async {
-    await _generateKeypair();
+  RSAPublicKey getPublicKey() {
     return _publicKey!;
   }
 
-  Future<String> getPublicKeyString() async {
-    await _generateKeypair();
+  String getPublicKeyString() {
     return _publicKeyString!;
   }
 
-  Future<RSAPrivateKey> getPrivateKey() async {
-    await _generateKeypair();
+  RSAPrivateKey getPrivateKey() {
     return _privateKey!;
   }
 
-  Future<String> getPrivateKeyString() async {
-    await _generateKeypair();
+  String getPrivateKeyString() {
     return _privateKeyString!;
+  }
+
+  String getCertificate() {
+    return certificate!;
   }
 }

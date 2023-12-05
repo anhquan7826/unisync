@@ -9,10 +9,12 @@ import 'package:unisync/repository/impl/pairing.repository.impl.dart';
 import 'package:unisync/repository/pairing.repository.dart';
 import 'package:unisync/routes/routes.dart';
 import 'package:unisync/themes/app_theme.dart';
+import 'package:unisync/utils/configs.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await ConfigUtil.authentication.prepareCryptography();
   if (!Platform.isAndroid) {
     await UnisyncDatabase.initialize();
   }

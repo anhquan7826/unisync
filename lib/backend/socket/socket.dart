@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:rxdart/rxdart.dart';
 import 'package:unisync/backend/device_connection/device_connection.dart';
 import 'package:unisync/constants/network_ports.dart';
+import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/logger.dart';
 
 class AppSocket {
@@ -23,7 +24,10 @@ class AppSocket {
   }
 
   Future<void> _createServerSocket(String address) async {
-    _serverSockets[address] = await SecureServerSocket.bind(address, NetworkPorts.socketPort, SecurityContext.defaultContext);
+    final context = SecurityContext.defaultContext
+      ..useCertificateChainBytes(ConfigUtil.authentication.getCertificate().codeUnits)
+      ..usePrivateKeyBytes(ConfigUtil.authentication.getPrivateKeyString().codeUnits);
+    _serverSockets[address] = await SecureServerSocket.bind(address, NetworkPorts.socketPort, context);
     infoLog('AppSocket: Created server socket on $address.');
     _serverSockets[address]?.listen((socket) {
       infoLog('AppSocket: New connection established to ${socket.address.address}.');
