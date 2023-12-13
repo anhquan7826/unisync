@@ -4,23 +4,28 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:unisync/backend/device_connection/device_connection.dart';
 import 'package:unisync/constants/network_ports.dart';
+import 'package:unisync/entry/device_entry_point.dart';
+import 'package:unisync/plugin/unisync_plugin.dart';
 import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/logger.dart';
 
-class AppSocket {
+class SocketPlugin extends UnisyncPlugin {
+  static SocketPluginHandler getHandler() {
+    return SocketPluginHandler();
+  }
+
   final Map<String, SecureServerSocket> _serverSockets = {};
 
+  @override
   Future<void> start() async {
     final interfaces = await NetworkInterface.list(type: InternetAddressType.IPv4);
     for (final interface in interfaces) {
       for (final address in interface.addresses) {
-        if (!address.isLoopback) {
-          await _createServerSocket(address.address);
-        }
+        await _createServerSocket(address.address);
       }
     }
+    _createServerSocket('127.0.0.1');
   }
 
   Future<void> _createServerSocket(String address) async {
@@ -31,10 +36,19 @@ class AppSocket {
     infoLog('AppSocket: Created server socket on $address.');
     _serverSockets[address]?.listen((socket) {
       infoLog('AppSocket: New connection established to ${socket.address.address}.');
-      DeviceConnection.createConnection(SocketConnection(socket));
+      DeviceEntryPoint.createConnection(SocketConnection(socket));
     });
   }
+
+  @override
+  Future<void> stop() async {
+    for (final element in _serverSockets.values) {
+      await element.close();
+    }
+  }
 }
+
+class SocketPluginHandler extends UnisyncPluginHandler {}
 
 enum SocketConnectionState { STATE_CONNECTED, STATE_DISCONNECTED }
 

@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import com.anhquan.unisync.features.ConnectionFeature
 import com.anhquan.unisync.features.PairingFeature
 import com.anhquan.unisync.features.UnisyncFeature
 import com.anhquan.unisync.plugins.MdnsPlugin
@@ -48,13 +49,13 @@ class UnisyncService : Service() {
         plugins[UnisyncPlugin.PLUGIN_MDNS] = UnisyncPlugin.Builder.buildPlugin(
             MdnsPlugin::class.java,
             onStart = {
-                features[UnisyncFeature.FEATURE_PAIRING]!!.addHandler(UnisyncPlugin.PLUGIN_MDNS, it)
+                features[UnisyncFeature.FEATURE_CONNECTION]!!.addHandler(UnisyncPlugin.PLUGIN_MDNS, it)
             }
         )
         plugins[UnisyncPlugin.PLUGIN_SOCKET] = UnisyncPlugin.Builder.buildPlugin(
             SocketPlugin::class.java,
             onStart = {
-                features[UnisyncFeature.FEATURE_PAIRING]!!.addHandler(
+                features[UnisyncFeature.FEATURE_CONNECTION]!!.addHandler(
                     UnisyncPlugin.PLUGIN_SOCKET,
                     it
                 )
@@ -76,6 +77,7 @@ class UnisyncService : Service() {
 
     private fun initiateFeatures() {
         features[UnisyncFeature.FEATURE_PAIRING] = PairingFeature()
+        features[UnisyncFeature.FEATURE_CONNECTION] = ConnectionFeature()
     }
 
     private fun configureNotificationChannel() {

@@ -98,50 +98,9 @@ object ChannelUtil {
         }
     }
 
-    object PairingChannel : ChannelHandler("/pairing") {
+    object ConnectionChannel : ChannelHandler("/connection") {
         const val GET_CONNECTED_DEVICES = "get_connected_devices"
-        const val GET_UNPAIRED_DEVICES = "get_unpaired_devices"
-        const val GET_PAIRED_DEVICES = "get_paired_devices"
-
-        /**
-         * DeviceInfo to JSON:
-         * {
-         *      "device": {
-         *          "id": _id,
-         *          "name": _name,
-         *          ...
-         *      }
-         * }
-         */
-        const val IS_DEVICE_ONLINE = "is_device_online"
-
-        /**
-         * DeviceInfo to JSON:
-         * {
-         *      "device": {
-         *          "id": _id,
-         *          "name": _name,
-         *          ...
-         *      }
-         * }
-         */
-        const val IS_DEVICE_PAIRED = "is_device_paired"
-
-        /**
-         * Param:
-         * {
-         *      "id": _id
-         * }
-         */
-        const val SET_ACCEPT_PAIR = "set_accept_pair"
-
-        /**
-         * Param:
-         * {
-         *      "id": _id
-         * }
-         */
-        const val SET_REJECT_PAIR = "set_reject_pair"
+        const val ADD_DEVICE_MANUALLY = "add_device_manually"
 
         /**
          * DeviceInfo to JSON:
@@ -166,6 +125,26 @@ object ChannelUtil {
          * }
          */
         const val ON_DEVICE_DISCONNECTED = "on_device_disconnected"
+    }
+
+    object PairingChannel : ChannelHandler("/pairing") {
+        const val GET_PAIRED_DEVICES = "get_paired_devices"
+
+        /**
+         * Param:
+         * {
+         *      "id": _id
+         * }
+         */
+        const val SET_ACCEPT_PAIR = "set_accept_pair"
+
+        /**
+         * Param:
+         * {
+         *      "id": _id
+         * }
+         */
+        const val SET_REJECT_PAIR = "set_reject_pair"
 
         /**
          * Param:
@@ -183,6 +162,8 @@ object ChannelUtil {
          * }
          */
         const val ON_DEVICE_PAIR_RESPONSE = "on_device_pair_response"
+
+        const val SEND_PAIR_REQUEST = "send_pair_request"
     }
 
     object PreferencesChannel : ChannelHandler("/preferences") {

@@ -16,6 +16,8 @@ abstract class PairingRepository {
 
   Future<bool> isDevicePaired(DeviceInfo device);
 
+  Future<bool> addDeviceManually(String ip);
+
   /// Add a state listener to a device connection. Callbacks are called immediately upon registering.
   void addDeviceStateListener(DeviceStateCallback callback);
 

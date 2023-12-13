@@ -78,6 +78,8 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
                 ),
               ),
             ),
+            if (Platform.isAndroid)
+              buildFooter()
           ],
         );
       },
@@ -131,6 +133,32 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
             ),
         ],
       ),
+    );
+  }
+
+  Widget buildFooter() {
+    return TextButton.icon(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Add a device'),
+              content: TextField(
+                decoration: const InputDecoration(
+                  label: Text('Device IP'),
+                ),
+                textInputAction: TextInputAction.done,
+                onSubmitted: (value) {
+                  cubit.addDevice(value.trim());
+                },
+              ),
+            );
+          },
+        );
+      },
+      icon: const Icon(Icons.add_rounded),
+      label: const Text('Add a device'),
     );
   }
 

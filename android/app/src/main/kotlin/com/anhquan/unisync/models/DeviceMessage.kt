@@ -12,8 +12,9 @@ data class DeviceMessage(
     }
 
     object MessageInformation {
-        const val DEVICE_PAIR_REQUEST = "device_pair_request"
-        const val DEVICE_PAIR_RESULT = "device_pair_result"
-        const val SHARED_SECRET = "shared_secret"
+        object Pairing {
+            const val DEVICE_PAIR_REQUEST = "device_pair_request"
+            const val DEVICE_PAIR_RESULT = "device_pair_result"
+        }
     }
 }

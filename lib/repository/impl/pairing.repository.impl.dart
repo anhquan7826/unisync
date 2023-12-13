@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:unisync/backend/device_connection/device_connection.dart';
+import 'package:unisync/entry/device_entry_point.dart';
 import 'package:unisync/constants/channel_result_code.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/repository/pairing.repository.dart';
@@ -26,7 +26,7 @@ class PairingRepositoryImpl extends PairingRepository {
           }
         });
     } else {
-      DeviceConnection.connectionNotifier.listen((value) {
+      DeviceEntryPoint.connectionNotifier.listen((value) {
         switch (value.state) {
           case DeviceState.ONLINE:
             for (final callback in _callbacks) {
@@ -58,7 +58,7 @@ class PairingRepositoryImpl extends PairingRepository {
         return [];
       }
     } else {
-      return DeviceConnection.connections.map((e) => e.info!).toList();
+      return DeviceEntryPoint.connections.map((e) => e.info!).toList();
     }
   }
 
@@ -124,7 +124,7 @@ class PairingRepositoryImpl extends PairingRepository {
         throw Exception(result.error);
       }
     } else {
-      return DeviceConnection.connections.any((element) => element.info!.id == device.id);
+      return DeviceEntryPoint.connections.any((element) => element.info!.id == device.id);
     }
   }
 
@@ -153,5 +153,22 @@ class PairingRepositoryImpl extends PairingRepository {
   @override
   void removeDeviceStateListener(DeviceStateCallback callback) {
     _callbacks.remove(callback);
+  }
+
+  @override
+  Future<bool> addDeviceManually(String ip) async {
+    if (Platform.isAndroid) {
+      final result = await UnisyncChannels.connection.invokeMethod(
+        PairingChannel.ADD_DEVICE_MANUALLY,
+        arguments: {'ip': ip},
+      );
+      if (result.resultCode == ChannelResultCode.success) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
   }
 }

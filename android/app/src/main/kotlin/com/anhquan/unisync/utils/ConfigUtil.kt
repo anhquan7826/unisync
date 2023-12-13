@@ -5,10 +5,8 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import com.anhquan.unisync.constants.SPKey
 import com.anhquan.unisync.database.UnisyncDatabase
-import com.anhquan.unisync.database.entity.DeviceRequestEntity
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
 import com.anhquan.unisync.models.DeviceInfo
-import com.anhquan.unisync.models.DeviceRequest
 import com.anhquan.unisync.utils.cryptography.RSAHelper
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -112,29 +110,6 @@ object ConfigUtil {
                     device
                 )
             )
-        }
-    }
-
-    object RequestQueue {
-        fun push(id: String, request: DeviceRequest) {
-            database.deviceRequestDao().push(DeviceRequestEntity(id = id, request = request))
-        }
-
-        fun pop(id: String, onResult: (DeviceRequest?) -> Unit) {
-            database.deviceRequestDao().pop(id).listen(
-                onResult = {
-                    onResult(it)
-                },
-                onError = {
-                    onResult(null)
-                }
-            )
-        }
-
-        fun isEmpty(id: String, onResult: (Boolean) -> Unit) {
-            database.deviceRequestDao().count(id).listen {
-                onResult(it == 0)
-            }
         }
     }
 }

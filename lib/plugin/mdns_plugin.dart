@@ -1,13 +1,23 @@
 import 'package:dbus/dbus.dart';
+import 'package:unisync/platform/linux/dbus/avahi_const.dart';
+import 'package:unisync/platform/linux/dbus/entry_group.dart';
+import 'package:unisync/platform/linux/dbus/server.dart';
+import 'package:unisync/plugin/unisync_plugin.dart';
 import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/logger.dart';
 
-import 'dbus/avahi_const.dart';
-import 'dbus/entry_group.dart';
-import 'dbus/server.dart';
+abstract class MdnsPlugin extends UnisyncPlugin {
+  static MdnsPluginHandler getHandler() {
+    return MdnsPluginHandler._();
+  }
+}
 
-class Avahi {
-  Avahi() {
+class MdnsPluginHandler extends UnisyncPluginHandler {
+  MdnsPluginHandler._();
+}
+
+class AvahiPlugin extends MdnsPlugin {
+  AvahiPlugin() {
     _server = AvahiServer(_dbus);
   }
 
@@ -15,7 +25,8 @@ class Avahi {
   late final AvahiServer _server;
   late AvahiEntryGroup _entryGroup;
 
-  Future<void> register() async {
+  @override
+  Future<void> start() async {
     if (await _server.callGetState() == AvahiServerState.AVAHI_SERVER_RUNNING) {
       infoLog('AvahiServer: AVAHI_SERVER_RUNNING');
       await _registerService();
@@ -64,4 +75,7 @@ class Avahi {
     await _entryGroup.callCommit();
     infoLog('Avahi: Service registered.');
   }
+
+  @override
+  Future<void> stop() async {}
 }

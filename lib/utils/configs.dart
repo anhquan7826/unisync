@@ -53,7 +53,7 @@ class _DeviceConfig {
 class _AuthenticationConfig {
   _AuthenticationConfig._();
 
-  String? certificate;
+  String? _certificate;
   RSAPrivateKey? _privateKey;
   String? _privateKeyString;
   RSAPublicKey? _publicKey;
@@ -69,6 +69,7 @@ class _AuthenticationConfig {
       _privateKeyString = sp.getString(SPKey.privateKey);
       _publicKey = RSAHelper.decodeRSAKey(_publicKeyString!) as RSAPublicKey;
       _privateKey = RSAHelper.decodeRSAKey(_privateKeyString!, isPrivate: true) as RSAPrivateKey;
+      _certificate = sp.getString(SPKey.certificate);
       return;
     }
     final keyPair = RSAHelper.generateKeypair();
@@ -76,11 +77,11 @@ class _AuthenticationConfig {
     _privateKeyString = RSAHelper.encodeRSAKey(_privateKey!, isPrivate: true);
     _publicKey = keyPair.publicKey;
     _publicKeyString = RSAHelper.encodeRSAKey(_publicKey!);
+    _certificate = await generateSelfSignedCertificate();
     sp
       ..setString(SPKey.publicKey, _publicKeyString!)
-      ..setString(SPKey.privateKey, _privateKeyString!);
-    certificate = await generateSelfSignedCertificate();
-    sp.setString(SPKey.certificate, certificate!);
+      ..setString(SPKey.privateKey, _privateKeyString!)
+      ..setString(SPKey.certificate, _certificate!);
   }
 
   RSAPublicKey getPublicKey() {
@@ -100,6 +101,6 @@ class _AuthenticationConfig {
   }
 
   String getCertificate() {
-    return certificate!;
+    return _certificate!;
   }
 }

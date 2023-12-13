@@ -128,8 +128,6 @@ class SocketPlugin(override val pluginConnection: UnisyncPluginConnection) : Uni
     }
 
     companion object {
-        // TODO: Create app trust manager.
-
         val trustAllManager = object: X509TrustManager {
             override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
 

@@ -1,9 +1,9 @@
 import 'package:basic_utils/basic_utils.dart';
 import 'package:unisync/utils/configs.dart';
 
-Future<String> generateSelfSignedCertificate() async {
-  final privKey = await ConfigUtil.authentication.getPrivateKey();
-  final pubKey = await ConfigUtil.authentication.getPublicKey();
+String generateSelfSignedCertificate() {
+  final privKey = ConfigUtil.authentication.getPrivateKey();
+  final pubKey = ConfigUtil.authentication.getPublicKey();
   final dn = {
     'CN': 'Self-Signed',
   };

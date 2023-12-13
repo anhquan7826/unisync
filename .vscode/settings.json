@@ -3,6 +3,11 @@
     "cmake.configureOnOpen": true,
     "C_Cpp.default.compilerPath": "/usr/bin/clang",
     "cSpell.words": [
-        "unisync"
+        "Avahi",
+        "dbus",
+        "MDNS",
+        "rxdart",
+        "unisync",
+        "writeln"
     ]
 }

@@ -1,5 +1,6 @@
-package com.anhquan.unisync.features
+package com.anhquan.unisync.entry
 
+import com.anhquan.unisync.features.UnisyncFeature
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.plugins.SocketPlugin
@@ -12,9 +13,8 @@ import com.anhquan.unisync.utils.listen
 import com.anhquan.unisync.utils.toJson
 import com.anhquan.unisync.utils.warningLog
 import io.reactivex.rxjava3.subjects.ReplaySubject
-import javax.crypto.SecretKey
 
-class DeviceConnection private constructor(private val socket: SocketPlugin.SocketConnection) {
+class DeviceEntryPoint private constructor(private val socket: SocketPlugin.SocketConnection) {
     enum class DeviceState {
         ONLINE, OFFLINE, PAIRING, PAIRED
     }
@@ -25,19 +25,22 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
     )
 
     companion object {
-        private val connections = mutableMapOf<String, DeviceConnection>()
+        private val connections = mutableMapOf<String, DeviceEntryPoint>()
+
         val connectionNotifier = ReplaySubject.create<ConnectionNotifierValue>()
 
-        fun getConnections(): List<DeviceConnection> {
+        val pairingNotifier = ReplaySubject.create<UnisyncFeature.FeatureNotifierMessage>()
+
+        fun getConnections(): List<DeviceEntryPoint> {
             return connections.values.toList()
         }
 
-        fun getConnection(id: String): DeviceConnection {
+        fun getConnection(id: String): DeviceEntryPoint {
             return connections[id]!!
         }
 
         fun createConnection(socket: SocketPlugin.SocketConnection) {
-            DeviceConnection(socket)
+            DeviceEntryPoint(socket)
         }
     }
 
@@ -61,13 +64,13 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
         }
     }
 
-    val messageNotifier = ReplaySubject.create<DeviceMessage>()
     lateinit var info: DeviceInfo
         private set
 
-    lateinit var secretKey: SecretKey
-
     private var isOnline: Boolean = false
+
+    var isPaired: Boolean = false
+        private set
 
     fun sendMessage(message: DeviceMessage) {
         if (isOnline) socket.send(toJson(message))
@@ -85,7 +88,7 @@ class DeviceConnection private constructor(private val socket: SocketPlugin.Sock
             }
         } else {
             try {
-                messageNotifier.onNext(fromJson(input, DeviceMessage::class.java)!!)
+                // TODO: send feature notify message
             } catch (_: Exception) {
                 warningLog("${this::class.simpleName}: Invalid message from ${info.name}. Message is '$input'.")
             }

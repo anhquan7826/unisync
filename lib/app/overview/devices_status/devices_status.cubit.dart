@@ -54,6 +54,10 @@ class DevicesStatusCubit extends Cubit<DevicesStatusState> {
     disconnectedDevices = pairedDevices.where((element) => element.ip.isEmpty).toList();
   }
 
+  Future<bool> addDevice(String ip) {
+    return pairingRepository.addDeviceManually(ip);
+  }
+
   @override
   Future<void> close() {
     pairingRepository.removeDeviceStateListener(_callback);

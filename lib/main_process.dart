@@ -1,16 +1,22 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:unisync/backend/socket/socket.dart';
 import 'package:unisync/constants/device_types.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
+import 'package:unisync/plugin/socket_plugin.dart';
+import 'package:unisync/plugin/unisync_plugin.dart';
 import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/id_gen.dart';
 import 'package:unisync/utils/logger.dart';
 
-import 'avahi/avahi.dart';
+import 'plugin/mdns_plugin.dart';
 
-class LinuxProcess {
+abstract class MainProcess {
+  Future<void> initialize();
+  Future<void> start();
+}
+
+class LinuxProcess extends MainProcess {
   factory LinuxProcess() {
     _instance ??= LinuxProcess._();
     return _instance!;
@@ -19,27 +25,31 @@ class LinuxProcess {
 
   static LinuxProcess? _instance;
 
-  late final Avahi _avahi;
-  late final AppSocket _socket;
+  late final MdnsPlugin _mdns;
+  late final SocketPlugin _socket;
 
+  @override
   Future<void> initialize() async {
     infoLog('Initializing Linux process.');
     if (!(await ConfigUtil.device.hasSetDeviceInfo())) {
       await ConfigUtil.device.setDeviceInfo(DeviceInfo(
-          id: generateId(),
-          name: Platform.localHostname,
-          deviceType: DeviceTypes.linux,
-          publicKey: await ConfigUtil.authentication.getPublicKeyString()));
+          id: generateId(), name: Platform.localHostname, deviceType: DeviceTypes.linux, publicKey: ConfigUtil.authentication.getPublicKeyString()));
     }
-    _avahi = Avahi();
-    _socket = AppSocket();
     infoLog('Linux process initialized.');
   }
 
+  @override
   Future<void> start() async {
     infoLog('Starting Linux process.');
-    await _avahi.register();
-    await _socket.start();
+    UnisyncPlugin.startPlugin();
     infoLog('Linux process started.');
   }
+}
+
+class WindowsProcess extends MainProcess {
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<void> start() async {}
 }

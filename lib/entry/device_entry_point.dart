@@ -4,25 +4,25 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:unisync/backend/socket/socket.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
+import 'package:unisync/plugin/socket_plugin.dart';
 import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/logger.dart';
 
-class DeviceConnection {
-  static final Map<String, DeviceConnection> _connections = {};
+class DeviceEntryPoint {
+  static final Map<String, DeviceEntryPoint> _connections = {};
 
-  static List<DeviceConnection> get connections => _connections.values.toList();
+  static List<DeviceEntryPoint> get connections => _connections.values.toList();
 
   static void createConnection(SocketConnection socket) {
-    DeviceConnection._(socket);
+    DeviceEntryPoint._(socket);
   }
 
   // ignore: close_sinks
   static final ReplaySubject<ConnectionNotifierValue> connectionNotifier = ReplaySubject();
 
-  DeviceConnection._(this._socket) {
+  DeviceEntryPoint._(this._socket) {
     initialize();
   }
 
@@ -44,7 +44,6 @@ class DeviceConnection {
 
   final SocketConnection _socket;
   // ignore: close_sinks
-  final ReplaySubject<String> messageNotifier = ReplaySubject();
   DeviceInfo? info;
 
   void _onInputData(String input) {
@@ -56,7 +55,7 @@ class DeviceConnection {
         _socket.disconnect();
       }
     } else {
-      messageNotifier.add(input);
+      // TODO: send feature notify message
     }
   }
 

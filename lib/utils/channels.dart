@@ -37,45 +37,10 @@ abstract class _ChannelHandler {
   }
 }
 
-class PairingChannel extends _ChannelHandler {
-  PairingChannel._() : super(const MethodChannel('${UnisyncChannels._authority}/pairing'));
+class ConnectionChannel extends _ChannelHandler {
+  ConnectionChannel._() : super(const MethodChannel('${UnisyncChannels._authority}/connection'));
+
   static const GET_CONNECTED_DEVICES = 'get_connected_devices';
-  static const GET_PAIRED_DEVICES = 'get_paired_devices';
-  static const GET_UNPAIRED_DEVICES = 'get_unpaired_devices';
-
-  /// Argument format is:
-  /// {
-  ///   "device": {
-  ///     "id": _id,
-  ///     "name": _name,
-  ///     ...
-  ///   }
-  /// }
-  /// with value of "device" is DeviceInfo converted to map.
-  static const IS_DEVICE_ONLINE = 'is_device_online';
-
-  /// Argument format is:
-  /// {
-  ///   "device": {
-  ///     "id": _id,
-  ///     "name": _name,
-  ///     ...
-  ///   }
-  /// }
-  /// with value of "device" is DeviceInfo converted to map.
-  static const IS_DEVICE_PAIRED = 'is_device_paired';
-
-  /// Argument:
-  /// {
-  ///   "id": _id
-  /// }
-  static const SET_ACCEPT_PAIR = 'set_accept_pair';
-
-  /// Argument:
-  /// {
-  ///   "id": _id
-  /// }
-  static const SET_REJECT_PAIR = 'set_reject_pair';
 
   /// Argument format is:
   /// {
@@ -99,6 +64,25 @@ class PairingChannel extends _ChannelHandler {
   /// with value of "device" is DeviceInfo converted to map.
   static const ON_DEVICE_DISCONNECTED = 'on_device_disconnected';
 
+  static const ADD_DEVICE_MANUALLY = 'add_device_manually';
+}
+
+class PairingChannel extends _ChannelHandler {
+  PairingChannel._() : super(const MethodChannel('${UnisyncChannels._authority}/pairing'));
+  static const GET_PAIRED_DEVICES = 'get_paired_devices';
+
+  /// Argument:
+  /// {
+  ///   "id": _id
+  /// }
+  static const SET_ACCEPT_PAIR = 'set_accept_pair';
+
+  /// Argument:
+  /// {
+  ///   "id": _id
+  /// }
+  static const SET_REJECT_PAIR = 'set_reject_pair';
+
   /// Argument:
   /// {
   ///   "id": _id,
@@ -111,6 +95,8 @@ class PairingChannel extends _ChannelHandler {
   ///   "response": true|false
   /// }
   static const ON_DEVICE_PAIR_RESPONSE = 'on_device_pair_response';
+
+  static const SEND_PAIR_REQUEST = 'send_pair_request';
 }
 
 class PreferencesChannel extends _ChannelHandler {
