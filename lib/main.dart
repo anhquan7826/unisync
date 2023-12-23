@@ -3,9 +3,8 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:unisync/main_process.dart';
 import 'package:unisync/database/unisync_database.dart';
-import 'package:unisync/repository/impl/pairing.repository.impl.dart';
+import 'package:unisync/main_process.dart';
 import 'package:unisync/repository/pairing.repository.dart';
 import 'package:unisync/routes/routes.dart';
 import 'package:unisync/themes/app_theme.dart';
@@ -17,9 +16,7 @@ void main() async {
   await ConfigUtil.authentication.prepareCryptography();
   if (!Platform.isAndroid) {
     await UnisyncDatabase.initialize();
-  }
-  if (Platform.isLinux) {
-    final process = LinuxProcess();
+    final process = MainProcess();
     await process.initialize();
     await process.start();
   }
@@ -53,15 +50,8 @@ class Unisync extends StatelessWidget {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       builder: (context, child) {
-        return MultiRepositoryProvider(
-          providers: [
-            RepositoryProvider<PairingRepository>(
-              create: (context) => PairingRepositoryImpl(),
-              lazy: false,
-            )
-          ],
-          child: child!,
-        );
+        // return child!;
+        return Placeholder();
       },
     );
   }

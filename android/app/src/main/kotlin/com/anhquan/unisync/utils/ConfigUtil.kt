@@ -2,7 +2,6 @@ package com.anhquan.unisync.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.room.Room
 import com.anhquan.unisync.constants.SPKey
 import com.anhquan.unisync.database.UnisyncDatabase
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
@@ -17,11 +16,11 @@ object ConfigUtil {
 
     fun setup(context: Context) {
         sharedPreferences = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
-        database = Room.databaseBuilder(
-            context,
-            UnisyncDatabase::class.java,
-            "unisync-database"
-        ).build()
+//        database = Room.databaseBuilder(
+//            context,
+//            UnisyncDatabase::class.java,
+//            "unisync-database"
+//        ).build()
     }
 
     object Authentication {

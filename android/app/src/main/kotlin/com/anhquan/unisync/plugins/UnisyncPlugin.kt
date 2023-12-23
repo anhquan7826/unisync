@@ -1,69 +1,43 @@
 package com.anhquan.unisync.plugins
 
-import android.content.Context
-import com.anhquan.unisync.utils.infoLog
+import androidx.annotation.CallSuper
+import com.anhquan.unisync.core.DeviceEntryPoint
+import com.anhquan.unisync.models.DeviceInfo
+import com.anhquan.unisync.models.DeviceMessage
+import com.anhquan.unisync.utils.ChannelUtil
+import com.anhquan.unisync.utils.listen
 
 abstract class UnisyncPlugin {
-    companion object {
-        const val PLUGIN_MDNS = "mdns"
-        const val PLUGIN_SOCKET = "socket"
-    }
+    protected abstract val channelHandler: ChannelUtil.ChannelHandler
+    abstract val plugin: String
+    var enabled: Boolean = true
 
-    object Builder {
-        @Suppress("UNCHECKED_CAST")
-        fun <T : UnisyncPlugin> buildPlugin(
-            plugin: Class<T>,
-            onStart: ((UnisyncPluginHandler) -> Unit)? = null,
-            onError: ((Exception) -> Unit)? = null,
-            onStop: (() -> Unit)? = null
-        ): T {
-            val connection = object : UnisyncPluginConnection {
-                override fun onPluginStarted(handler: UnisyncPluginHandler) {
-                    super.onPluginStarted(handler)
-                    onStart?.invoke(handler)
-                }
-
-                override fun onPluginStopped() {
-                    super.onPluginStopped()
-                    onStop?.invoke()
-                }
-
-                override fun onPluginError(error: Exception) {
-                    super.onPluginError(error)
-                    onError?.invoke(error)
-                }
-            }
-            return when (plugin) {
-                MdnsPlugin::class.java -> MdnsPlugin(connection) as T
-                SocketPlugin::class.java -> SocketPlugin(connection) as T
-                else -> {
-                    throw Exception("Invalid plugin type!")
-                }
-            }
+    @CallSuper
+    open fun start() {
+        addChannelHandler()
+        DeviceEntryPoint.Notifier.apply {
+            connectedDeviceNotifier.listen(onNext = ::onDeviceConnected)
+            disconnectedDeviceNotifier.listen(onNext = ::onDeviceDisconnected)
+            deviceMessageNotifier.listen(onNext = ::onDeviceMessage)
         }
     }
-
-    interface UnisyncPluginHandler
-
-    interface UnisyncPluginConnection {
-        fun onPluginStarted(handler: UnisyncPluginHandler) {
-            infoLog("plugin started.")
-        }
-
-        fun onPluginError(error: Exception) {
-            infoLog("plugin error:\n${error.message}")
-        }
-
-        fun onPluginStopped() {
-            infoLog("plugin stopped.")
-        }
-    }
-
-    abstract val pluginConnection: UnisyncPluginConnection
-
-    abstract val pluginHandler: UnisyncPluginHandler
-
-    abstract fun start(context: Context)
 
     abstract fun stop()
+
+    protected fun send(deviceId: String, function: String, extra: Map<String, Any?> = mapOf()) {
+        DeviceEntryPoint.send(deviceId, plugin, function, extra)
+    }
+
+    protected open fun onDeviceConnected(info: DeviceInfo) {}
+
+    protected open fun onDeviceDisconnected(info: DeviceInfo) {}
+
+    protected abstract fun onDeviceMessage(message: DeviceMessage)
+
+    protected abstract fun addChannelHandler()
+
+    companion object {
+        const val PLUGIN_CONNECTION = "connection"
+        const val PLUGIN_PAIRING = "pairing"
+    }
 }

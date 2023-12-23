@@ -1,4 +1,4 @@
-package com.anhquan.unisync.extensions
+package com.anhquan.unisync.utils.extensions
 
 import java.nio.charset.StandardCharsets
 import javax.jmdns.ServiceInfo

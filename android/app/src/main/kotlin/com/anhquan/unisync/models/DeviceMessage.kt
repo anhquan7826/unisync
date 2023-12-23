@@ -1,20 +1,8 @@
 package com.anhquan.unisync.models
 
 data class DeviceMessage(
-    val messageType: Int,
-    val information: String,
-    val data: Map<String, Any?> = mapOf()
-) {
-    companion object {
-        const val REQUEST = 1
-        const val RESPONSE = 2
-        const val STATUS = 0
-    }
-
-    object MessageInformation {
-        object Pairing {
-            const val DEVICE_PAIR_REQUEST = "device_pair_request"
-            const val DEVICE_PAIR_RESULT = "device_pair_result"
-        }
-    }
-}
+    val deviceId: String,
+    val plugin: String,
+    val function: String,
+    val extra: Map<String, Any?> = mapOf()
+)

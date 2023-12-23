@@ -7,77 +7,37 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.anhquan.unisync.features.ConnectionFeature
-import com.anhquan.unisync.features.PairingFeature
-import com.anhquan.unisync.features.UnisyncFeature
-import com.anhquan.unisync.plugins.MdnsPlugin
-import com.anhquan.unisync.plugins.SocketPlugin
+import com.anhquan.unisync.core.DeviceDiscovery
+import com.anhquan.unisync.plugins.ConnectionPlugin
 import com.anhquan.unisync.plugins.UnisyncPlugin
 import com.anhquan.unisync.utils.infoLog
 
 class UnisyncService : Service() {
-    private val plugins = mutableMapOf<String, UnisyncPlugin>()
-    private val features = mutableMapOf<String, UnisyncFeature>()
+    private val plugin = mutableMapOf<String, UnisyncPlugin>()
 
     override fun onCreate() {
         super.onCreate()
         configureNotificationChannel()
-        initiateFeatures()
-        initiatePlugins()
+        startForeground(1, buildPersistentNotification())
+        DeviceDiscovery.start(this)
+        configurePlugins()
         infoLog("${this::class.simpleName}: service created.")
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startPlugins()
-        startForeground(1, buildPersistentNotification())
-        infoLog("${this::class.simpleName}: service started.")
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopPlugins()
+        DeviceDiscovery.stop()
         infoLog("${this::class.simpleName}: service destroyed.")
     }
 
-    /**
-     * Creates plugin instances and add handlers to features.
-     */
-    private fun initiatePlugins() {
-        plugins[UnisyncPlugin.PLUGIN_MDNS] = UnisyncPlugin.Builder.buildPlugin(
-            MdnsPlugin::class.java,
-            onStart = {
-                features[UnisyncFeature.FEATURE_CONNECTION]!!.addHandler(UnisyncPlugin.PLUGIN_MDNS, it)
-            }
-        )
-        plugins[UnisyncPlugin.PLUGIN_SOCKET] = UnisyncPlugin.Builder.buildPlugin(
-            SocketPlugin::class.java,
-            onStart = {
-                features[UnisyncFeature.FEATURE_CONNECTION]!!.addHandler(
-                    UnisyncPlugin.PLUGIN_SOCKET,
-                    it
-                )
-            }
-        )
-    }
-
-    private fun startPlugins() {
-        plugins.values.forEach {
-            it.start(this)
-        }
-    }
-
-    private fun stopPlugins() {
-        plugins.values.forEach {
-            it.stop()
-        }
-    }
-
-    private fun initiateFeatures() {
-        features[UnisyncFeature.FEATURE_PAIRING] = PairingFeature()
-        features[UnisyncFeature.FEATURE_CONNECTION] = ConnectionFeature()
+    private fun configurePlugins() {
+        plugin[UnisyncPlugin.PLUGIN_CONNECTION] = ConnectionPlugin().apply { this.start() }
     }
 
     private fun configureNotificationChannel() {

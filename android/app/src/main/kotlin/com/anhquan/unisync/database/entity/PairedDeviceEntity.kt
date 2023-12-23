@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import com.anhquan.unisync.models.DeviceInfo
 
 @Entity(tableName = "paired_devices")
-data class PairedDeviceEntity(
+data class  PairedDeviceEntity(
     @PrimaryKey val id: String,
     val device: DeviceInfo,
 )

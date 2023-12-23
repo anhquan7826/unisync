@@ -18,3 +18,7 @@ void infoLog(dynamic message) {
 void errorLog(dynamic message) {
   _logger.e(message);
 }
+
+void warningLog(dynamic message) {
+  _logger.w(message);
+}

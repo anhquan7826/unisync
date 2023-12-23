@@ -10,7 +10,7 @@ import 'package:unisync/app/overview/overview.cubit.dart';
 import 'package:unisync/constants/device_types.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
-import 'package:unisync/utils/extensions/conveniences.ext.dart';
+import 'package:unisync/utils/extensions/scope.ext.dart';
 
 import '../../../resources/resources.dart';
 

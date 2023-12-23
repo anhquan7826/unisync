@@ -42,6 +42,12 @@ class ConnectionChannel extends _ChannelHandler {
 
   static const GET_CONNECTED_DEVICES = 'get_connected_devices';
 
+  /// Argument:
+  /// {
+  ///   "ip": _ipAddress
+  /// }
+  static const ADD_DEVICE_MANUALLY = 'add_device_manually';
+
   /// Argument format is:
   /// {
   ///   "device": {
@@ -63,8 +69,6 @@ class ConnectionChannel extends _ChannelHandler {
   /// }
   /// with value of "device" is DeviceInfo converted to map.
   static const ON_DEVICE_DISCONNECTED = 'on_device_disconnected';
-
-  static const ADD_DEVICE_MANUALLY = 'add_device_manually';
 }
 
 class PairingChannel extends _ChannelHandler {

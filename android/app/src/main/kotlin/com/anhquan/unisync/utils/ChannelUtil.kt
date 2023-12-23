@@ -22,21 +22,30 @@ object ChannelUtil {
 
     open class ChannelHandler(private val path: String) {
         inner class ResultEmitter(private val method: String, private val r: MethodChannel.Result) {
-            fun success(result: Any? = null) {
-                r.success(
-                    toMap(
-                        ChannelResult(
-                            method = method,
-                            resultCode = ChannelResult.SUCCESS,
-                            result = result
-                        )
-                    )
-                )
+            fun emit(resultCode: Int, result: Any? = null, error: String? = null) {
+                r.success(toMap(ChannelResult(
+                    method = method,
+                    resultCode = resultCode,
+                    result = result,
+                    error = error
+                )))
             }
 
-            fun error(message: String?) {
-                r.error("", message, null)
-            }
+//            fun success(result: Any? = null) {
+//                r.success(
+//                    toMap(
+//                        ChannelResult(
+//                            method = method,
+//                            resultCode = ChannelResult.SUCCESS,
+//                            result = result
+//                        )
+//                    )
+//                )
+//            }
+//
+//            fun error(message: String?) {
+//                r.error("", message, null)
+//            }
         }
 
         private var channel: MethodChannel? = null
