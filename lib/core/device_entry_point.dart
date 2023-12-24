@@ -1,7 +1,6 @@
 // ignore_for_file: close_sinks
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -18,6 +17,7 @@ class DeviceEntryPoint {
   DeviceEntryPoint._();
 
   static final _devices = <String, DeviceConnection>{};
+
   static List<DeviceInfo> get devices => _devices.values.map((e) => e.info).toList();
 
   static final notifiers = _DeviceEntryPointNotifiers._();
@@ -38,7 +38,7 @@ class DeviceEntryPoint {
     Map<String, dynamic> extra = const {},
   }) async {
     await _devices[toDeviceId]?.send(DeviceMessage(
-      deviceId: (await ConfigUtil.device.getDeviceInfo()).id,
+      fromDeviceId: (await ConfigUtil.device.getDeviceInfo()).id,
       plugin: plugin,
       function: function,
       extra: extra,
@@ -71,17 +71,16 @@ class DeviceConnection {
   late final DeviceInfo info;
 
   var _isConnected = true;
-  
+
   late final StreamSubscription<Uint8List> _streamSubscription;
 
   var _firstEvent = true;
+
   void _listen() {
     _streamSubscription = socket.listen(
       (event) {
         if (_firstEvent) {
-          info = DeviceInfo.fromJson(event.string.toMap()).copy(
-              ip: socket.address.address
-          );
+          info = DeviceInfo.fromJson(event.string.toMap()).copy(ip: socket.address.address);
           infoLog('Connected to ${info.name} (${info.ip}).');
           if (!DeviceEntryPoint._devices.containsKey(info.id)) {
             DeviceEntryPoint._devices[info.id] = this;
@@ -91,8 +90,7 @@ class DeviceConnection {
             _disconnect();
           }
           _firstEvent = false;
-        }
-        else {
+        } else {
           debugLog('Received message from device "${info.name}": ${event.string}');
           DeviceEntryPoint.notifiers._deviceMessageNotifier.add(
             DeviceMessage.fromJson(

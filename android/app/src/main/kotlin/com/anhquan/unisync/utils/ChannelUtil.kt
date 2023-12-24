@@ -10,6 +10,7 @@ object ChannelUtil {
 
     fun setup(engine: FlutterEngine) {
         this.engine = engine
+        ConnectionChannel.setup()
         PairingChannel.setup()
         PreferencesChannel.setup()
     }
@@ -23,29 +24,17 @@ object ChannelUtil {
     open class ChannelHandler(private val path: String) {
         inner class ResultEmitter(private val method: String, private val r: MethodChannel.Result) {
             fun emit(resultCode: Int, result: Any? = null, error: String? = null) {
-                r.success(toMap(ChannelResult(
-                    method = method,
-                    resultCode = resultCode,
-                    result = result,
-                    error = error
-                )))
+                r.success(
+                    toMap(
+                        ChannelResult(
+                            method = method,
+                            resultCode = resultCode,
+                            result = result,
+                            error = error
+                        )
+                    )
+                )
             }
-
-//            fun success(result: Any? = null) {
-//                r.success(
-//                    toMap(
-//                        ChannelResult(
-//                            method = method,
-//                            resultCode = ChannelResult.SUCCESS,
-//                            result = result
-//                        )
-//                    )
-//                )
-//            }
-//
-//            fun error(message: String?) {
-//                r.error("", message, null)
-//            }
         }
 
         private var channel: MethodChannel? = null
@@ -56,6 +45,7 @@ object ChannelUtil {
         internal fun setup() {
             channel = MethodChannel(engine!!.dartExecutor.binaryMessenger, authority + path)
             channel?.setMethodCallHandler { call, result ->
+                debugLog("Flutter invoked method ${call.method}")
                 if (callHandlers.containsKey(call.method)) {
                     val emitter = ResultEmitter(call.method, result)
                     callHandlers[call.method]!!.invoke(
@@ -78,13 +68,15 @@ object ChannelUtil {
             onError: (String?) -> Unit = { errorLog("${this::class.simpleName}: error: $it") },
             onResult: ((Any?) -> Unit)? = null,
         ) {
+            debugLog("Invoking method $method...");
             channel?.invokeMethod(method, args, object : MethodChannel.Result {
                 override fun success(result: Any?) {
+                    debugLog("Result from method $method: $result");
                     onResult?.invoke(result)
                 }
 
                 override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                    onError.invoke("$errorMessage\nDetails: $errorDetails")
+                    onError.invoke("$errorMessage ($errorDetails)")
                 }
 
                 override fun notImplemented() {
@@ -172,6 +164,12 @@ object ChannelUtil {
          */
         const val ON_DEVICE_PAIR_RESPONSE = "on_device_pair_response"
 
+        /**
+         * Param:
+         * {
+         *      "id": _id
+         * }
+         */
         const val SEND_PAIR_REQUEST = "send_pair_request"
     }
 

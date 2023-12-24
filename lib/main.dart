@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/database/unisync_database.dart';
 import 'package:unisync/main_process.dart';
+import 'package:unisync/repository/connection.repository.dart';
+import 'package:unisync/repository/impl/connection.repository.impl.dart';
+import 'package:unisync/repository/impl/pairing.repository.impl.dart';
 import 'package:unisync/repository/pairing.repository.dart';
 import 'package:unisync/routes/routes.dart';
 import 'package:unisync/themes/app_theme.dart';
@@ -43,15 +46,24 @@ class Unisync extends StatelessWidget {
       title: 'Flutter Demo',
       theme: AppThemes.light,
       darkTheme: AppThemes.dark,
-      themeMode: ThemeMode.dark,
-      routerConfig: AppRoute.routerConfigs,
+      themeMode: ThemeMode.light,
+      routerConfig: routerConfigs,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       builder: (context, child) {
-        // return child!;
-        return Placeholder();
+        return MultiRepositoryProvider(
+          providers: [
+            RepositoryProvider<ConnectionRepository>(
+              create: (context) => ConnectionRepositoryImpl(),
+            ),
+            RepositoryProvider<PairingRepository>(
+              create: (context) => PairingRepositoryImpl(),
+            ),
+          ],
+          child: child!,
+        );
       },
     );
   }

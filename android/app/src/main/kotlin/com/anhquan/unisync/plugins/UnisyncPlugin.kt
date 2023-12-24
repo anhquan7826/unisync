@@ -6,6 +6,7 @@ import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ChannelUtil
 import com.anhquan.unisync.utils.listen
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 
 abstract class UnisyncPlugin {
     protected abstract val channelHandler: ChannelUtil.ChannelHandler
@@ -16,23 +17,35 @@ abstract class UnisyncPlugin {
     open fun start() {
         addChannelHandler()
         DeviceEntryPoint.Notifier.apply {
-            connectedDeviceNotifier.listen(onNext = ::onDeviceConnected)
-            disconnectedDeviceNotifier.listen(onNext = ::onDeviceDisconnected)
-            deviceMessageNotifier.listen(onNext = ::onDeviceMessage)
+            connectedDeviceNotifier.listen(
+                subscribeOn = AndroidSchedulers.mainThread(),
+                observeOn = AndroidSchedulers.mainThread(),
+                onNext = ::onDeviceConnected
+            )
+            disconnectedDeviceNotifier.listen(
+                subscribeOn = AndroidSchedulers.mainThread(),
+                observeOn = AndroidSchedulers.mainThread(),
+                onNext = ::onDeviceDisconnected
+            )
+            deviceMessageNotifier.listen(
+                subscribeOn = AndroidSchedulers.mainThread(),
+                observeOn = AndroidSchedulers.mainThread(),
+                onNext = ::onDeviceMessage
+            )
         }
     }
 
-    abstract fun stop()
+    open fun stop() {}
 
-    protected fun send(deviceId: String, function: String, extra: Map<String, Any?> = mapOf()) {
-        DeviceEntryPoint.send(deviceId, plugin, function, extra)
+    protected fun send(toDeviceId: String, function: String, extra: Map<String, Any?> = mapOf()) {
+        DeviceEntryPoint.send(toDeviceId, plugin, function, extra)
     }
 
     protected open fun onDeviceConnected(info: DeviceInfo) {}
 
     protected open fun onDeviceDisconnected(info: DeviceInfo) {}
 
-    protected abstract fun onDeviceMessage(message: DeviceMessage)
+    protected open fun onDeviceMessage(message: DeviceMessage) {}
 
     protected abstract fun addChannelHandler()
 

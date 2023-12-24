@@ -1,22 +1,31 @@
 {
-    "continue": "Continue",
-    "landing": {
-        "welcome": "Welcome to Unisync",
-        "description": "A tool to connect your phone and your PC together."
-    },
-    "devices_status": {
-        "title": "Unisync Devices",
-        "connected_devices": "Connected devices",
-        "disconnected_devices": "Disconnected devices",
-        "add_device": "Add new device",
-        "no_devices_found": "No devices found!",
-        "no_connected_devices": "No devices connected!",
-        "available_devices": "Available devices",
-        "paired_devices": "Paired devices",
-        "rescan": "Rescan"
-    },
-    "status": {
-        "connected": "Connected",
-        "disconnected": "Disconnected"
-    }
+  "continue": "Continue",
+  "landing": {
+    "welcome": "Welcome to Unisync",
+    "description": "A tool to connect your phone and your PC together."
+  },
+  "device_pair": {
+    "connect_to_device": "Connect to a device",
+    "add_manually": "Add device manually",
+    "id": "ID",
+    "ip_address": "IP Address",
+    "cancel": "Cancel",
+    "request_pair": "Request pair",
+    "connect": "Connect"
+  },
+  "devices_status": {
+    "title": "Unisync Devices",
+    "connected_devices": "Connected devices",
+    "disconnected_devices": "Disconnected devices",
+    "add_device": "Add new device",
+    "no_devices_found": "No devices found!",
+    "no_connected_devices": "No devices connected!",
+    "available_devices": "Available devices",
+    "paired_devices": "Paired devices",
+    "rescan": "Rescan"
+  },
+  "status": {
+    "connected": "Connected",
+    "disconnected": "Disconnected"
+  }
 }

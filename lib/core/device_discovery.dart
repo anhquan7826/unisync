@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:unisync/backend/mdns.dart';
-import 'package:unisync/constants/network_ports.dart';
 import 'package:unisync/core/device_entry_point.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/configs.dart';
+import 'package:unisync/utils/constants/network_ports.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/logger.dart';
 

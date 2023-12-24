@@ -7,7 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:unisync/app/overview/devices_status/devices_status.cubit.dart';
 import 'package:unisync/app/overview/devices_status/devices_status.state.dart';
 import 'package:unisync/app/overview/overview.cubit.dart';
-import 'package:unisync/constants/device_types.dart';
+import 'package:unisync/utils/constants/device_types.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
@@ -100,10 +100,10 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
             padding: const EdgeInsets.only(right: 16),
             child: SvgPicture.asset(
               Platform.isLinux
-                  ? R.icons.linux
+                  ? R.icon.linux
                   : Platform.isWindows
-                      ? R.icons.windows
-                      : R.icons.android,
+                      ? R.icon.windows
+                      : R.icon.android,
               colorFilter: ColorFilter.mode(
                 context.isDarkMode ? Colors.white : Colors.black,
                 BlendMode.srcIn,
@@ -116,7 +116,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  R.strings.appName,
+                  R.string.appName,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -170,7 +170,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          R.strings.devicesStatus.pairedDevices,
+          R.string.devicesStatus.pairedDevices,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
         ).tr(),
         if (connectedDevices.isNotEmpty) ...[
@@ -181,7 +181,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
               bottom: 16,
             ),
             child: Text(
-              R.strings.devicesStatus.connectedDevice,
+              R.string.devicesStatus.connectedDevice,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ).tr(),
           ),
@@ -197,7 +197,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
               bottom: 16,
             ),
             child: Text(
-              R.strings.devicesStatus.disconnectedDevice,
+              R.string.devicesStatus.disconnectedDevice,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ).tr(),
           ),
@@ -217,7 +217,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
           children: [
             Expanded(
               child: Text(
-                R.strings.devicesStatus.availableDevices,
+                R.string.devicesStatus.availableDevices,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white70),
               ).tr(),
             ),
@@ -226,7 +226,7 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
                 cubit.loadDevices();
               },
               icon: const Icon(Icons.replay_rounded),
-              label: Text(R.strings.devicesStatus.rescan).tr(),
+              label: Text(R.string.devicesStatus.rescan).tr(),
             ),
           ],
         ),
@@ -242,10 +242,10 @@ class _DevicesStatusViewState extends State<DevicesStatusView> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: SvgPicture.asset(
         device.deviceType == DeviceTypes.android
-            ? R.icons.android
+            ? R.icon.android
             : device.deviceType == DeviceTypes.linux
-                ? R.icons.linux
-                : R.icons.windows,
+                ? R.icon.linux
+                : R.icon.windows,
         colorFilter: ColorFilter.mode(
           context.isDarkMode ? Colors.white : Colors.black,
           BlendMode.srcIn,

@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:unisync/core/device_entry_point.dart';
+import 'package:unisync/models/channel_result/channel_result.model.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/plugin/connection.plugin.dart';
 import 'package:unisync/repository/connection.repository.dart';
 import 'package:unisync/utils/channels.dart';
+import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/extensions/string.ext.dart';
 
 class ConnectionRepositoryImpl extends ConnectionRepository {
@@ -18,15 +20,23 @@ class ConnectionRepositoryImpl extends ConnectionRepository {
         ..addCallHandler(
           ConnectionChannel.ON_DEVICE_CONNECTED,
           (arguments) {
-            final device = DeviceInfo.fromJson(arguments!['device']);
+            final device = DeviceInfo.fromJson((arguments!['device'] as Map).cast<String, dynamic>());
             onDeviceAdd(device);
+            return ChannelResult(
+              method: ConnectionChannel.ON_DEVICE_CONNECTED,
+              resultCode: ChannelResult.SUCCESS,
+            );
           },
         )
         ..addCallHandler(
           ConnectionChannel.ON_DEVICE_DISCONNECTED,
           (arguments) {
-            final device = DeviceInfo.fromJson(arguments!['device']);
+            final device = DeviceInfo.fromJson((arguments!['device'] as Map).cast<String, dynamic>());
             onDeviceRemove(device);
+            return ChannelResult(
+              method: ConnectionChannel.ON_DEVICE_DISCONNECTED,
+              resultCode: ChannelResult.SUCCESS,
+            );
           },
         );
     } else {
@@ -48,7 +58,7 @@ class ConnectionRepositoryImpl extends ConnectionRepository {
   @override
   Future<void> connectToAddress(String ipAddress) async {
     if (Platform.isAndroid) {
-      UnisyncChannels.connection.invokeMethod(
+      UnisyncChannels.connection.invoke(
         ConnectionChannel.ADD_DEVICE_MANUALLY,
         arguments: {'ip': ipAddress},
       );
@@ -58,10 +68,20 @@ class ConnectionRepositoryImpl extends ConnectionRepository {
   @override
   Future<List<DeviceInfo>> getAvailableDevices() async {
     if (Platform.isAndroid) {
-      final devices = (await UnisyncChannels.connection.invokeMethod(ConnectionChannel.GET_CONNECTED_DEVICES)).result as List<String>;
+      final devices = ((await UnisyncChannels.connection.invoke(ConnectionChannel.GET_CONNECTED_DEVICES)).result as List).cast<String>();
       return devices.map((e) => DeviceInfo.fromJson(e.toMap())).toList();
     } else {
       return DeviceEntryPoint.devices;
     }
+  }
+
+  @override
+  Future<DeviceInfo?> getLastUsedDevice() async {
+    return ConfigUtil.device.getLastUsedDevice();
+  }
+
+  @override
+  Future<void> setLastUsedDevice(DeviceInfo device) async {
+    ConfigUtil.device.setLastUsedDevice(device);
   }
 }

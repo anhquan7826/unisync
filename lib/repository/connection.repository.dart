@@ -11,4 +11,8 @@ abstract class ConnectionRepository {
   void removeDeviceChangeListener();
 
   Future<void> connectToAddress(String ipAddress);
+
+  Future<DeviceInfo?> getLastUsedDevice();
+  
+  Future<void> setLastUsedDevice(DeviceInfo device);
 }

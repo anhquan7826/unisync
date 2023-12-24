@@ -6,9 +6,11 @@ import 'package:unisync/plugin/base_plugin.dart';
 
 class ConnectionPlugin extends UnisyncPlugin {
   factory ConnectionPlugin() {
-    _i ??= ConnectionPlugin();
+    _i ??= ConnectionPlugin._();
     return _i!;
   }
+
+  ConnectionPlugin._();
 
   static ConnectionPlugin? _i;
 
@@ -17,9 +19,6 @@ class ConnectionPlugin extends UnisyncPlugin {
 
   @override
   String plugin = UnisyncPlugin.PLUGIN_CONNECTION;
-
-  @override
-  Future<void> stop() async {}
 
   void subscribeDeviceChanges(void Function(DeviceInfo) onAdd, void Function(DeviceInfo) onRemove) {
     _deviceAddSubscription = DeviceEntryPoint.notifiers.connectedDeviceNotifier.listen(onAdd);

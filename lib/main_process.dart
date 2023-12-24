@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:unisync/constants/device_types.dart';
+import 'package:unisync/utils/constants/device_types.dart';
 import 'package:unisync/core/device_discovery.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/plugin/base_plugin.dart';

@@ -40,15 +40,22 @@ object DeviceEntryPoint {
         Notifier.disconnectedDeviceNotifier.onNext(info)
     }
 
-    fun send(toDeviceId: String, plugin: String, function: String, extra: Map<String, Any?> = mapOf()) {
-        _devices[toDeviceId]?.send(toJson(
-            DeviceMessage(
-                deviceId = ConfigUtil.Device.getDeviceInfo().id,
-                plugin = plugin,
-                function = function,
-                extra = extra
+    fun send(
+        toDeviceId: String,
+        plugin: String,
+        function: String,
+        extra: Map<String, Any?> = mapOf()
+    ) {
+        _devices[toDeviceId]?.send(
+            toJson(
+                DeviceMessage(
+                    fromDeviceId = ConfigUtil.Device.getDeviceInfo().id,
+                    plugin = plugin,
+                    function = function,
+                    extra = extra
+                )
             )
-        ))
+        )
     }
 
     private class DeviceConnection(val info: DeviceInfo, val socket: SSLSocket) {

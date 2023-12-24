@@ -4,7 +4,6 @@ import com.anhquan.unisync.core.DeviceDiscovery
 import com.anhquan.unisync.core.DeviceEntryPoint
 import com.anhquan.unisync.models.ChannelResult
 import com.anhquan.unisync.models.DeviceInfo
-import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ChannelUtil
 import com.anhquan.unisync.utils.ChannelUtil.ConnectionChannel
 import com.anhquan.unisync.utils.ChannelUtil.ConnectionChannel.ADD_DEVICE_MANUALLY
@@ -17,8 +16,6 @@ import com.anhquan.unisync.utils.toMap
 class ConnectionPlugin : UnisyncPlugin() {
     override val channelHandler: ChannelUtil.ChannelHandler = ConnectionChannel
     override val plugin: String = PLUGIN_CONNECTION
-
-    override fun stop() {}
 
     override fun addChannelHandler() {
         channelHandler.addCallHandler(
@@ -40,12 +37,20 @@ class ConnectionPlugin : UnisyncPlugin() {
     }
 
     override fun onDeviceConnected(info: DeviceInfo) {
-        channelHandler.invoke(ON_DEVICE_CONNECTED, args = toMap(info))
+        channelHandler.invoke(
+            ON_DEVICE_CONNECTED,
+            args = mapOf(
+                "device" to toMap(info)
+            )
+        )
     }
 
     override fun onDeviceDisconnected(info: DeviceInfo) {
-        channelHandler.invoke(ON_DEVICE_DISCONNECTED, args = toMap(info))
+        channelHandler.invoke(
+            ON_DEVICE_DISCONNECTED,
+            args = mapOf(
+                "device" to toMap(info)
+            )
+        )
     }
-
-    override fun onDeviceMessage(message: DeviceMessage) {}
 }

@@ -3,7 +3,6 @@
 import 'package:unisync/core/device_entry_point.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
-import 'package:unisync/plugin/connection.plugin.dart';
 
 abstract class UnisyncPlugin {
   static const PLUGIN_CONNECTION = 'connection';
@@ -19,7 +18,7 @@ abstract class UnisyncPlugin {
       ..deviceMessageNotifier.listen(enabled ? onDeviceMessage : (_) {});
   }
 
-  Future<void> stop();
+  Future<void> stop() async {}
 
   void send({
     required String deviceId,

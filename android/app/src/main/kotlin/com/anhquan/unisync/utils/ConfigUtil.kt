@@ -2,6 +2,7 @@ package com.anhquan.unisync.utils
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.room.Room
 import com.anhquan.unisync.constants.SPKey
 import com.anhquan.unisync.database.UnisyncDatabase
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
@@ -16,11 +17,11 @@ object ConfigUtil {
 
     fun setup(context: Context) {
         sharedPreferences = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
-//        database = Room.databaseBuilder(
-//            context,
-//            UnisyncDatabase::class.java,
-//            "unisync-database"
-//        ).build()
+        database = Room.databaseBuilder(
+            context,
+            UnisyncDatabase::class.java,
+            "unisync-database"
+        ).build()
     }
 
     object Authentication {
@@ -37,7 +38,8 @@ object ConfigUtil {
                 publicKeyString = sharedPreferences.getString(SPKey.publicKey, "")!!
                 privateKeyString = sharedPreferences.getString(SPKey.privateKey, "")!!
                 publicKey = RSAHelper.decodeRSAKey(publicKeyString) as PublicKey
-                privateKey = RSAHelper.decodeRSAKey(privateKeyString, isPrivate = true) as PrivateKey
+                privateKey =
+                    RSAHelper.decodeRSAKey(privateKeyString, isPrivate = true) as PrivateKey
                 return
             }
             val keypair = RSAHelper.generateKeypair()

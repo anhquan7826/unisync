@@ -4,7 +4,7 @@ import 'package:unisync/resources/string_resources.dart';
 class R {
   R._();
 
-  static final strings = StringResources();
+  static final string = StringResources();
 
-  static final icons = IconResource();
+  static final icon = IconResource();
 }

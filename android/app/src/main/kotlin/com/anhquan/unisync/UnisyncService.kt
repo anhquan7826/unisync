@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.IBinder
 import com.anhquan.unisync.core.DeviceDiscovery
 import com.anhquan.unisync.plugins.ConnectionPlugin
+import com.anhquan.unisync.plugins.PairingPlugin
 import com.anhquan.unisync.plugins.UnisyncPlugin
 import com.anhquan.unisync.utils.infoLog
 
@@ -16,11 +17,11 @@ class UnisyncService : Service() {
     private val plugin = mutableMapOf<String, UnisyncPlugin>()
 
     override fun onCreate() {
-        super.onCreate()
         configureNotificationChannel()
         startForeground(1, buildPersistentNotification())
         DeviceDiscovery.start(this)
         configurePlugins()
+        super.onCreate()
         infoLog("${this::class.simpleName}: service created.")
     }
 
@@ -38,6 +39,7 @@ class UnisyncService : Service() {
 
     private fun configurePlugins() {
         plugin[UnisyncPlugin.PLUGIN_CONNECTION] = ConnectionPlugin().apply { this.start() }
+        plugin[UnisyncPlugin.PLUGIN_PAIRING] = PairingPlugin().apply { this.start() }
     }
 
     private fun configureNotificationChannel() {

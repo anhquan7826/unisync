@@ -68,7 +68,7 @@ class DeviceActionState extends State<DeviceAction> {
       title: device == null
           ? context.isLandscape
               ? null
-              : Text(R.strings.devicesStatus.title).tr()
+              : Text(R.string.devicesStatus.title).tr()
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -100,7 +100,7 @@ class DeviceActionState extends State<DeviceAction> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgPicture.asset(
-            R.icons.unlink,
+            R.icon.unlink,
             width: 128,
             colorFilter: ColorFilter.mode(
               context.isDarkMode ? Colors.white : Colors.black,
@@ -112,7 +112,7 @@ class DeviceActionState extends State<DeviceAction> {
               top: 16,
               bottom: 32,
             ),
-            child: Text(R.strings.devicesStatus.noConnectedDevices).tr(),
+            child: Text(R.string.devicesStatus.noConnectedDevices).tr(),
           ),
           if (context.isPortrait)
             FilledButton.tonalIcon(
@@ -120,7 +120,7 @@ class DeviceActionState extends State<DeviceAction> {
                 widget.scaffoldKey?.currentState?.openDrawer();
               },
               icon: const Icon(Icons.add),
-              label: Text(R.strings.devicesStatus.addDevice).tr(),
+              label: Text(R.string.devicesStatus.addDevice).tr(),
             ),
         ],
       ),

@@ -2,33 +2,38 @@
 
 import 'package:flutter/services.dart';
 import 'package:unisync/models/channel_result/channel_result.model.dart';
+import 'package:unisync/utils/logger.dart';
 
 class UnisyncChannels {
   UnisyncChannels._();
 
   static const _authority = 'com.anhquan.unisync.channel';
 
-  static final connection = PairingChannel._();
+  static final connection = ConnectionChannel._();
+  static final pairing = PairingChannel._();
   static final preferences = PreferencesChannel._();
 }
 
 abstract class _ChannelHandler {
   _ChannelHandler(this._methodChannel) {
     _methodChannel.setMethodCallHandler((call) async {
+      debugLog('Native invoked method ${call.method} with arguments ${call.arguments}');
       final args = (call.arguments as Map?)?.map((key, value) => MapEntry(key.toString(), value));
-      return _callHandlers[call.method]?.call(args);
+      return _callHandlers[call.method]?.call(args).toJson();
     });
   }
 
   final MethodChannel _methodChannel;
-  final _callHandlers = <String, dynamic Function(Map<String, dynamic>? arguments)>{};
+  final _callHandlers = <String, ChannelResult Function(Map<String, dynamic>? arguments)>{};
 
-  Future<ChannelResult> invokeMethod(String method, {Map<String, dynamic>? arguments}) async {
+  Future<ChannelResult> invoke(String method, {Map<String, dynamic>? arguments}) async {
+    debugLog('Invoking method $method...');
     final result = (await _methodChannel.invokeMethod<Map>(method, arguments))!.cast<String, dynamic>();
+    debugLog('Result from method $method: $result');
     return ChannelResult.fromJson(result);
   }
 
-  void addCallHandler(String call, void Function(Map<String, dynamic>? arguments) handler) {
+  void addCallHandler(String call, ChannelResult Function(Map<String, dynamic>? arguments) handler) {
     _callHandlers[call] = handler;
   }
 

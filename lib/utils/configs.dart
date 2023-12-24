@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:pointycastle/pointycastle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:unisync/constants/sp_key.dart';
 import 'package:unisync/database/unisync_database.dart';
+import 'package:unisync/utils/constants/sp_key.dart';
 import 'package:unisync/utils/cryptography/cert.dart';
 import 'package:unisync/utils/cryptography/rsa.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
+import 'package:unisync/utils/extensions/scope.ext.dart';
+import 'package:unisync/utils/extensions/string.ext.dart';
 import 'package:unisync/utils/preferences.dart';
 
 import '../models/device_info/device_info.model.dart';
@@ -47,6 +49,19 @@ class _DeviceConfig {
 
   Future<void> removePairedDevice(DeviceInfo device) async {
     await UnisyncDatabase.pairedDeviceDao.remove(device);
+  }
+
+  Future<DeviceInfo?> getLastUsedDevice() async {
+    return (await AppPreferences.getString(SPKey.lastUsedDevice)).let((it) {
+      if (it == null) {
+        return null;
+      }
+      return DeviceInfo.fromJson(it.toMap());
+    });
+  }
+
+  Future<void> setLastUsedDevice(DeviceInfo device) async {
+    await AppPreferences.putString(SPKey.lastUsedDevice, device.toJson().toJsonString());
   }
 }
 

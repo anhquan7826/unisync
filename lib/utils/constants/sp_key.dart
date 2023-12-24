@@ -6,4 +6,6 @@ class SPKey {
   static const privateKey = 'private_key';
   static const publicKey = 'public_key';
   static const certificate = 'certificate';
+
+  static const lastUsedDevice = 'last_used_device';
 }

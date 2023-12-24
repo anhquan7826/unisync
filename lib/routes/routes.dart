@@ -1,32 +1,36 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:unisync/app/overview/devices_status/devices_status.cubit.dart';
-import 'package:unisync/app/overview/overview.cubit.dart';
-import 'package:unisync/app/overview/overview.view.dart';
+import 'package:unisync/app/device_pair/device_pair.cubit.dart';
+import 'package:unisync/app/device_pair/device_pair.view.dart';
+import 'package:unisync/app/landing/landing.cubit.dart';
+import 'package:unisync/app/landing/landing.view.dart';
+import 'package:unisync/utils/extensions/context.ext.dart';
 
-class AppRoute {
-  AppRoute._();
-  static const overview = '/';
+const routes = (landing: '/', pair: '/pair');
 
-  static final routerConfigs = GoRouter(
-    initialLocation: overview,
-    routes: [
-      GoRoute(
-        path: overview,
-        builder: (context, state) {
-          return MultiBlocProvider(
-            providers: [
-              BlocProvider<OverviewCubit>(
-                create: (context) => OverviewCubit(),
-              ),
-              BlocProvider<DevicesStatusCubit>(
-                create: (context) => DevicesStatusCubit(context),
-              )
-            ],
-            child: const OverviewView(),
-          );
-        },
-      ),
-    ],
-  );
-}
+final routerConfigs = GoRouter(
+  initialLocation: routes.landing,
+  routes: [
+    GoRoute(
+      path: routes.landing,
+      builder: (context, state) {
+        return BlocProvider(
+          create: (context) => LandingCubit(context.getRepo()),
+          child: const LandingView(),
+        );
+      },
+    ),
+    GoRoute(
+      path: routes.pair,
+      builder: (context, state) {
+        return BlocProvider(
+          create: (context) => DevicePairCubit(
+            connectionRepo: context.getRepo(),
+            pairingRepo: context.getRepo(),
+          ),
+          child: const DevicePairView(),
+        );
+      },
+    )
+  ],
+);

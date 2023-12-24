@@ -12,7 +12,7 @@ class AppPreferences {
   static Future<String?> getString(String key) async {
     _fsp ??= await SharedPreferences.getInstance();
     if (Platform.isAndroid) {
-      return (await _asp.invokeMethod(PreferencesChannel.GET_STRING, arguments: {'key': key})).result as String?;
+      return (await _asp.invoke(PreferencesChannel.GET_STRING, arguments: {'key': key})).result as String?;
     } else {
       return _fsp!.getString(key);
     }
@@ -21,7 +21,7 @@ class AppPreferences {
   static Future<int?> getInt(String key) async {
     _fsp ??= await SharedPreferences.getInstance();
     if (Platform.isAndroid) {
-      return (await _asp.invokeMethod(PreferencesChannel.GET_INT, arguments: {'key': key})).result as int?;
+      return (await _asp.invoke(PreferencesChannel.GET_INT, arguments: {'key': key})).result as int?;
     } else {
       return _fsp!.getInt(key);
     }
@@ -30,7 +30,7 @@ class AppPreferences {
   static Future<bool?> getBool(String key) async {
     _fsp ??= await SharedPreferences.getInstance();
     if (Platform.isAndroid) {
-      return (await _asp.invokeMethod(PreferencesChannel.GET_BOOL, arguments: {'key': key})).result as bool?;
+      return (await _asp.invoke(PreferencesChannel.GET_BOOL, arguments: {'key': key})).result as bool?;
     } else {
       return _fsp!.getBool(key);
     }
@@ -39,7 +39,7 @@ class AppPreferences {
   static Future<void> putString(String key, String value) async {
     _fsp ??= await SharedPreferences.getInstance();
     if (Platform.isAndroid) {
-      await _asp.invokeMethod(PreferencesChannel.PUT_STRING, arguments: {'key': key, 'value': value});
+      await _asp.invoke(PreferencesChannel.PUT_STRING, arguments: {'key': key, 'value': value});
     } else {
       _fsp!.setString(key, value);
     }
@@ -48,7 +48,7 @@ class AppPreferences {
   static Future<void> putInt(String key, int value) async {
     _fsp ??= await SharedPreferences.getInstance();
     if (Platform.isAndroid) {
-      await _asp.invokeMethod(PreferencesChannel.PUT_INT, arguments: {'key': key, 'value': value});
+      await _asp.invoke(PreferencesChannel.PUT_INT, arguments: {'key': key, 'value': value});
     } else {
       _fsp!.setInt(key, value);
     }
@@ -58,7 +58,7 @@ class AppPreferences {
   static Future<void> putBool(String key, bool value) async {
     _fsp ??= await SharedPreferences.getInstance();
     if (Platform.isAndroid) {
-      await _asp.invokeMethod(PreferencesChannel.PUT_BOOL, arguments: {'key': key, 'value': value});
+      await _asp.invoke(PreferencesChannel.PUT_BOOL, arguments: {'key': key, 'value': value});
     } else {
       _fsp!.setBool(key, value);
     }
