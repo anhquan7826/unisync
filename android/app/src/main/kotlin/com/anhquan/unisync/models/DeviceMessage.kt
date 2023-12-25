@@ -10,6 +10,7 @@ data class DeviceMessage(
         const val REQUEST_PAIR = "request_pair"
         const val PAIR_ACCEPTED = "pair_accepted"
         const val PAIR_REJECTED = "pair_rejected"
+        const val QUERY_PAIR = "query_pair"
         const val UNPAIR = "unpair"
     }
 }

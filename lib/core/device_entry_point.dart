@@ -39,6 +39,7 @@ class DeviceEntryPoint {
   }) async {
     await _devices[toDeviceId]?.send(DeviceMessage(
       fromDeviceId: (await ConfigUtil.device.getDeviceInfo()).id,
+      toDeviceId: toDeviceId,
       plugin: plugin,
       function: function,
       extra: extra,
@@ -64,6 +65,7 @@ class _DeviceEntryPointNotifiers {
 
 class DeviceConnection {
   DeviceConnection._({required this.socket}) {
+    _exchange();
     _listen();
   }
 
@@ -75,6 +77,10 @@ class DeviceConnection {
   late final StreamSubscription<Uint8List> _streamSubscription;
 
   var _firstEvent = true;
+
+  Future<void> _exchange() async {
+    socket.writeln((await ConfigUtil.device.getDeviceInfo()).toJson().toJsonString());
+  }
 
   void _listen() {
     _streamSubscription = socket.listen(
@@ -95,6 +101,8 @@ class DeviceConnection {
           DeviceEntryPoint.notifiers._deviceMessageNotifier.add(
             DeviceMessage.fromJson(
               event.string.toMap(),
+            ).copy(
+              fromDeviceId: info.id,
             ),
           );
         }

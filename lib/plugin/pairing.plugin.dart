@@ -5,6 +5,15 @@ import 'package:unisync/plugin/base_plugin.dart';
 import 'package:unisync/utils/configs.dart';
 
 class PairingPlugin extends UnisyncPlugin {
+  factory PairingPlugin() {
+    _i ?? PairingPlugin._();
+    return _i!;
+  }
+
+  PairingPlugin._();
+
+  static PairingPlugin? _i;
+
   @override
   String get plugin => UnisyncPlugin.PLUGIN_PAIRING;
 
