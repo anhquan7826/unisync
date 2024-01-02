@@ -1,16 +1,13 @@
 package com.anhquan.unisync.models
 
+import com.google.gson.annotations.SerializedName
+
 data class DeviceMessage(
-    val fromDeviceId: String,
-    val plugin: String,
-    val function: String,
-    val extra: Map<String, Any?> = mapOf()
+    val time: Long = System.currentTimeMillis(),
+    val type: Type,
+    val body: Map<String, Any?> = mapOf()
 ) {
-    object Pairing {
-        const val REQUEST_PAIR = "request_pair"
-        const val PAIR_ACCEPTED = "pair_accepted"
-        const val PAIR_REJECTED = "pair_rejected"
-        const val QUERY_PAIR = "query_pair"
-        const val UNPAIR = "unpair"
+    enum class Type {
+        @SerializedName("pair") PAIR
     }
 }

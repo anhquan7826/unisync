@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:unisync/core/device_entry_point.dart';
+import 'package:unisync/handlers/base_plugin.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
-import 'package:unisync/plugin/base_plugin.dart';
 
 class ConnectionPlugin extends UnisyncPlugin {
   factory ConnectionPlugin() {

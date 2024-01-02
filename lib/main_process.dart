@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:unisync/utils/constants/device_types.dart';
 import 'package:unisync/core/device_discovery.dart';
+import 'package:unisync/handlers/connection.plugin.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
-import 'package:unisync/plugin/base_plugin.dart';
-import 'package:unisync/plugin/connection.plugin.dart';
 import 'package:unisync/utils/configs.dart';
+import 'package:unisync/utils/constants/device_types.dart';
 import 'package:unisync/utils/id_gen.dart';
-import 'package:unisync/utils/logger.dart';
 
 class MainProcess {
   Future<void> initialize() async {

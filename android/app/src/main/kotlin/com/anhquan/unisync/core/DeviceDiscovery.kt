@@ -6,6 +6,7 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import com.anhquan.unisync.constants.NetworkPorts
+import com.anhquan.unisync.core.providers.ConnectionProvider
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.debugLog
@@ -155,7 +156,7 @@ object DeviceDiscovery {
                 ip = socket.inetAddress.hostAddress ?: ""
             )
             infoLog("${this::class.simpleName}: Connected to ${info.name} (${info.ip}).")
-            DeviceEntryPoint.create(
+            ConnectionProvider.create(
                 info,
                 socket
             )

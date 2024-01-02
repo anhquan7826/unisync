@@ -1,26 +1,22 @@
 package com.anhquan.unisync
 
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import com.anhquan.unisync.core.DeviceDiscovery
-import com.anhquan.unisync.plugins.ConnectionPlugin
-import com.anhquan.unisync.plugins.PairingPlugin
 import com.anhquan.unisync.plugins.UnisyncPlugin
+import com.anhquan.unisync.utils.NotificationUtil
 import com.anhquan.unisync.utils.infoLog
 
 class UnisyncService : Service() {
     private val plugin = mutableMapOf<String, UnisyncPlugin>()
 
     override fun onCreate() {
-        configureNotificationChannel()
+        NotificationUtil.configure(applicationContext)
         startForeground(1, buildPersistentNotification())
         DeviceDiscovery.start(this)
-        configurePlugins()
         super.onCreate()
         infoLog("${this::class.simpleName}: service created.")
     }
@@ -35,23 +31,6 @@ class UnisyncService : Service() {
         super.onDestroy()
         DeviceDiscovery.stop()
         infoLog("${this::class.simpleName}: service destroyed.")
-    }
-
-    private fun configurePlugins() {
-        plugin[UnisyncPlugin.PLUGIN_CONNECTION] = ConnectionPlugin().apply { this.start() }
-        plugin[UnisyncPlugin.PLUGIN_PAIRING] = PairingPlugin().apply { this.start() }
-    }
-
-    private fun configureNotificationChannel() {
-        val notificationChannel = NotificationChannel(
-            "$packageName.service",
-            "Persistent Notification",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        notificationChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-        getSystemService(NotificationManager::class.java).createNotificationChannel(
-            notificationChannel
-        )
     }
 
     private fun buildPersistentNotification(): Notification {

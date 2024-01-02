@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import androidx.room.Room
 import com.anhquan.unisync.constants.SPKey
 import com.anhquan.unisync.database.UnisyncDatabase
-import com.anhquan.unisync.database.entity.PairedDeviceEntity
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.cryptography.RSAHelper
 import java.security.PrivateKey
@@ -13,7 +12,7 @@ import java.security.PublicKey
 
 object ConfigUtil {
     private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var database: UnisyncDatabase
+    lateinit var database: UnisyncDatabase
 
     fun setup(context: Context) {
         sharedPreferences = context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
@@ -87,30 +86,6 @@ object ConfigUtil {
 
         fun setDeviceInfo(info: DeviceInfo) {
             sharedPreferences.edit().putString(SPKey.deviceInfo, toJson(info)).apply()
-        }
-
-        fun getPairedDevices(onResult: (List<DeviceInfo>) -> Unit) {
-            database.pairedDeviceDao().getAll().listen {
-                onResult.invoke(it)
-            }
-        }
-
-        fun addPairedDevice(device: DeviceInfo) {
-            database.pairedDeviceDao().add(
-                PairedDeviceEntity(
-                    device.id,
-                    device
-                )
-            )
-        }
-
-        fun removePairedDevice(device: DeviceInfo) {
-            database.pairedDeviceDao().remove(
-                PairedDeviceEntity(
-                    device.id,
-                    device
-                )
-            )
         }
     }
 }

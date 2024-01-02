@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:unisync/core/device_entry_point.dart';
+import 'package:unisync/handlers/connection.plugin.dart';
 import 'package:unisync/models/channel_result/channel_result.model.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
-import 'package:unisync/plugin/connection.plugin.dart';
 import 'package:unisync/repository/connection.repository.dart';
 import 'package:unisync/utils/channels.dart';
 import 'package:unisync/utils/configs.dart';

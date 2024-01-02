@@ -1,7 +1,7 @@
 import 'package:unisync/core/device_entry_point.dart';
+import 'package:unisync/handlers/base_plugin.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
-import 'package:unisync/plugin/base_plugin.dart';
 import 'package:unisync/utils/configs.dart';
 
 class PairingPlugin extends UnisyncPlugin {
