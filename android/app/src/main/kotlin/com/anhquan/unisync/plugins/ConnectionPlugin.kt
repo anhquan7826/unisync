@@ -1,7 +1,7 @@
 package com.anhquan.unisync.plugins
 
 import com.anhquan.unisync.core.DeviceDiscovery
-import com.anhquan.unisync.core.providers.ConnectionProvider
+import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.models.ChannelResult
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.ChannelUtil
@@ -31,7 +31,7 @@ class ConnectionPlugin : UnisyncPlugin() {
         ) { _, emitter ->
             emitter.emit(
                 resultCode = ChannelResult.SUCCESS,
-                result = ConnectionProvider.devices.map { toJson(it) }
+                result = DeviceProvider.devices.map { toJson(it) }
             )
         }
     }

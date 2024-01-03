@@ -6,17 +6,17 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import com.anhquan.unisync.core.DeviceDiscovery
-import com.anhquan.unisync.plugins.UnisyncPlugin
 import com.anhquan.unisync.utils.NotificationUtil
 import com.anhquan.unisync.utils.infoLog
 
 class UnisyncService : Service() {
-    private val plugin = mutableMapOf<String, UnisyncPlugin>()
+    private lateinit var deviceDiscovery: DeviceDiscovery
 
     override fun onCreate() {
+        deviceDiscovery = DeviceDiscovery(applicationContext)
         NotificationUtil.configure(applicationContext)
         startForeground(1, buildPersistentNotification())
-        DeviceDiscovery.start(this)
+        deviceDiscovery.start()
         super.onCreate()
         infoLog("${this::class.simpleName}: service created.")
     }
@@ -29,7 +29,7 @@ class UnisyncService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        DeviceDiscovery.stop()
+        deviceDiscovery.stop()
         infoLog("${this::class.simpleName}: service destroyed.")
     }
 

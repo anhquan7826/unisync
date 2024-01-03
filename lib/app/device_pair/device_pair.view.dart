@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/app/device_pair/device_pair.cubit.dart';
 import 'package:unisync/app/device_pair/device_pair.state.dart';
-import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/resources/resources.dart';
-import 'package:unisync/utils/constants/device_types.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/widgets/image.dart';
+import 'package:unisync_backend/models/device_info/device_info.model.dart';
+import 'package:unisync_backend/utils/constants/device_types.dart';
 
 class DevicePairView extends StatefulWidget {
   const DevicePairView({super.key});

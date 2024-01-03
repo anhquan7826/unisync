@@ -1,13 +1,9 @@
 import 'dart:io';
 
-import 'package:unisync/core/device_entry_point.dart';
-import 'package:unisync/handlers/connection.plugin.dart';
-import 'package:unisync/models/channel_result/channel_result.model.dart';
-import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/repository/connection.repository.dart';
-import 'package:unisync/utils/channels.dart';
-import 'package:unisync/utils/configs.dart';
-import 'package:unisync/utils/extensions/string.ext.dart';
+import 'package:unisync_backend/models/channel_result/channel_result.model.dart';
+import 'package:unisync_backend/models/device_info/device_info.model.dart';
+import 'package:unisync_backend/utils/channels.dart';
 
 class ConnectionRepositoryImpl extends ConnectionRepository {
   @override

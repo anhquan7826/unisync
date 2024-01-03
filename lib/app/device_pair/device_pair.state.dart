@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:unisync/models/device_info/device_info.model.dart';
+import 'package:unisync_backend/models/device_info/device_info.model.dart';
 
 abstract class DevicePairState extends Equatable {
   const DevicePairState();

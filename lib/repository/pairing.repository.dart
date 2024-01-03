@@ -1,4 +1,4 @@
-import 'package:unisync/models/device_info/device_info.model.dart';
+import 'package:unisync_backend/models/device_info/device_info.model.dart';
 
 abstract class PairingRepository {
   /// Get paired devices, include connected and disconnected devices.

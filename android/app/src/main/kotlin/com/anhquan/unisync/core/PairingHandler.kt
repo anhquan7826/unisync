@@ -1,16 +1,15 @@
 package com.anhquan.unisync.core
 
-import com.anhquan.unisync.core.interfaces.IDeviceConnection
-import com.anhquan.unisync.core.interfaces.IMessageListener
+import com.anhquan.unisync.R
 import com.anhquan.unisync.database.UnisyncDatabase
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
-import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.NotificationUtil
 import com.anhquan.unisync.utils.listen
 
-class PairingHandler(device: Device) : IMessageListener {
+class PairingHandler(private val device: Device) :
+    NotificationUtil.NotificationHandler(NotificationUtil.CHANNEL_ID_PAIR) {
     interface PairingOperation {
         fun requestPair()
 
@@ -22,13 +21,11 @@ class PairingHandler(device: Device) : IMessageListener {
     }
 
     private val database: UnisyncDatabase = ConfigUtil.database
-    private val connection: IDeviceConnection = device.connection
-    private val info: DeviceInfo = device.deviceInfo
 
     val operation = object : PairingOperation {
         override fun requestPair() {
             if (state == PairState.NOT_PAIRED) {
-                connection.send(
+                device.connection.send(
                     DeviceMessage(
                         type = DeviceMessage.Type.PAIR,
                         body = mapOf(
@@ -42,12 +39,19 @@ class PairingHandler(device: Device) : IMessageListener {
 
         override fun acceptPair() {
             if (state == PairState.REQUESTED_BY_PEER) {
-                connection.send(
+                device.connection.send(
                     DeviceMessage(
                         type = DeviceMessage.Type.PAIR,
                         body = mapOf(
                             "message" to "accepted"
                         )
+                    )
+                )
+                database.pairedDeviceDao().add(
+                    PairedDeviceEntity(
+                        id = device.info.id,
+                        name = device.info.name,
+                        type = device.info.deviceType,
                     )
                 )
                 state = PairState.PAIRED
@@ -56,7 +60,7 @@ class PairingHandler(device: Device) : IMessageListener {
 
         override fun rejectPair() {
             if (state == PairState.REQUESTED_BY_PEER) {
-                connection.send(
+                device.connection.send(
                     DeviceMessage(
                         type = DeviceMessage.Type.PAIR,
                         body = mapOf(
@@ -69,22 +73,24 @@ class PairingHandler(device: Device) : IMessageListener {
         }
 
         override fun unpair() {
-            database.pairedDeviceDao().remove(info.id)
-            connection.send(
-                DeviceMessage(
-                    type = DeviceMessage.Type.PAIR,
-                    body = mapOf(
-                        "message" to "unpair"
+            if (state == PairState.PAIRED) {
+                database.pairedDeviceDao().remove(device.info.id)
+                device.connection.send(
+                    DeviceMessage(
+                        type = DeviceMessage.Type.PAIR,
+                        body = mapOf(
+                            "message" to "unpair"
+                        )
                     )
                 )
-            )
-            state = PairState.NOT_PAIRED
+                state = PairState.NOT_PAIRED
+            }
         }
 
     }
 
     init {
-        database.pairedDeviceDao().exist(device.deviceInfo.id).listen {
+        database.pairedDeviceDao().exist(device.info.id).listen {
             state = if (it == 1) PairState.PAIRED else PairState.NOT_PAIRED
         }
     }
@@ -99,20 +105,25 @@ class PairingHandler(device: Device) : IMessageListener {
     var state: PairState = PairState.NOT_PAIRED
         private set
 
-    override fun onMessageReceived(message: DeviceMessage) {
-        if (message.body.containsKey("message")) {
+    fun onMessageReceived(message: DeviceMessage) {
+        if (message.type == DeviceMessage.Type.PAIR && message.body.containsKey("message")) {
             when (message.body["message"].toString()) {
                 "requested" -> {
                     state = PairState.REQUESTED_BY_PEER
-                    NotificationUtil
+                    showNotification(device.context) {
+                        setContentTitle("Pair request from ${device.info.name}.")
+                        setContentText("Address: ${device.info.ip}")
+                        setSmallIcon(R.drawable.launch_background)
+                        // TODO: Using deep link instead
+                    }
                 }
 
                 "accepted" -> {
                     database.pairedDeviceDao().add(
                         PairedDeviceEntity(
-                            id = info.id,
-                            name = info.name,
-                            type = info.deviceType
+                            id = device.info.id,
+                            name = device.info.name,
+                            type = device.info.deviceType
                         )
                     )
                     state = PairState.PAIRED
@@ -123,7 +134,7 @@ class PairingHandler(device: Device) : IMessageListener {
                 }
 
                 "unpair" -> {
-                    database.pairedDeviceDao().remove(info.id)
+                    database.pairedDeviceDao().remove(device.info.id)
                     state = PairState.NOT_PAIRED
                 }
             }

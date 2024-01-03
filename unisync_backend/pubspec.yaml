@@ -1,0 +1,32 @@
+name: unisync_backend
+description: "A new Flutter project."
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  shared_preferences: ^2.2.1
+  json_annotation: ^4.8.1
+  build_runner: ^2.4.6
+  logger: ^2.0.2+1
+  dbus: ^0.7.8
+  uuid: ^4.1.0
+  rxdart: ^0.27.7
+  pointycastle: ^3.7.3
+  encrypt: ^5.0.3
+  sqflite_common_ffi: ^2.3.0+2
+  path: ^1.8.3
+  path_provider: ^2.1.1
+  basic_utils: ^5.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  json_serializable: ^6.7.1
+  
+flutter:
+  uses-material-design: true

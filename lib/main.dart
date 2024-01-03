@@ -2,23 +2,15 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:unisync/database/unisync_database.dart';
-import 'package:unisync/main_process.dart';
-import 'package:unisync/repository/connection.repository.dart';
-import 'package:unisync/repository/impl/connection.repository.impl.dart';
-import 'package:unisync/repository/impl/pairing.repository.impl.dart';
-import 'package:unisync/repository/pairing.repository.dart';
 import 'package:unisync/routes/routes.dart';
 import 'package:unisync/themes/app_theme.dart';
-import 'package:unisync/utils/configs.dart';
+import 'package:unisync_backend/main_process.dart';
+import 'package:unisync_backend/utils/configs.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-  await ConfigUtil.authentication.prepareCryptography();
   if (!Platform.isAndroid) {
-    await UnisyncDatabase.initialize();
     final process = MainProcess();
     await process.initialize();
     await process.start();
@@ -43,7 +35,6 @@ class Unisync extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Flutter Demo',
       theme: AppThemes.light,
       darkTheme: AppThemes.dark,
       themeMode: ThemeMode.light,
@@ -53,17 +44,7 @@ class Unisync extends StatelessWidget {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       builder: (context, child) {
-        return MultiRepositoryProvider(
-          providers: [
-            RepositoryProvider<ConnectionRepository>(
-              create: (context) => ConnectionRepositoryImpl(),
-            ),
-            RepositoryProvider<PairingRepository>(
-              create: (context) => PairingRepositoryImpl(),
-            ),
-          ],
-          child: child!,
-        );
+        return child!;
       },
     );
   }

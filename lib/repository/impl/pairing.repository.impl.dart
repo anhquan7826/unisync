@@ -1,5 +1,5 @@
-import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/repository/pairing.repository.dart';
+import 'package:unisync_backend/models/device_info/device_info.model.dart';
 
 class PairingRepositoryImpl extends PairingRepository {
   void Function(DeviceInfo p1)? onPairRequestListener;

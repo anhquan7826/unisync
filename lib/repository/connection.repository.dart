@@ -1,4 +1,4 @@
-import 'package:unisync/models/device_info/device_info.model.dart';
+import 'package:unisync_backend/models/device_info/device_info.model.dart';
 
 abstract class ConnectionRepository {
   Future<List<DeviceInfo>> getAvailableDevices();
@@ -13,6 +13,6 @@ abstract class ConnectionRepository {
   Future<void> connectToAddress(String ipAddress);
 
   Future<DeviceInfo?> getLastUsedDevice();
-  
+
   Future<void> setLastUsedDevice(DeviceInfo device);
 }

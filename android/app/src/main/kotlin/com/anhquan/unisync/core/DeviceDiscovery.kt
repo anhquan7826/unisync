@@ -6,7 +6,7 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import com.anhquan.unisync.constants.NetworkPorts
-import com.anhquan.unisync.core.providers.ConnectionProvider
+import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.debugLog
@@ -22,7 +22,7 @@ import javax.net.ssl.SSLSocket
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.X509TrustManager
 
-object DeviceDiscovery {
+class DeviceDiscovery(private val context: Context) {
     private val trustAllManager = @SuppressLint("CustomX509TrustManager")
     object : X509TrustManager {
         @SuppressLint("TrustAllX509TrustManager")
@@ -43,11 +43,11 @@ object DeviceDiscovery {
         it.socketFactory
     }
 
-    private const val serviceType = "_unisync._tcp"
+    private val serviceType = "_unisync._tcp"
     private lateinit var nsdManager: NsdManager
     private lateinit var discoveryListener: NsdManager.DiscoveryListener
 
-    fun start(context: Context) {
+    fun start() {
         nsdManager = context.getSystemService(NsdManager::class.java)
         configureServiceDiscovery()
     }
@@ -156,7 +156,8 @@ object DeviceDiscovery {
                 ip = socket.inetAddress.hostAddress ?: ""
             )
             infoLog("${this::class.simpleName}: Connected to ${info.name} (${info.ip}).")
-            ConnectionProvider.create(
+            DeviceProvider.create(
+                context,
                 info,
                 socket
             )

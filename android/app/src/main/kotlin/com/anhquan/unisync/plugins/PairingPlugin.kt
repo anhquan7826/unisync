@@ -1,6 +1,6 @@
 package com.anhquan.unisync.plugins
 
-import com.anhquan.unisync.core.providers.ConnectionProvider
+import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.models.ChannelResult
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
@@ -39,7 +39,7 @@ class PairingPlugin : UnisyncPlugin() {
         requestedPairStack.removeIf { d -> d.id == deviceId }
         requestedPairStack.add(
             0,
-            ConnectionProvider.devices.first { d -> d.id == deviceId }
+            DeviceProvider.devices.first { d -> d.id == deviceId }
         )
         channelHandler.invoke(
             PairingChannel.ON_DEVICE_PAIR_REQUEST,
@@ -48,7 +48,7 @@ class PairingPlugin : UnisyncPlugin() {
     }
 
     private fun onPairRequestAccepted(deviceId: String) {
-        ConfigUtil.Device.addPairedDevice(ConnectionProvider.devices.first { d -> d.id == deviceId })
+        ConfigUtil.Device.addPairedDevice(DeviceProvider.devices.first { d -> d.id == deviceId })
         channelHandler.invoke(
             PairingChannel.ON_DEVICE_PAIR_RESPONSE,
             args = mapOf(
@@ -99,7 +99,7 @@ class PairingPlugin : UnisyncPlugin() {
 
     private fun acceptPairFrom(deviceId: String) {
         send(toDeviceId = deviceId, function = Pairing.PAIR_ACCEPTED)
-        ConfigUtil.Device.addPairedDevice(ConnectionProvider.devices.first { d -> d.id == deviceId })
+        ConfigUtil.Device.addPairedDevice(DeviceProvider.devices.first { d -> d.id == deviceId })
         requestedPairStack.removeIf { d -> d.id == deviceId }
     }
 
