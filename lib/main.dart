@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:unisync/routes/routes.dart';
-import 'package:unisync/themes/app_theme.dart';
 import 'package:unisync_backend/main_process.dart';
-import 'package:unisync_backend/utils/configs.dart';
+
+import 'main_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,25 +27,13 @@ void main() async {
       child: const Unisync(),
     ),
   );
-}
-
-class Unisync extends StatelessWidget {
-  const Unisync({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp.router(
-      theme: AppThemes.light,
-      darkTheme: AppThemes.dark,
-      themeMode: ThemeMode.light,
-      routerConfig: routerConfigs,
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
-      builder: (context, child) {
-        return child!;
-      },
-    );
+  if (!Platform.isAndroid) {
+    doWhenWindowReady(() {
+      const initialSize = Size(1280, 720);
+      appWindow.minSize = initialSize;
+      appWindow.size = initialSize;
+      appWindow.alignment = Alignment.center;
+      appWindow.show();
+    });
   }
 }

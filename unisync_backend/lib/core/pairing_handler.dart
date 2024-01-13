@@ -22,18 +22,6 @@ class PairingHandler {
 
   PairState get state => _state;
 
-  void requestPair() {
-    if (_state == PairState.notPaired) {
-      device.connection.send(DeviceMessage(
-        type: DeviceMessage.Type.PAIR,
-        body: {
-          'message': 'requested',
-        },
-      ));
-      _state = PairState.requested;
-    }
-  }
-
   void acceptPair() {
     if (_state == PairState.requestedByPeer) {
       device.connection.send(DeviceMessage(

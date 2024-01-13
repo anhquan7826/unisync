@@ -1,36 +1,70 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:unisync/app/device_pair/device_pair.cubit.dart';
-import 'package:unisync/app/device_pair/device_pair.view.dart';
-import 'package:unisync/app/landing/landing.cubit.dart';
-import 'package:unisync/app/landing/landing.view.dart';
-import 'package:unisync/utils/extensions/context.ext.dart';
+import 'package:unisync/app/desktop/home/home.cubit.dart';
+import 'package:unisync/app/desktop/home/home.view.dart';
+import 'package:unisync_backend/models/device_info/device_info.model.dart';
 
-const routes = (landing: '/', pair: '/pair');
+import '../app/desktop/connections/connection.cubit.dart';
+import '../app/desktop/connections/connection.view.dart';
+import '../app/desktop/landing/landing.cubit.dart';
+import '../app/desktop/landing/landing.view.dart';
 
-final routerConfigs = GoRouter(
-  initialLocation: routes.landing,
-  routes: [
-    GoRoute(
-      path: routes.landing,
-      builder: (context, state) {
-        return BlocProvider(
-          create: (context) => LandingCubit(context.getRepo()),
-          child: const LandingView(),
-        );
-      },
-    ),
-    GoRoute(
-      path: routes.pair,
-      builder: (context, state) {
-        return BlocProvider(
-          create: (context) => DevicePairCubit(
-            connectionRepo: context.getRepo(),
-            pairingRepo: context.getRepo(),
-          ),
-          child: const DevicePairView(),
-        );
-      },
-    )
-  ],
-);
+class MobileRouter {
+  MobileRouter._();
+
+  static const routes = (landing: '/', pair: '/pair');
+
+  static final routerConfigs = GoRouter(
+    initialLocation: routes.landing,
+    routes: [],
+  );
+}
+
+class DesktopRouter {
+  DesktopRouter._();
+
+  static const routes = (
+    landing: 'landing',
+    home: 'home',
+    pair: 'pair',
+  );
+
+  static final routerConfigs = GoRouter(
+    initialLocation: '/landing',
+    routes: [
+      GoRoute(
+        name: routes.landing,
+        path: '/landing',
+        builder: (context, state) {
+          return BlocProvider(
+            create: (context) => LandingCubit(),
+            child: const LandingView(),
+          );
+        },
+      ),
+      GoRoute(
+        name: routes.home,
+        path: '/home',
+        builder: (context, state) {
+          final device = state.extra as DeviceInfo;
+          return BlocProvider<HomeCubit>(
+            create: (context) => HomeCubit(device),
+            child: HomeScreen(
+              device: device,
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        name: routes.pair,
+        path: '/pair',
+        builder: (context, state) {
+          return BlocProvider(
+            create: (context) => ConnectionCubit(),
+            child: const ConnectionScreen(),
+          );
+        },
+      )
+    ],
+  );
+}

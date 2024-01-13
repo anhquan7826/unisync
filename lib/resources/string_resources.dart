@@ -1,12 +1,12 @@
-class StringResources {
-  final appName = 'Unisync';
+part of 'resources.dart';
 
-  final landing = (
+const _stringResources = (
+  appName: 'Unisync',
+  landing: (
     welcome: 'landing.welcome',
     description: 'landing.description',
-  );
-
-  final devicePair = (
+  ),
+  devicePair: (
     connectToDevice: 'device_pair.connect_to_device',
     addManually: 'device_pair.add_manually',
     id: 'device_pair.id',
@@ -14,9 +14,8 @@ class StringResources {
     cancel: 'device_pair.cancel',
     requestPair: 'device_pair.request_pair',
     connect: 'device_pair.connect',
-  );
-
-  final devicesStatus = (
+  ),
+  devicesStatus: (
     title: 'devices_status.title',
     connectedDevice: 'devices_status.connected_devices',
     disconnectedDevice: 'devices_status.disconnected_devices',
@@ -26,12 +25,10 @@ class StringResources {
     availableDevices: 'devices_status.available_devices',
     pairedDevices: 'devices_status.paired_devices',
     rescan: 'devices_status.rescan',
-  );
-
-  final status = (
+  ),
+  status: (
     connected: 'status.connected',
     status: 'status.disconnected',
-  );
-
-  final labelContinue = 'continue';
-}
+  ),
+  labelContinue: 'continue',
+);
