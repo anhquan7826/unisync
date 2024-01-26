@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Unisync</string>
+    <string name="pair_new_device">Pair new device</string>
+    <string name="connected">Connected</string>
+    <string name="connected_devices">Connected devices</string>
+    <string name="settings">Settings</string>
+    <string name="find_new_device">Find new device</string>
+    <string name="requested_devices">Requested devices</string>
+    <string name="available_devices">Available devices</string>
+    <string name="close">Close</string>
+    <string name="request_pair">Request pair</string>
+</resources>

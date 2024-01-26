@@ -48,9 +48,9 @@ class DeviceDiscovery {
     try {
       infoLog('DeviceDiscovery: Found a service on address ${socket.address.address}.');
       socket.writeln((await ConfigUtil.device.getDeviceInfo()).toJson().toJsonString());
-      final socketStream = socket.asBroadcastStream();
-      final info = DeviceInfo.fromJson((await socketStream.first).string.toMap()).copy(ip: socket.address.address);
-      DeviceProvider.create(info: info, socket: socket);
+      final inputStream = socket.asBroadcastStream();
+      final info = DeviceInfo.fromJson((await inputStream.first).string.toMap()).copy(ip: socket.address.address);
+      DeviceProvider.create(info: info, socket: socket, inputStream: inputStream);
     } catch (e) {
       errorLog('DeviceDiscovery: Error connecting to ${socket.address.address}. Exception is:\n$e');
       rethrow;

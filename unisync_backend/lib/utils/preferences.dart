@@ -8,7 +8,7 @@ class AppPreferences {
   AppPreferences._();
 
   static SharedPreferences? _fsp;
-  static final _asp = UnisyncChannels('shared_preferences');
+  static final _asp = UnisyncChannel('shared_preferences');
 
   static Future<String?> getString(String key) async {
     _fsp ??= await SharedPreferences.getInstance();

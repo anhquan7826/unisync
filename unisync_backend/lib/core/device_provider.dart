@@ -1,6 +1,7 @@
 // ignore_for_file: close_sinks
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:unisync_backend/core/device.dart';
 import 'package:unisync_backend/core/device_connection.dart';
@@ -18,18 +19,18 @@ class DeviceProvider {
 
   static List<DeviceInfo> get devices => _devices.values.map((e) => e.info).toList();
 
-  static void create({required DeviceInfo info, required SecureSocket socket}) {
+  static void create({required DeviceInfo info, required SecureSocket socket, required Stream<Uint8List> inputStream}) {
     if (_devices.containsKey(info)) {
       socket.close();
     } else {
-      _devices[info] = Device(DeviceConnection(socket, info));
+      _devices[info] = Device(DeviceConnection(socket, inputStream, info));
       infoLog('Connected to ${info.name} (${info.ip}).');
       UnisyncEventNotifier.publish(DeviceConnectedEvent(info));
     }
   }
 
   static void remove(DeviceInfo info) {
-    _devices.remove(info.id);
+    _devices.remove(info);
     UnisyncEventNotifier.publish(DeviceDisconnectedEvent(info));
   }
 }

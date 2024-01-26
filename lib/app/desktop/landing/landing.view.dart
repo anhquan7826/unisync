@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:unisync/routes/routes.dart';
+import 'package:unisync/routes/routes.desktop.dart';
 import 'package:unisync_backend/models/device_info/device_info.model.dart';
 import 'package:unisync_backend/utils/constants/device_types.dart';
 

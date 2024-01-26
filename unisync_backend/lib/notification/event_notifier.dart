@@ -3,6 +3,7 @@ import 'package:unisync_backend/notification/events/device_connected.event.dart'
 import 'package:unisync_backend/notification/handlers/base_event_handler.dart';
 import 'package:unisync_backend/notification/handlers/device_connected.event_handler.dart';
 import 'package:unisync_backend/notification/handlers/device_disconnected.event_handler.dart';
+import 'package:unisync_backend/utils/logger.dart';
 
 import 'events/device_disconnected.event.dart';
 
@@ -15,18 +16,22 @@ class UnisyncEventNotifier {
   static void register(BaseEventHandler listener) {
     if (listener is DeviceConnectedEventHandler) {
       _deviceConnected.add(listener);
+      debugLog('Registered DeviceConnectedEventHandler(${listener.hashCode})');
     }
     if (listener is DeviceDisconnectedEventHandler) {
       _deviceDisconnected.add(listener);
+      debugLog('Registered DeviceDisconnectedEventHandler(${listener.hashCode})');
     }
   }
 
   static void unregister(BaseEventHandler listener) {
     if (listener is DeviceConnectedEventHandler) {
       _deviceConnected.remove(listener);
+      debugLog('Unregistered DeviceConnectedEventHandler(${listener.hashCode})');
     }
     if (listener is DeviceDisconnectedEventHandler) {
       _deviceDisconnected.remove(listener);
+      debugLog('Unregistered DeviceDisconnectedEventHandler(${listener.hashCode})');
     }
   }
 

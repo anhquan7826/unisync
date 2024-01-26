@@ -5,18 +5,20 @@ import 'package:flutter/services.dart';
 import '../models/channel_result/channel_result.model.dart';
 import 'logger.dart';
 
-class UnisyncChannels {
-  factory UnisyncChannels(String path) {
-    _channels[path] ??= UnisyncChannels._(path);
+class UnisyncChannel {
+  factory UnisyncChannel(String path) {
+    _channels[path] ??= UnisyncChannel._(path);
     return _channels[path]!;
   }
 
-  UnisyncChannels._(String path) {
+  UnisyncChannel._(String path) {
     _create(path);
   }
 
+  static const DEVICES = 'devices';
+
   static const _authority = 'com.anhquan.unisync.channel';
-  static final _channels = <String, UnisyncChannels>{};
+  static final _channels = <String, UnisyncChannel>{};
 
   late final MethodChannel _methodChannel;
   final _callHandlers = <String, ChannelResult Function(Map<String, dynamic>? arguments)>{};

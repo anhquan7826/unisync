@@ -1,10 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'device_info.model.g.dart';
 
 @JsonSerializable(includeIfNull: true, explicitToJson: true)
+@immutable
 class DeviceInfo {
-  DeviceInfo({
+  const DeviceInfo({
     required this.id,
     required this.name,
     this.ip = '',

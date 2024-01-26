@@ -20,7 +20,7 @@ class ConnectionScreen extends StatefulWidget {
 }
 
 class _ConnectionScreenState extends State<ConnectionScreen> {
-  final List<DeviceInfo> devices = [];
+  final Set<DeviceInfo> devices = {};
   bool loaded = false;
 
   @override
@@ -52,7 +52,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             devices.add(state.device);
           }
           if (state is OnDeviceRemoveState) {
-            devices.removeWhere((element) => element.id == state.device.id);
+            devices.remove(state.device);
           }
           setState(() {});
         },

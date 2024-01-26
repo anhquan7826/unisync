@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "unisync",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "unisync (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "unisync (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "unisync_backend",
+            "cwd": "unisync_backend",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "unisync_backend (profile mode)",
+            "cwd": "unisync_backend",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "unisync_backend (release mode)",
+            "cwd": "unisync_backend",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

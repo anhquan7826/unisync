@@ -5,7 +5,7 @@ import 'package:unisync/app/desktop/home/gallery/gallery.view.dart';
 import 'package:unisync/app/desktop/home/messages/messages.view.dart';
 import 'package:unisync/app/desktop/home/notification/notification.view.dart';
 import 'package:unisync/resources/resources.dart';
-import 'package:unisync/routes/routes.dart';
+import 'package:unisync/routes/routes.desktop.dart';
 import 'package:unisync/widgets/image.dart';
 import 'package:unisync_backend/models/device_info/device_info.model.dart';
 

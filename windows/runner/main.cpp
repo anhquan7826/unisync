@@ -4,6 +4,7 @@
 
 #include "flutter_window.h"
 #include "utils.h"
+#include "C:/Program Files/Bonjour SDK/Include/dns_sd.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
@@ -31,6 +32,28 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
+
+  DNSServiceRef serviceRef;
+  DNSServiceErrorType err;
+
+  err = DNSServiceRegister(
+    &serviceRef,
+    0, // flags
+    0, // interface index (0 means all available interfaces)
+    "unisync@windows", // service name
+    "_unisync._tcp", // service type
+    "local", // domain (empty for default domain)
+    NULL, // host (NULL for automatic local hostname)
+    htons(50810), // port number
+    0, // txt record length
+    NULL, // txt record
+    NULL, // callback function
+    NULL // context
+  );
+
+  if (err != kDNSServiceErr_NoError) {
+    return EXIT_FAILURE;
+  }
 
   ::MSG msg;
   while (::GetMessage(&msg, nullptr, 0, 0)) {
