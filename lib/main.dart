@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:unisync_backend/main_process.dart';
 
 import 'main_app.dart';
+import 'main_process.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +12,7 @@ void main() async {
   if (!Platform.isAndroid) {
     final process = MainProcess();
     await process.initialize();
-    await process.start();
+    process.start();
   }
   runApp(
     EasyLocalization(
