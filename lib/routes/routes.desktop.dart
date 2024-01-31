@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unisync/app/connections/connection.cubit.dart';
 import 'package:unisync/app/connections/connection.view.dart';
-import 'package:unisync/app/home/home.cubit.dart';
 import 'package:unisync/app/home/home.view.dart';
 import 'package:unisync/app/landing/landing.cubit.dart';
 import 'package:unisync/app/landing/landing.view.dart';
@@ -33,11 +32,8 @@ final routerConfigs = GoRouter(
       path: '/home',
       builder: (context, state) {
         final device = state.extra as DeviceInfo;
-        return BlocProvider<HomeCubit>(
-          create: (context) => HomeCubit(device),
-          child: HomeScreen(
-            device: device,
-          ),
+        return HomeScreen(
+          device: device,
         );
       },
     ),

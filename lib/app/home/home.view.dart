@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/resources/resources.dart';
 import 'package:unisync/routes/routes.desktop.dart';
 import 'package:unisync/widgets/image.dart';
@@ -160,8 +162,13 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: pageController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                StatusScreen(deviceInfo: widget.device),
-                const FileTransferScreen(),
+                BlocProvider(
+                  create: (context) => StatusCubit(widget.device),
+                  child: StatusScreen(deviceInfo: widget.device),
+                ),
+                FileTransferScreen(
+                  device: widget.device,
+                ),
                 const GalleryScreen(),
                 const MessagesScreen(),
                 const NotificationScreen(),

@@ -6,9 +6,6 @@ import 'dart:typed_data';
 import 'package:rxdart/rxdart.dart';
 
 import '../models/device_info/device_info.model.dart';
-import '../notification/event_notifier.dart';
-import '../notification/events/device_connected.event.dart';
-import '../notification/events/device_disconnected.event.dart';
 import '../utils/logger.dart';
 import 'device.dart';
 import 'device_connection.dart';
@@ -26,13 +23,11 @@ class DeviceProvider {
     } else {
       _devices[info] = Device(DeviceConnection(socket, inputStream, info));
       infoLog('Connected to ${info.name} (${info.ip}).');
-      UnisyncEventNotifier.publish(DeviceConnectedEvent(info));
     }
   }
 
   static void remove(DeviceInfo info) {
     _devices.remove(info);
-    UnisyncEventNotifier.publish(DeviceDisconnectedEvent(info));
   }
 
   static Device? get(DeviceInfo info) {

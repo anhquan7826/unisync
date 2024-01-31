@@ -1,27 +1,13 @@
-import '../home.state.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:unisync/utils/constants/load_state.dart';
 
-abstract class StatusState extends HomeState {
-  const StatusState();
-}
+part 'status.state.freezed.dart';
 
-class LoadingStatusState extends StatusState {
-  const LoadingStatusState();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class StatusLoadedState extends StatusState {
-  const StatusLoadedState({
-    required this.isConnected,
-    this.battery = -1,
-    this.connectivity = const [],
-  });
-
-  final bool isConnected;
-  final int battery;
-  final List<String> connectivity;
-
-  @override
-  List<Object?> get props => [isConnected, battery, ...connectivity];
+@freezed
+class StatusState with _$StatusState {
+  const factory StatusState({
+    @Default(LoadState.idle) LoadState loadState,
+    @Default(-1) int batteryLevel,
+    @Default(false) bool isCharging,
+  }) = _StatusState;
 }

@@ -11,8 +11,14 @@ import '../models/device_message/device_message.model.dart';
 import '../utils/logger.dart';
 import 'device_provider.dart';
 
-abstract class ConnectionListener {
+mixin ConnectionListener {
   void onMessage(DeviceMessage message);
+
+  void onDisconnected();
+}
+
+mixin ConnectionEmitter {
+  void sendMessage(DeviceMessage message);
 }
 
 class DeviceConnection {
@@ -28,12 +34,14 @@ class DeviceConnection {
 
   late final StreamSubscription<Uint8List> _streamSubscription;
 
-  ConnectionListener? messageListener;
+  ConnectionListener? connectionListener;
 
   void _listenInputStream() {
     _streamSubscription = inputStream.listen(
       (event) {
-        messageListener?.onMessage(DeviceMessage.fromJson(event.string.toMap()));
+        infoLog('DeviceConnection@${info.name}: Message received:');
+        infoLog(event.string.toMap());
+        connectionListener?.onMessage(DeviceMessage.fromJson(event.string.toMap()));
       },
       cancelOnError: true,
       onDone: disconnect,
@@ -43,6 +51,8 @@ class DeviceConnection {
   void send(DeviceMessage message) {
     if (_isConnected) {
       socket.writeln(message.toJson().toJsonString());
+      infoLog('DeviceConnection@${info.name}: Message sent:');
+      infoLog(message.toJson());
     }
   }
 
@@ -50,6 +60,7 @@ class DeviceConnection {
     _isConnected = false;
     await _streamSubscription.cancel();
     await socket.close();
+    connectionListener?.onDisconnected();
     DeviceProvider.remove(info);
     infoLog('DeviceConnection: ${info.name} disconnected!');
   }

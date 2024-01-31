@@ -1,8 +1,7 @@
 #include "my_application.h"
-#include <avahi-client/client.h>
-#include <avahi-client/publish.h>
-#include <avahi-common/simple-watch.h>
 #include <flutter_linux/flutter_linux.h>
+#include "plugins/mdns/mdns.h"
+#include "plugins/clipboard/clipboard.h"
 
 #ifdef GDK_WINDOWING_X11
 
@@ -16,41 +15,61 @@ struct _MyApplication {
     GtkApplication parent_instance;
     char **dart_entrypoint_arguments;
     FlMethodChannel *mdns_channel;
+    FlMethodChannel *clipboard_channel;
 };
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
-static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata) {
-    // Handle entry group state changes if needed
-}
-
-static void server_state_callback(AvahiClient *s, AvahiClientState state, void *userdata) {
-    if (state == AVAHI_CLIENT_S_RUNNING) {
-        g_print("Avahi server is running. Registering entry group...\n");
-        AvahiEntryGroup *group = avahi_entry_group_new(s, entry_group_callback, nullptr);
-        avahi_entry_group_add_service(group, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, AVAHI_PUBLISH_USE_MULTICAST, "unisync@linux",
-                                      "_unisync._tcp",
-                                      "local", nullptr, 50810, NULL);
-        avahi_entry_group_commit(group);
-        g_print("Entry group registered!\n");
+void clipboard_call_handler(FlMethodChannel *channel,
+                            FlMethodCall *method_call,
+                            gpointer user_data) {
+    g_autoptr(FlMethodResponse) response = nullptr;
+    if (strcmp(fl_method_call_get_name(method_call), "get") == 0) {
+        gchar *result = get_clipboard();
+        response = FL_METHOD_RESPONSE(
+                fl_method_success_response_new(
+                        fl_value_new_string(
+                                static_cast<gchar *> (result)
+                        )
+                )
+        );
+    }
+    if (strcmp(fl_method_call_get_name(method_call), "set") == 0) {
+        FlValue *value = fl_method_call_get_args(method_call);
+        const char *content = fl_value_get_string(value);
+        set_clipboard(content);
+        response = FL_METHOD_RESPONSE(
+                fl_method_success_response_new(
+                        fl_value_new_bool(
+                                static_cast<bool> (true)
+                        )
+                )
+        );
+    }
+    g_autoptr(GError) error = nullptr;
+    if (!fl_method_call_respond(method_call, response, &error)) {
+        g_warning("Failed to send response: %s", error->message);
     }
 }
 
-// Function to register Avahi service
-void register_avahi_service() {
-    AvahiSimplePoll *simple_pool = avahi_simple_poll_new();
-    avahi_client_new(avahi_simple_poll_get(simple_pool), AVAHI_CLIENT_NO_FAIL, server_state_callback,
-                                           nullptr, nullptr);
-}
-
-static void mdns_call_handler(FlMethodChannel *channel,
-                              FlMethodCall *method_call,
-                              gpointer user_data) {
+void mdns_call_handler(FlMethodChannel *channel,
+                       FlMethodCall *method_call,
+                       gpointer user_data) {
     g_autoptr(FlMethodResponse) response = nullptr;
     if (strcmp(fl_method_call_get_name(method_call), "register") == 0) {
         g_print("Registering Avahi Service...\n");
-        register_avahi_service();
-        response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
+        service_registration_new("unisync@linux", "_unisync._tcp", "local", 50810);
+        response = FL_METHOD_RESPONSE(
+                fl_method_success_response_new(
+                        fl_value_new_bool(
+                                static_cast<bool>(true)
+                        )
+                )
+        );
+    }
+    g_autoptr(GError) error = nullptr;
+    if (!fl_method_call_respond(method_call, response, &error)) {
+        g_warning("Failed to send response: %s", error->message);
     }
 }
 
@@ -59,33 +78,6 @@ static void my_application_activate(GApplication *application) {
     MyApplication *self = MY_APPLICATION(application);
     GtkWindow *window =
             GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
-
-    // Use a header bar when running in GNOME as this is the common style used
-    // by applications and is the setup most users will be using (e.g. Ubuntu
-    // desktop).
-    // If running on X and not using GNOME then just use a traditional title bar
-    // in case the window manager does more exotic layout, e.g. tiling.
-    // If running on Wayland assume the header bar will work (may need changing
-    // if future cases occur).
-//    gboolean use_header_bar = TRUE;
-//#ifdef GDK_WINDOWING_X11
-//    GdkScreen *screen = gtk_window_get_screen(window);
-//    if (GDK_IS_X11_SCREEN(screen)) {
-//        const gchar *wm_name = gdk_x11_screen_get_window_manager_name(screen);
-//        if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
-//            use_header_bar = FALSE;
-//        }
-//    }
-//#endif
-//    if (use_header_bar) {
-//        GtkHeaderBar *header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
-//        gtk_widget_show(GTK_WIDGET(header_bar));
-//        gtk_header_bar_set_title(header_bar, "unisync");
-//        gtk_header_bar_set_show_close_button(header_bar, TRUE);
-//        gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
-//    } else {
-//        gtk_window_set_title(window, "unisync");
-//    }
 
     gtk_window_set_title(window, "unisync");
     gtk_window_set_default_size(window, 1280, 720);
@@ -100,11 +92,20 @@ static void my_application_activate(GApplication *application) {
 
     g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
     fl_register_plugins(FL_PLUGIN_REGISTRY(view));
+
+    // DEFINE CHANNELS
     self->mdns_channel = fl_method_channel_new(
             fl_engine_get_binary_messenger(fl_view_get_engine(view)),
             "com.anhquan.unisync/mdns", FL_METHOD_CODEC(codec));
+    self->clipboard_channel = fl_method_channel_new(
+            fl_engine_get_binary_messenger(fl_view_get_engine(view)),
+            "com.anhquan.unisync/clipboard", FL_METHOD_CODEC(codec));
+
+    // REGISTER HANDLERS
     fl_method_channel_set_method_call_handler(
             self->mdns_channel, mdns_call_handler, self, nullptr);
+    fl_method_channel_set_method_call_handler(
+            self->clipboard_channel, clipboard_call_handler, self, nullptr);
 
     gtk_widget_grab_focus(GTK_WIDGET(view));
 }
@@ -133,6 +134,7 @@ static void my_application_dispose(GObject *object) {
     MyApplication *self = MY_APPLICATION(object);
     g_clear_pointer(&self->dart_entrypoint_arguments, g_strfreev);
     g_clear_object(&self->mdns_channel);
+    g_clear_object(&self->clipboard_channel);
     G_OBJECT_CLASS(my_application_parent_class)->dispose(object);
 }
 

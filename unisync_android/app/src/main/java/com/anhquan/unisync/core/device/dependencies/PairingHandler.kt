@@ -1,6 +1,5 @@
 package com.anhquan.unisync.core.device.dependencies
 
-import com.anhquan.unisync.R
 import com.anhquan.unisync.core.device.Device
 import com.anhquan.unisync.database.UnisyncDatabase
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
@@ -22,7 +21,7 @@ class PairingHandler(private val device: Device) :
     val operation = object : PairingOperation {
         override fun requestPair() {
             if (state == PairState.NOT_PAIRED) {
-                device.connection.send(
+                device.sendMessage(
                     DeviceMessage(
                         type = DeviceMessage.Type.PAIR,
                         body = mapOf(
@@ -37,7 +36,7 @@ class PairingHandler(private val device: Device) :
         override fun unpair() {
             if (state == PairState.PAIRED) {
                 database.pairedDeviceDao().remove(device.info.id)
-                device.connection.send(
+                device.sendMessage(
                     DeviceMessage(
                         type = DeviceMessage.Type.PAIR,
                         body = mapOf(

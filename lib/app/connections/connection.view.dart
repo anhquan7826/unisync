@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:unisync/core/device_provider.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/resources/resources.dart';
 import 'package:unisync/widgets/image.dart';
 
+import '../../routes/routes.desktop.dart';
 import '../../utils/constants/device_types.dart';
 import 'connection.cubit.dart';
 import 'connection.state.dart';
@@ -25,6 +28,20 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(R.string.devicePair.connectToDevice).tr(),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              final device = DeviceProvider.connectedDevices.firstOrNull;
+              context.goNamed(
+                routes.home,
+                extra: device,
+              );
+            }
+          },
+        ),
       ),
       body: BlocListener<ConnectionCubit, DeviceConnectionState>(
         listener: (BuildContext context, DeviceConnectionState state) {

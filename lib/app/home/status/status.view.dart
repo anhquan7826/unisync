@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/resources/resources.dart';
+import 'package:unisync/utils/constants/load_state.dart';
+import 'package:unisync/utils/extensions/state.ext.dart';
 import 'package:unisync/widgets/image.dart';
 
 import '../../../models/device_info/device_info.model.dart';
-import '../home.cubit.dart';
-import '../home.state.dart';
 import 'status.state.dart';
 
 class StatusScreen extends StatefulWidget {
@@ -19,19 +20,16 @@ class StatusScreen extends StatefulWidget {
 
 class _StatusScreenState extends State<StatusScreen> {
   @override
+  void initState() {
+    super.initState();
+    getCubit<StatusCubit>().getStatus();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<HomeCubit, HomeState>(
-        buildWhen: (_, state) => state is StatusState,
+      body: BlocBuilder<StatusCubit, StatusState>(
         builder: (context, state) {
-          if (state is LoadingStatusState) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          final isConnected = (state as StatusLoadedState).isConnected;
-          final battery = state.battery;
-          final connectivity = state.connectivity;
           return Stack(
             children: [
               Container(
@@ -41,7 +39,7 @@ class _StatusScreenState extends State<StatusScreen> {
                   image: DecorationImage(
                     image: const AssetImage('assets/placeholder_bg.png'),
                     fit: BoxFit.fitWidth,
-                    colorFilter: isConnected
+                    colorFilter: state.loadState == LoadState.loaded
                         ? null
                         : const ColorFilter.mode(
                             Colors.grey,
@@ -79,22 +77,41 @@ class _StatusScreenState extends State<StatusScreen> {
                     ),
                     const SizedBox(height: 8),
                     textWithLeading(
-                      isConnected ? 'Connected at ${widget.deviceInfo.ip}' : 'Disconnected',
-                      leading: Icon(
+                      true ? 'Connected at ${widget.deviceInfo.ip}' : 'Disconnected',
+                      leading: const Icon(
                         Icons.circle,
                         size: 12,
-                        color: isConnected ? Colors.green : Colors.grey,
+                        color: true ? Colors.green : Colors.grey,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    if (isConnected) ...[
+                    if (state.loadState == LoadState.loaded) ...[
                       Row(
                         children: [
                           textWithLeading(
-                            '${state.battery}%',
+                            '${state.batteryLevel}%',
                             leading: ColorFiltered(
                               colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
-                              child: UImage.asset(imageResource: R.icon.battery.full),
+                              child: UImage.asset(
+                                  imageResource: () {
+                                if (state.isCharging) {
+                                  return R.icon.battery.charging;
+                                } else {
+                                  if (state.batteryLevel <= 20) {
+                                    return R.icon.battery.empty;
+                                  }
+                                  if (state.batteryLevel <= 40) {
+                                    return R.icon.battery.quarter;
+                                  }
+                                  if (state.batteryLevel <= 60) {
+                                    return R.icon.battery.half;
+                                  }
+                                  if (state.batteryLevel <= 80) {
+                                    return R.icon.battery.threeQuarter;
+                                  }
+                                  return R.icon.battery.full;
+                                }
+                              }.call()),
                             ),
                           ),
                         ],

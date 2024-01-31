@@ -4,6 +4,7 @@ import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.fromJson
+import com.anhquan.unisync.utils.infoLog
 import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.toJson
@@ -19,6 +20,10 @@ class DeviceConnection(private val socket: SSLSocket) {
         fun onMessage(message: DeviceMessage)
 
         fun onDisconnection()
+    }
+
+    interface ConnectionEmitter {
+        fun sendMessage(message: DeviceMessage)
     }
 
     private val reader: BufferedReader = socket.inputStream.bufferedReader()
@@ -69,6 +74,7 @@ class DeviceConnection(private val socket: SSLSocket) {
                         write(toJson(message))
                         flush()
                     }
+                    infoLog("${this::class.simpleName}@${deviceInfo.name}: Message sent:\n${toJson(message)}")
                 },
                 onError = {
                     disconnect()

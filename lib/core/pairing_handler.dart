@@ -7,13 +7,13 @@ enum PairState { notPaired, paired, requested, requestedByPeer }
 
 class PairingHandler {
   PairingHandler(this.device) {
-    UnisyncDatabase.pairedDeviceDao.exist(device.info.id).then((value) {
-      if (value) {
-        _state = PairState.paired;
-      } else {
-        _state = PairState.notPaired;
-      }
-    });
+    // UnisyncDatabase.pairedDeviceDao.exist(device.info.id).then((value) {
+    //   if (value) {
+    //     _state = PairState.paired;
+    //   } else {
+    //     _state = PairState.notPaired;
+    //   }
+    // });
   }
 
   final Device device;

@@ -33,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
+import com.anhquan.unisync.core.plugins.ClipboardPlugin
+import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.UAppBar
 import com.anhquan.unisync.ui.screen.settings.SettingsActivity
@@ -52,67 +54,66 @@ class HomeActivity : ComponentActivity() {
 
     @Composable
     private fun HomeScreen() {
-        Scaffold(
-            containerColor = Color.White,
+        Scaffold(containerColor = Color.White,
             contentWindowInsets = WindowInsets(left = 16.dp, right = 16.dp),
             modifier = Modifier.systemBarsPadding(),
             topBar = {
-                UAppBar(
-                    title = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Image(
-                                painterResource(id = R.drawable.computer),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(42.dp)
-                                    .padding(end = 8.dp)
+                UAppBar(title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            painterResource(id = R.drawable.computer),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(42.dp)
+                                .padding(end = 8.dp)
+                        )
+                        Column {
+                            Text(
+                                deviceInfo.name,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
-                            Column {
-                                Text(
-                                    deviceInfo.name,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(stringResource(R.string.connected), fontSize = 10.sp)
-                            }
+                            Text(stringResource(R.string.connected), fontSize = 10.sp)
                         }
-                    },
-                    actions = listOf(
-                        painterResource(id = R.drawable.settings),
-                    ),
-                    onActionPressed = listOf {
-                        startActivity(Intent(this@HomeActivity, SettingsActivity::class.java))
                     }
-                )
-            }
-        ) { padding ->
+                }, actions = listOf(
+                    painterResource(id = R.drawable.settings),
+                ), onActionPressed = listOf {
+                    startActivity(Intent(this@HomeActivity, SettingsActivity::class.java))
+                })
+            }) { padding ->
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = padding,
             ) {
                 item {
                     FeatureTile(
-                        icon = painterResource(id = R.drawable.computer),
+                        icon = painterResource(id = R.drawable.data_transfer),
                         title = "Send files",
                     ) {}
                 }
                 item {
                     FeatureTile(
-                        icon = painterResource(id = R.drawable.computer),
+                        icon = painterResource(id = R.drawable.clipboards),
                         title = "Send clipboard",
-                    ) {}
+                    ) {
+                        DeviceProvider.get(deviceInfo)?.getPlugin(ClipboardPlugin::class.java)
+                            ?.apply {
+                                sendLatestClipboard()
+                            }
+                    }
                 }
                 item {
                     FeatureTile(
-                        icon = painterResource(id = R.drawable.computer),
+                        icon = painterResource(id = R.drawable.equalizer_control),
                         title = "Control multimedia",
                     ) {}
                 }
                 item {
                     FeatureTile(
-                        icon = painterResource(id = R.drawable.computer),
+                        icon = painterResource(id = R.drawable.command_line),
                         title = "Run command",
                     ) {
 
@@ -120,7 +121,7 @@ class HomeActivity : ComponentActivity() {
                 }
                 item {
                     FeatureTile(
-                        icon = painterResource(id = R.drawable.computer),
+                        icon = painterResource(id = R.drawable.ssh),
                         title = "SSH",
                     ) {
 
@@ -128,7 +129,7 @@ class HomeActivity : ComponentActivity() {
                 }
                 item {
                     FeatureTile(
-                        icon = painterResource(id = R.drawable.computer),
+                        icon = painterResource(id = R.drawable.remote_control),
                         title = "Remote desktop",
                     ) {
 
@@ -140,10 +141,7 @@ class HomeActivity : ComponentActivity() {
 
     @Composable
     private fun FeatureTile(
-        modifier: Modifier = Modifier,
-        icon: Painter,
-        title: String,
-        onTap: () -> Unit
+        modifier: Modifier = Modifier, icon: Painter, title: String, onTap: () -> Unit
     ) {
         Card(
             modifier = modifier
