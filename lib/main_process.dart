@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:unisync/utils/id_gen.dart';
+import 'package:unisync/utils/push_notification.dart';
 
 import 'core/device_discovery.dart';
 import 'database/unisync_database.dart';
@@ -23,6 +24,7 @@ class MainProcess {
         ),
       );
     }
+    await PushNotification.setup();
   }
 
   Future<void> start() async {

@@ -1,10 +1,11 @@
-package com.anhquan.unisync.core.plugins
+package com.anhquan.unisync.core.plugins.clipboard
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.ClipboardManager.OnPrimaryClipChangedListener
 import android.content.Context
 import com.anhquan.unisync.core.device.dependencies.DeviceConnection
+import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 
 class ClipboardPlugin(

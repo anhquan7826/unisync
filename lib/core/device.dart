@@ -2,6 +2,7 @@ import 'package:unisync/core/pairing_handler.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/core/plugins/battery.plugin.dart';
 import 'package:unisync/core/plugins/clipboard.plugin.dart';
+import 'package:unisync/core/plugins/notification_plugin.dart';
 
 import '../models/device_info/device_info.model.dart';
 import '../models/device_message/device_message.model.dart';
@@ -13,6 +14,7 @@ class Device with ConnectionListener, ConnectionEmitter {
     plugins = [
       BatteryPlugin(this),
       ClipboardPlugin(this),
+      NotificationPlugin(this),
     ];
   }
 

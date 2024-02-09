@@ -1,1 +1,1 @@
-sudo dnf install avahi avahi-devel sqlite sqlite-devel perl-Digest-SHA
+sudo dnf install cmake clang ninja-build gtk3-devel avahi avahi-devel sqlite sqlite-devel perl-Digest-SHA

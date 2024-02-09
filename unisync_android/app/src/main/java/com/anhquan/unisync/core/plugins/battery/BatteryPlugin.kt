@@ -1,10 +1,11 @@
-package com.anhquan.unisync.core.plugins
+package com.anhquan.unisync.core.plugins.battery
 
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import com.anhquan.unisync.core.device.dependencies.DeviceConnection
+import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 
 class BatteryPlugin(

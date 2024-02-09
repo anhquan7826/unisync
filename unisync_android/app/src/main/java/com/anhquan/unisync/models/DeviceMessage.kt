@@ -10,6 +10,7 @@ data class DeviceMessage(
     enum class Type {
         @SerializedName("pair") PAIR,
         @SerializedName("battery") BATTERY,
-        @SerializedName("clipboard") CLIPBOARD
+        @SerializedName("clipboard") CLIPBOARD,
+        @SerializedName("notification") NOTIFICATION,
     }
 }
