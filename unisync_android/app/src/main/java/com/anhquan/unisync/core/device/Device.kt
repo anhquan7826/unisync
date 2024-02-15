@@ -7,6 +7,7 @@ import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.core.plugins.battery.BatteryPlugin
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
 import com.anhquan.unisync.core.plugins.notification.NotificationPlugin
+import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 
@@ -22,7 +23,8 @@ class Device(
         plugins = listOf(
             BatteryPlugin(context, this),
             ClipboardPlugin(context, this),
-            NotificationPlugin(context, this)
+            NotificationPlugin(context, this),
+            VolumePlugin(context, this)
         )
     }
 

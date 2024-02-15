@@ -58,10 +58,13 @@ class DeviceConnection(private val socket: SSLSocket) {
                 }
             },
             onResult = {
+                infoLog("${deviceInfo.name}@${deviceInfo.ip}: Message received:\n$it")
                 fromJson(
                     it,
                     DeviceMessage::class.java
-                )?.let { message -> listener?.onMessage(message) }
+                )?.let { message ->
+                    listener?.onMessage(message)
+                }
             }
         )
     }
@@ -74,7 +77,7 @@ class DeviceConnection(private val socket: SSLSocket) {
                         write(toJson(message))
                         flush()
                     }
-                    infoLog("${this::class.simpleName}@${deviceInfo.name}: Message sent:\n${toJson(message)}")
+                    infoLog("${deviceInfo.name}@${deviceInfo.ip}: Message sent:\n${toJson(message)}")
                 },
                 onError = {
                     disconnect()

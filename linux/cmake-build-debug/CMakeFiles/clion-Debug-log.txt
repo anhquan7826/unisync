@@ -1,22 +1,8 @@
-"E:\Applications\CLion 2023.3.3\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=E:/Applications/CLion 2023.3.3/bin/ninja/win/x64/ninja.exe" -G Ninja -S E:\Repositories\unisync\linux -B E:\Repositories\unisync\linux\cmake-build-debug
--- The CXX compiler identification is GNU 13.1.0
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: E:/Applications/CLion 2023.3.3/bin/mingw/bin/g++.exe - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
-CMake Error at flutter/CMakeLists.txt:7 (include):
-  include could not find requested file:
-
-    E:/Repositories/unisync/linux/flutter/ephemeral/generated_config.cmake
-
-
-CMake Error at E:/Applications/CLion 2023.3.3/bin/cmake/win/x64/share/cmake-3.27/Modules/FindPackageHandleStandardArgs.cmake:230 (message):
-  Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE)
-Call Stack (most recent call first):
-  E:/Applications/CLion 2023.3.3/bin/cmake/win/x64/share/cmake-3.27/Modules/FindPackageHandleStandardArgs.cmake:600 (_FPHSA_FAILURE_MESSAGE)
-  E:/Applications/CLion 2023.3.3/bin/cmake/win/x64/share/cmake-3.27/Modules/FindPkgConfig.cmake:99 (find_package_handle_standard_args)
-  flutter/CMakeLists.txt:24 (find_package)
-
-
--- Configuring incomplete, errors occurred!
+/home/anhquan7826/Applications/clion/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/anhquan7826/Applications/clion/bin/ninja/linux/x64/ninja -G Ninja -S /home/anhquan7826/Repositories/unisync/linux -B /home/anhquan7826/Repositories/unisync/linux/cmake-build-debug
+-- Checking for module 'avahi-client'
+--   Found avahi-client, version 0.8
+-- Found ALSA: /usr/lib/x86_64-linux-gnu/libasound.so (found version "1.2.6.1") 
+/usr/lib/x86_64-linux-gnu/libasound.so
+-- Configuring done (0.9s)
+-- Generating done (0.3s)
+-- Build files have been written to: /home/anhquan7826/Repositories/unisync/linux/cmake-build-debug

@@ -1,0 +1,147 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 113,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 120,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 123,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 126,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 130,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 130,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 138,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 141,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "Runtime",
+			"type" : "code"
+		},
+		{
+			"backtrace" : 2,
+			"component" : "Runtime",
+			"destination" : "/home/anhquan7826/Repositories/unisync/linux/cmake-build-debug/bundle",
+			"paths" : 
+			[
+				"intermediates_do_not_run/unisync"
+			],
+			"targetId" : "unisync::@6890427a1f51a3e7e1df",
+			"targetIndex" : 3,
+			"type" : "target"
+		},
+		{
+			"backtrace" : 3,
+			"component" : "Runtime",
+			"destination" : "/home/anhquan7826/Repositories/unisync/linux/cmake-build-debug/bundle/data",
+			"paths" : 
+			[
+				"flutter/ephemeral/icudtl.dat"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 4,
+			"component" : "Runtime",
+			"destination" : "/home/anhquan7826/Repositories/unisync/linux/cmake-build-debug/bundle/lib",
+			"paths" : 
+			[
+				"flutter/ephemeral/libflutter_linux_gtk.so"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 5,
+			"component" : "Runtime",
+			"destination" : "/home/anhquan7826/Repositories/unisync/linux/cmake-build-debug/bundle/lib",
+			"paths" : 
+			[
+				"cmake-build-debug/plugins/clipboard_watcher/libclipboard_watcher_plugin.so"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 6,
+			"component" : "Runtime",
+			"destination" : "/home/anhquan7826/Repositories/unisync/linux/cmake-build-debug/bundle/lib",
+			"paths" : 
+			[
+				"cmake-build-debug/plugins/flutter_volume_controller/libflutter_volume_controller_plugin.so"
+			],
+			"type" : "file"
+		},
+		{
+			"backtrace" : 7,
+			"component" : "Runtime",
+			"type" : "code"
+		},
+		{
+			"backtrace" : 8,
+			"component" : "Runtime",
+			"destination" : "/home/anhquan7826/Repositories/unisync/linux/cmake-build-debug/bundle/data",
+			"paths" : 
+			[
+				"/home/anhquan7826/Repositories/unisync/build//flutter_assets"
+			],
+			"type" : "directory"
+		}
+	],
+	"paths" : 
+	{
+		"build" : ".",
+		"source" : "."
+	}
+}

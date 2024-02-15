@@ -21,7 +21,7 @@ import androidx.compose.ui.window.Dialog
 @Composable
 fun UDialog(
     title: String,
-    content: String,
+    content: @Composable () -> Unit,
     cancelText: String,
     confirmText: String,
     onCancel: () -> Unit,
@@ -45,14 +45,7 @@ fun UDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Divider(modifier = Modifier.fillMaxWidth())
-                Text(
-                    text = content,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(
-                        top = 16.dp,
-                        bottom = 32.dp
-                    )
-                )
+                content()
                 Row {
                     TextButton(
                         modifier = Modifier

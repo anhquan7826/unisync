@@ -154,7 +154,6 @@ class DeviceDiscovery(private val context: Context) {
             ).copy(
                 ip = socket.inetAddress.hostAddress ?: ""
             )
-            infoLog("${this::class.simpleName}: Connected to ${info.name} (${info.ip}).")
             DeviceProvider.create(
                 context,
                 info,

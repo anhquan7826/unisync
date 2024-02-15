@@ -5,6 +5,7 @@ import com.anhquan.unisync.core.device.Device
 import com.anhquan.unisync.core.device.dependencies.DeviceConnection
 import com.anhquan.unisync.core.device.dependencies.PairingHandler
 import com.anhquan.unisync.models.DeviceInfo
+import com.anhquan.unisync.utils.infoLog
 import io.reactivex.rxjava3.subjects.PublishSubject
 import javax.net.ssl.SSLSocket
 
@@ -48,8 +49,10 @@ object DeviceProvider {
             onChangeNotifier.onNext(
                 DeviceChangedState(info, true)
             )
+            infoLog("${this::class.simpleName}: Connected to ${info.name}@${info.ip}.")
         } else {
             socket.close()
+            infoLog("${this::class.simpleName}: Duplicate connection to ${info.name}@${info.ip}. Closing connection...")
         }
     }
 

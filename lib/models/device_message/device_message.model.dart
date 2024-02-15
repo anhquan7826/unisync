@@ -17,5 +17,11 @@ class DeviceMessage {
 
   Map<String, dynamic> toJson() => _$DeviceMessageToJson(this);
 
-  static const Type = (PAIR: 'pair', BATTERY: 'battery', CLIPBOARD: 'clipboard', NOTIFICATION: 'notification');
+  static const Type = (
+    PAIR: 'pair',
+    BATTERY: 'battery',
+    CLIPBOARD: 'clipboard',
+    NOTIFICATION: 'notification',
+    VOLUME: 'volume',
+  );
 }

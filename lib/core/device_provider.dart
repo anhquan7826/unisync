@@ -19,10 +19,11 @@ class DeviceProvider {
 
   static void create({required DeviceInfo info, required SecureSocket socket, required Stream<Uint8List> inputStream}) {
     if (_devices.containsKey(info)) {
+      infoLog('DeviceProvider: Duplicate connection to ${info.name}@${info.ip}. Closing connection...');
       socket.close();
     } else {
       _devices[info] = Device(DeviceConnection(socket, inputStream, info));
-      infoLog('Connected to ${info.name} (${info.ip}).');
+      infoLog('DeviceProvider: Connected to ${info.name}@${info.ip}.');
     }
   }
 

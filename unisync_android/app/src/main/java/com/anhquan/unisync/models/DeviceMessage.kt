@@ -8,9 +8,15 @@ data class DeviceMessage(
     val body: Map<String, Any?> = mapOf()
 ) {
     enum class Type {
-        @SerializedName("pair") PAIR,
-        @SerializedName("battery") BATTERY,
-        @SerializedName("clipboard") CLIPBOARD,
-        @SerializedName("notification") NOTIFICATION,
+        @SerializedName("pair")
+        PAIR,
+        @SerializedName("battery")
+        BATTERY,
+        @SerializedName("clipboard")
+        CLIPBOARD,
+        @SerializedName("notification")
+        NOTIFICATION,
+        @SerializedName("volume")
+        VOLUME,
     }
 }
