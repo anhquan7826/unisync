@@ -1,7 +1,12 @@
 package com.anhquan.unisync.ui.screen.home
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -49,6 +54,7 @@ import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.UAppBar
+import com.anhquan.unisync.ui.screen.home.file_transfer.FileTransferActivity
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.settings.SettingsActivity
 import com.anhquan.unisync.ui.theme.setView
@@ -58,6 +64,17 @@ import kotlin.math.roundToInt
 class HomeActivity : ComponentActivity() {
     private lateinit var deviceInfo: DeviceInfo
 
+//    private val manageAllFilePermissionCheck = registerForActivityResult(
+//        ActivityResultContracts.RequestPermission()) {
+//        if (it) {
+//            startActivity(Intent(this@HomeActivity, FileTransferActivity::class.java))
+//        } else {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+//                startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+//            }
+//        }
+//    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         deviceInfo = gson.fromJson(intent.extras!!.getString("device"), DeviceInfo::class.java)
@@ -66,6 +83,7 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("NewApi")
     @Composable
     private fun HomeScreen() {
         Scaffold(containerColor = Color.White,
@@ -106,7 +124,19 @@ class HomeActivity : ComponentActivity() {
                     FeatureTile(
                         icon = painterResource(id = R.drawable.data_transfer),
                         title = "Send files",
-                    ) {}
+                    ) {
+                        if (Environment.isExternalStorageManager()) {
+                            startActivity(Intent(this@HomeActivity, FileTransferActivity::class.java))
+                        }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            startActivity(
+                                Intent(
+                                    Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                                    Uri.parse("package:$packageName")
+                                )
+                            )
+                        }
+                    }
                 }
                 item {
                     FeatureTile(

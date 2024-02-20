@@ -66,4 +66,11 @@ object DeviceProvider {
     fun get(info: DeviceInfo): Device? {
         return _devices[info]
     }
+
+    fun get(deviceId: String): Device? {
+        val key = _devices.keys.firstOrNull {
+            it.id == deviceId
+        }
+        return if (key == null) null else _devices[key]
+    }
 }

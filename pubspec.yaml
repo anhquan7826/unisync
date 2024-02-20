@@ -22,7 +22,6 @@ dependencies:
   logger: ^2.0.2+1
   equatable: ^2.0.5
   flutter_svg: ^2.0.7
-  dbus: ^0.7.8
   uuid: ^4.1.0
   rxdart: ^0.27.7
   pointycastle: ^3.7.3

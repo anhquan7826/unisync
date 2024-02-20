@@ -1,10 +1,9 @@
 package com.anhquan.unisync.core.device.dependencies
 
 import com.anhquan.unisync.core.device.Device
-import com.anhquan.unisync.database.UnisyncDatabase
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
 import com.anhquan.unisync.models.DeviceMessage
-import com.anhquan.unisync.utils.ConfigUtil
+import com.anhquan.unisync.utils.Database
 import com.anhquan.unisync.utils.NotificationUtil
 import com.anhquan.unisync.utils.listen
 
@@ -15,9 +14,7 @@ class PairingHandler(private val device: Device) :
 
         fun unpair()
     }
-
-    private val database: UnisyncDatabase = ConfigUtil.database
-
+    
     val operation = object : PairingOperation {
         override fun requestPair() {
             if (state == PairState.NOT_PAIRED) {
@@ -35,7 +32,7 @@ class PairingHandler(private val device: Device) :
 
         override fun unpair() {
             if (state == PairState.PAIRED) {
-                database.pairedDeviceDao().remove(device.info.id)
+                Database.pairedDevice.remove(device.info.id)
                 device.sendMessage(
                     DeviceMessage(
                         type = DeviceMessage.Type.PAIR,
@@ -51,7 +48,7 @@ class PairingHandler(private val device: Device) :
     }
 
     init {
-        database.pairedDeviceDao().exist(device.info.id).listen {
+        Database.pairedDevice.exist(device.info.id).listen {
             state = if (it == 1) PairState.PAIRED else PairState.NOT_PAIRED
         }
     }
@@ -69,7 +66,7 @@ class PairingHandler(private val device: Device) :
         if (message.type == DeviceMessage.Type.PAIR && message.body.containsKey("message")) {
             when (message.body["message"].toString()) {
                 "accepted" -> {
-                    database.pairedDeviceDao().add(
+                    Database.pairedDevice.add(
                         PairedDeviceEntity(
                             id = device.info.id,
                             name = device.info.name,
@@ -84,7 +81,7 @@ class PairingHandler(private val device: Device) :
                 }
 
                 "unpair" -> {
-                    database.pairedDeviceDao().remove(device.info.id)
+                    Database.pairedDevice.remove(device.info.id)
                     state = PairState.NOT_PAIRED
                 }
             }

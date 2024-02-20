@@ -18,5 +18,7 @@ data class DeviceMessage(
         NOTIFICATION,
         @SerializedName("volume")
         VOLUME,
+        @SerializedName("run_command")
+        RUN_COMMAND
     }
 }

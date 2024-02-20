@@ -6,6 +6,7 @@ import android.os.Build
 import com.anhquan.unisync.constants.DeviceType
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.ConfigUtil
+import com.anhquan.unisync.utils.Database
 import com.anhquan.unisync.utils.IDUtil
 
 class UnisyncApplication : Application() {
@@ -17,6 +18,7 @@ class UnisyncApplication : Application() {
 
     private fun initialSetupClientInfo() {
         ConfigUtil.setup(applicationContext)
+        Database.initialize(applicationContext)
         try {
             ConfigUtil.Device.getDeviceInfo()
         } catch (e: Exception) {

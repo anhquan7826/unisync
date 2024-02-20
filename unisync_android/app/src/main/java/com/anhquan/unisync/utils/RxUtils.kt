@@ -1,5 +1,6 @@
 package com.anhquan.unisync.utils
 
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.ObservableEmitter
 import io.reactivex.rxjava3.core.Scheduler
@@ -71,6 +72,18 @@ fun <T : Any> Single<T>.listen(
     onResult: (T) -> Unit
 ): Disposable {
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onResult, onError)
+}
+
+fun Completable.listen(
+    subscribeOn: Scheduler = Schedulers.io(),
+    observeOn: Scheduler = Schedulers.io(),
+    onError: (Throwable) -> Unit = { errorLog(it); it.printStackTrace() },
+    onResult: () -> Unit
+): Disposable {
+    return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(
+        onResult,
+        onError
+    )
 }
 
 fun delay(timeMillis: Long = 500, callback: () -> Unit): Disposable {

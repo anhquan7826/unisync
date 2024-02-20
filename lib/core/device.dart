@@ -3,6 +3,7 @@ import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/core/plugins/battery.plugin.dart';
 import 'package:unisync/core/plugins/clipboard.plugin.dart';
 import 'package:unisync/core/plugins/notification_plugin.dart';
+import 'package:unisync/core/plugins/run_command.plugin.dart';
 import 'package:unisync/core/plugins/volume.plugin.dart';
 
 import '../models/device_info/device_info.model.dart';
@@ -17,6 +18,7 @@ class Device with ConnectionListener, ConnectionEmitter {
       ClipboardPlugin(this),
       NotificationPlugin(this),
       VolumePlugin(this),
+      RunCommandPlugin(this),
     ];
   }
 

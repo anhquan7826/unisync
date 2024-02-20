@@ -23,5 +23,6 @@ class DeviceMessage {
     CLIPBOARD: 'clipboard',
     NOTIFICATION: 'notification',
     VOLUME: 'volume',
+    RUN_COMMAND: 'run_command',
   );
 }
