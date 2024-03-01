@@ -19,6 +19,8 @@ data class DeviceMessage(
         @SerializedName("volume")
         VOLUME,
         @SerializedName("run_command")
-        RUN_COMMAND
+        RUN_COMMAND,
+        @SerializedName("ring_phone")
+        RING_PHONE,
     }
 }

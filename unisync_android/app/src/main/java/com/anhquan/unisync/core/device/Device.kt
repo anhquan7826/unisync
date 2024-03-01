@@ -7,6 +7,7 @@ import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.core.plugins.battery.BatteryPlugin
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
 import com.anhquan.unisync.core.plugins.notification.NotificationPlugin
+import com.anhquan.unisync.core.plugins.ring_phone.RingPhonePlugin
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.models.DeviceInfo
@@ -27,6 +28,7 @@ class Device(
             NotificationPlugin(context, this),
             VolumePlugin(context, this),
             RunCommandPlugin(context, this),
+            RingPhonePlugin(context, this),
         )
     }
 

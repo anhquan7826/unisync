@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:unisync/utils/constants/network_ports.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/extensions/string.ext.dart';
 import 'package:unisync/utils/extensions/uint8list.ext.dart';
 
 import '../models/device_info/device_info.model.dart';
 import '../utils/configs.dart';
-import '../utils/constants/network_ports.dart';
 import '../utils/logger.dart';
 import 'device_provider.dart';
 import 'mdns.dart';

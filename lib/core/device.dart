@@ -3,6 +3,7 @@ import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/core/plugins/battery.plugin.dart';
 import 'package:unisync/core/plugins/clipboard.plugin.dart';
 import 'package:unisync/core/plugins/notification_plugin.dart';
+import 'package:unisync/core/plugins/ring_phone.plugin.dart';
 import 'package:unisync/core/plugins/run_command.plugin.dart';
 import 'package:unisync/core/plugins/volume.plugin.dart';
 
@@ -19,6 +20,7 @@ class Device with ConnectionListener, ConnectionEmitter {
       NotificationPlugin(this),
       VolumePlugin(this),
       RunCommandPlugin(this),
+      RingPhonePlugin(this),
     ];
   }
 

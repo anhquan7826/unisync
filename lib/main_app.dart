@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import 'components/themes/app_theme.dart';
 import 'routes/routes.desktop.dart';
-import 'themes/app_theme.dart';
 
 class Unisync extends StatelessWidget {
   const Unisync({super.key});

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unisync/app/home/status/status.cubit.dart';
-import 'package:unisync/resources/resources.dart';
+import 'package:unisync/components/resources/resources.dart';
+import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/routes/routes.desktop.dart';
-import 'package:unisync/widgets/image.dart';
 
 import '../../models/device_info/device_info.model.dart';
 import 'file_transfer/file_transfer.view.dart';
@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             UImage.asset(
-                              imageResource: R.icon.android,
+                              R.icon.android,
                               width: 16,
                               height: 16,
                             ),
@@ -110,23 +110,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     labelType: NavigationRailLabelType.all,
                     destinations: [
                       NavigationRailDestination(
-                        icon: UImage.asset(imageResource: R.icon.info),
+                        icon: UImage.asset(R.icon.info),
                         label: const Text('Information'),
                       ),
                       NavigationRailDestination(
-                        icon: UImage.asset(imageResource: R.icon.exchange),
+                        icon: UImage.asset(R.icon.exchange),
                         label: const Text('File Explorer'),
                       ),
                       NavigationRailDestination(
-                        icon: UImage.asset(imageResource: R.icon.gallery),
+                        icon: UImage.asset(R.icon.gallery),
                         label: const Text('Gallery'),
                       ),
                       NavigationRailDestination(
-                        icon: UImage.asset(imageResource: R.icon.messages),
+                        icon: UImage.asset(R.icon.messages),
                         label: const Text('Messages'),
                       ),
                       NavigationRailDestination(
-                        icon: UImage.asset(imageResource: R.icon.notification),
+                        icon: UImage.asset(R.icon.notification),
                         label: const Text('Notifications'),
                       ),
                     ],
@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 IconButton(
                   icon: UImage.asset(
-                    imageResource: R.icon.settings,
+                    R.icon.settings,
                     width: 32,
                     height: 32,
                   ),

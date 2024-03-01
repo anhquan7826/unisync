@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unisync/components/resources/resources.dart';
+import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/core/device_provider.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
-import 'package:unisync/resources/resources.dart';
-import 'package:unisync/widgets/image.dart';
 
 import '../../routes/routes.desktop.dart';
 import '../../utils/constants/device_types.dart';
@@ -74,7 +74,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: UImage.asset(
-        imageResource: device.deviceType == DeviceTypes.android
+        device.deviceType == DeviceTypes.android
             ? R.icon.android
             : device.deviceType == DeviceTypes.linux
                 ? R.icon.linux

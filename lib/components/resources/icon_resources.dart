@@ -20,4 +20,5 @@ const _iconResources = (
     threeQuarter: 'assets/icons/battery-three-quarters.svg',
     full: 'assets/icons/battery-full.svg',
   ),
+  phoneRing: 'assets/icons/phone-ring.svg',
 );

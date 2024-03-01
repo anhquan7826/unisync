@@ -15,6 +15,9 @@ class BatteryPlugin extends UnisyncPlugin {
   }
 
   void getBatteryInfo() {
-    emitter.sendMessage(DeviceMessage(type: DeviceMessage.Type.BATTERY, body: {'request': 'get_info'}));
+    emitter.sendMessage(DeviceMessage(
+      type: DeviceMessage.Type.BATTERY,
+      body: {'request': 'get_info'},
+    ));
   }
 }

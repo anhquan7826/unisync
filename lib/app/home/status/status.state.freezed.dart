@@ -16,9 +16,10 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$StatusState {
-  LoadState get loadState => throw _privateConstructorUsedError;
+  Status get status => throw _privateConstructorUsedError;
   int get batteryLevel => throw _privateConstructorUsedError;
   bool get isCharging => throw _privateConstructorUsedError;
+  Uint8List? get wallpaper => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $StatusStateCopyWith<StatusState> get copyWith =>
@@ -31,7 +32,8 @@ abstract class $StatusStateCopyWith<$Res> {
           StatusState value, $Res Function(StatusState) then) =
       _$StatusStateCopyWithImpl<$Res, StatusState>;
   @useResult
-  $Res call({LoadState loadState, int batteryLevel, bool isCharging});
+  $Res call(
+      {Status status, int batteryLevel, bool isCharging, Uint8List? wallpaper});
 }
 
 /// @nodoc
@@ -47,15 +49,16 @@ class _$StatusStateCopyWithImpl<$Res, $Val extends StatusState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? loadState = null,
+    Object? status = null,
     Object? batteryLevel = null,
     Object? isCharging = null,
+    Object? wallpaper = freezed,
   }) {
     return _then(_value.copyWith(
-      loadState: null == loadState
-          ? _value.loadState
-          : loadState // ignore: cast_nullable_to_non_nullable
-              as LoadState,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as Status,
       batteryLevel: null == batteryLevel
           ? _value.batteryLevel
           : batteryLevel // ignore: cast_nullable_to_non_nullable
@@ -64,6 +67,10 @@ class _$StatusStateCopyWithImpl<$Res, $Val extends StatusState>
           ? _value.isCharging
           : isCharging // ignore: cast_nullable_to_non_nullable
               as bool,
+      wallpaper: freezed == wallpaper
+          ? _value.wallpaper
+          : wallpaper // ignore: cast_nullable_to_non_nullable
+              as Uint8List?,
     ) as $Val);
   }
 }
@@ -76,7 +83,8 @@ abstract class _$$StatusStateImplCopyWith<$Res>
       __$$StatusStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({LoadState loadState, int batteryLevel, bool isCharging});
+  $Res call(
+      {Status status, int batteryLevel, bool isCharging, Uint8List? wallpaper});
 }
 
 /// @nodoc
@@ -90,15 +98,16 @@ class __$$StatusStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? loadState = null,
+    Object? status = null,
     Object? batteryLevel = null,
     Object? isCharging = null,
+    Object? wallpaper = freezed,
   }) {
     return _then(_$StatusStateImpl(
-      loadState: null == loadState
-          ? _value.loadState
-          : loadState // ignore: cast_nullable_to_non_nullable
-              as LoadState,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as Status,
       batteryLevel: null == batteryLevel
           ? _value.batteryLevel
           : batteryLevel // ignore: cast_nullable_to_non_nullable
@@ -107,6 +116,10 @@ class __$$StatusStateImplCopyWithImpl<$Res>
           ? _value.isCharging
           : isCharging // ignore: cast_nullable_to_non_nullable
               as bool,
+      wallpaper: freezed == wallpaper
+          ? _value.wallpaper
+          : wallpaper // ignore: cast_nullable_to_non_nullable
+              as Uint8List?,
     ));
   }
 }
@@ -115,23 +128,27 @@ class __$$StatusStateImplCopyWithImpl<$Res>
 
 class _$StatusStateImpl implements _StatusState {
   const _$StatusStateImpl(
-      {this.loadState = LoadState.idle,
+      {this.status = Status.idle,
       this.batteryLevel = -1,
-      this.isCharging = false});
+      this.isCharging = false,
+      this.wallpaper = null});
 
   @override
   @JsonKey()
-  final LoadState loadState;
+  final Status status;
   @override
   @JsonKey()
   final int batteryLevel;
   @override
   @JsonKey()
   final bool isCharging;
+  @override
+  @JsonKey()
+  final Uint8List? wallpaper;
 
   @override
   String toString() {
-    return 'StatusState(loadState: $loadState, batteryLevel: $batteryLevel, isCharging: $isCharging)';
+    return 'StatusState(status: $status, batteryLevel: $batteryLevel, isCharging: $isCharging, wallpaper: $wallpaper)';
   }
 
   @override
@@ -139,17 +156,17 @@ class _$StatusStateImpl implements _StatusState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$StatusStateImpl &&
-            (identical(other.loadState, loadState) ||
-                other.loadState == loadState) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.batteryLevel, batteryLevel) ||
                 other.batteryLevel == batteryLevel) &&
             (identical(other.isCharging, isCharging) ||
-                other.isCharging == isCharging));
+                other.isCharging == isCharging) &&
+            const DeepCollectionEquality().equals(other.wallpaper, wallpaper));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, loadState, batteryLevel, isCharging);
+  int get hashCode => Object.hash(runtimeType, status, batteryLevel, isCharging,
+      const DeepCollectionEquality().hash(wallpaper));
 
   @JsonKey(ignore: true)
   @override
@@ -160,16 +177,19 @@ class _$StatusStateImpl implements _StatusState {
 
 abstract class _StatusState implements StatusState {
   const factory _StatusState(
-      {final LoadState loadState,
+      {final Status status,
       final int batteryLevel,
-      final bool isCharging}) = _$StatusStateImpl;
+      final bool isCharging,
+      final Uint8List? wallpaper}) = _$StatusStateImpl;
 
   @override
-  LoadState get loadState;
+  Status get status;
   @override
   int get batteryLevel;
   @override
   bool get isCharging;
+  @override
+  Uint8List? get wallpaper;
   @override
   @JsonKey(ignore: true)
   _$$StatusStateImplCopyWith<_$StatusStateImpl> get copyWith =>

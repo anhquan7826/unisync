@@ -9,4 +9,6 @@
     <string name="available_devices">Available devices</string>
     <string name="close">Close</string>
     <string name="request_pair">Request pair</string>
+    <string name="persistent_indicator_text">Unisync is running in the background.</string>
+    <string name="found_my_phone">Found my phone!</string>
 </resources>
