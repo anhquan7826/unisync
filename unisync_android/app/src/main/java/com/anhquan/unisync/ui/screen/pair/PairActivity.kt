@@ -1,11 +1,9 @@
 package com.anhquan.unisync.ui.screen.pair
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,6 +14,8 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,9 +35,7 @@ import androidx.compose.ui.window.Dialog
 import com.anhquan.unisync.R
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.UAppBar
-import com.anhquan.unisync.ui.screen.home.HomeActivity
 import com.anhquan.unisync.ui.theme.setView
-import com.anhquan.unisync.utils.gson
 
 class PairActivity : ComponentActivity() {
     private val viewModel: PairViewModel by viewModels()
@@ -58,90 +56,95 @@ class PairActivity : ComponentActivity() {
         var currentDeviceDialog: DeviceInfo? by remember {
             mutableStateOf(null)
         }
-        Scaffold(
-            containerColor = Color.White,
+        Scaffold(containerColor = Color.White,
             contentWindowInsets = WindowInsets(left = 16.dp, right = 16.dp),
             modifier = Modifier.systemBarsPadding(),
             topBar = {
-                UAppBar(
-                    title = {
-                        Text(text = stringResource(R.string.pair_new_device))
-                    },
-                    leading = painterResource(id = R.drawable.arrow_back),
-                    onLeadingPressed = {
-                        val device = viewModel.getConnected()
-                        if (intent.extras?.getBoolean("isInitial") == true && device != null) {
-                            startActivity(
-                                Intent(
-                                    this@PairActivity,
-                                    HomeActivity::class.java
-                                ).apply {
-                                    putExtra("device", gson.toJson(device))
-                                })
-                        }
-                        finish()
-                    },
-                    actions = listOf(
-                        painterResource(id = R.drawable.add)
-                    ),
-                    onActionPressed = listOf {
-                        // TODO
-                    },
-                )
-            }
-        ) { padding ->
-            Column(
-                modifier = Modifier.padding(padding)
-            ) {
-                if (state.requestedDevices.isNotEmpty()) {
-                    Text(stringResource(R.string.requested_devices))
-                    state.requestedDevices.forEach {
-                        DeviceTile(info = it) {
-
-                        }
-                    }
-                }
-                if (state.notPairedDevices.isNotEmpty()) {
-                    Text(stringResource(R.string.available_devices))
-                    state.notPairedDevices.forEach {
-                        DeviceTile(info = it) {
-                            currentDeviceDialog = it
-                        }
-                    }
-                }
-            }
+                BuildAppBar()
+            }) { padding ->
+            BuildBody(modifier = Modifier.padding(padding), state)
         }
 
         if (currentDeviceDialog != null) {
-            DeviceDialog(
-                info = currentDeviceDialog!!,
-                onDismiss = {
-                    currentDeviceDialog = null
-                }
-            ) {
+            DeviceDialog(info = currentDeviceDialog!!, onDismiss = {
+                currentDeviceDialog = null
+            }) {
                 viewModel.sendPairRequest(currentDeviceDialog!!)
             }
         }
     }
 
     @Composable
-    fun DeviceTile(info: DeviceInfo, onTap: () -> Unit) {
-        ListItem(
-            modifier = Modifier.clickable(onClick = onTap),
-            leadingContent = {
-                Image(
-                    painterResource(id = R.drawable.computer),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp)
-                )
+    private fun BuildAppBar() {
+        UAppBar(
+            title = {
+                Text(text = stringResource(R.string.pair_new_device))
             },
-            headlineContent = {
-                Text(info.name)
+            leading = painterResource(id = R.drawable.arrow_back),
+            onLeadingPressed = {
+//                val device = viewModel.getConnected()
+//                if (intent.extras?.getBoolean("isInitial") == true && device != null) {
+//                    startActivity(
+//                        Intent(
+//                            this@PairActivity,
+//                            HomeActivity::class.java
+//                        ).apply {
+//                            putExtra("device", gson.toJson(device))
+//                        })
+//                }
+                // TODO: go to ?
+                finish()
             },
-            supportingContent = {
-                Text(info.ip)
-            }
+            actions = listOf(
+                painterResource(id = R.drawable.add)
+            ),
+            onActionPressed = listOf {
+                // TODO
+            },
         )
+    }
+
+    @Composable
+    fun BuildBody(modifier: Modifier = Modifier, state: PairViewModel.PairViewState) {
+        Column(
+            modifier = modifier
+        ) {
+            if (state.requestedDevices.isNotEmpty()) {
+                Text(stringResource(R.string.requested_devices))
+                state.requestedDevices.forEach {
+                    DeviceTile(info = it)
+                }
+            }
+            if (state.availableDevices.isNotEmpty()) {
+                Text(text = stringResource(id = R.string.available_devices))
+                state.availableDevices.forEach {
+                    DeviceTile(info = it) {
+                        viewModel.sendPairRequest(it)
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun DeviceTile(info: DeviceInfo, onPair: (() -> Unit)? = null) {
+        ListItem(leadingContent = {
+            Image(
+                painterResource(id = R.drawable.computer),
+                contentDescription = null,
+                modifier = Modifier.size(32.dp)
+            )
+        }, headlineContent = {
+            Text(info.name)
+        }, supportingContent = {
+            Text(info.ip)
+        }, trailingContent = {
+            if (onPair != null) IconButton(onClick = onPair) {
+                Icon(
+                    painterResource(id = R.drawable.link), contentDescription = null
+                )
+            }
+        })
     }
 
     @Composable

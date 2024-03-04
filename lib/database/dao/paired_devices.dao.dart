@@ -17,7 +17,11 @@ class PairedDeviceDao {
   Future<void> add(DeviceInfo device) async {
     await _database.insert(
       UnisyncDatabase.PAIRED_DEVICES,
-      device.toJson(),
+      {
+        'id': device.id,
+        'name': device.name,
+        'deviceType': device.deviceType,
+      },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -25,11 +29,11 @@ class PairedDeviceDao {
   Future<void> remove(String deviceId) async {
     await _database.delete(
       UnisyncDatabase.PAIRED_DEVICES,
-      where: 'id = $deviceId',
+      where: "id = '$deviceId'",
     );
   }
 
   Future<bool> exist(String deviceId) async {
-    return (await _database.query(UnisyncDatabase.PAIRED_DEVICES, where: 'id = $deviceId')).isNotEmpty;
+    return (await _database.query(UnisyncDatabase.PAIRED_DEVICES, where: "id='$deviceId'")).isNotEmpty;
   }
 }

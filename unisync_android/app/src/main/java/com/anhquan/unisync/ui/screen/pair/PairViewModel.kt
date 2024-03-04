@@ -1,7 +1,9 @@
 package com.anhquan.unisync.ui.screen.pair
 
 import androidx.lifecycle.ViewModel
-import com.anhquan.unisync.core.device.dependencies.PairingHandler
+import com.anhquan.unisync.core.device.dependencies.PairingHandler.PairState.NOT_PAIRED
+import com.anhquan.unisync.core.device.dependencies.PairingHandler.PairState.PAIRED
+import com.anhquan.unisync.core.device.dependencies.PairingHandler.PairState.REQUESTED
 import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.extensions.addTo
@@ -14,9 +16,9 @@ import kotlinx.coroutines.flow.update
 
 class PairViewModel : ViewModel() {
     data class PairViewState(
-        val pairedDevices: List<DeviceInfo> = listOf(),
-        val notPairedDevices: List<DeviceInfo> = listOf(),
-        val requestedDevices: List<DeviceInfo> = listOf(),
+        val availableDevices: Set<DeviceInfo> = setOf(),
+        val requestedDevices: Set<DeviceInfo> = setOf(),
+        val pairedDevices: Set<DeviceInfo> = setOf()
     )
 
     private var _state = MutableStateFlow(PairViewState())
@@ -25,55 +27,51 @@ class PairViewModel : ViewModel() {
     private val disposables = CompositeDisposable()
 
     init {
-        val devices = DeviceProvider.currentConnectedDevices
         _state.update {
             it.copy(
-                pairedDevices = devices.filter { info ->
-                    DeviceProvider.get(info)!!.pairState == PairingHandler.PairState.PAIRED
-                },
-                notPairedDevices = devices.filter { info ->
-                    DeviceProvider.get(info)!!.pairState == PairingHandler.PairState.NOT_PAIRED
-                },
-                requestedDevices = devices.filter { info ->
-                    DeviceProvider.get(info)!!.pairState == PairingHandler.PairState.REQUESTED
-                },
+                availableDevices = DeviceProvider.devices.filter { info ->
+                    val device = DeviceProvider.get(info)
+                    device?.pairState != PAIRED
+                }.toSet()
             )
         }
 
-        DeviceProvider.onChangeNotifier.listen(
+        DeviceProvider.deviceNotifier.listen(
             subscribeOn = AndroidSchedulers.mainThread(),
             observeOn = AndroidSchedulers.mainThread()
-        ) { deviceState ->
-            if (deviceState.connected) {
-                val pairState = DeviceProvider.get(deviceState.device)!!.pairState
-                _state.update {
-                    it.copy(
-                        pairedDevices = it.pairedDevices.let { list ->
-                            if (pairState == PairingHandler.PairState.PAIRED)
-                                list.plus(deviceState.device)
-                            else
-                                list
-                        },
-                        notPairedDevices = it.notPairedDevices.let { list ->
-                            if (pairState == PairingHandler.PairState.NOT_PAIRED)
-                                list.plus(deviceState.device)
-                            else
-                                list
-                        },
-                        requestedDevices = it.requestedDevices.let { list ->
-                            if (pairState == PairingHandler.PairState.REQUESTED)
-                                list.plus(deviceState.device)
-                            else
-                                list
+        ) { value ->
+            if (value.connected) {
+                when (value.pairState!!) {
+                    NOT_PAIRED -> {
+                        _state.update {
+                            it.copy(
+                                availableDevices = it.availableDevices.plus(value.device),
+                                requestedDevices = it.availableDevices.minus(value.device),
+                            )
                         }
-                    )
+                    }
+                    PAIRED -> {
+                        _state.update {
+                            it.copy(
+                                availableDevices = it.availableDevices.minus(value.device),
+                                requestedDevices = it.availableDevices.minus(value.device),
+                            )
+                        }
+                    }
+                    REQUESTED -> {
+                        _state.update {
+                            it.copy(
+                                availableDevices = it.availableDevices.minus(value.device),
+                                requestedDevices = it.availableDevices.plus(value.device),
+                            )
+                        }
+                    }
                 }
             } else {
                 _state.update {
                     it.copy(
-                        pairedDevices = it.pairedDevices.minus(deviceState.device),
-                        notPairedDevices = it.notPairedDevices.minus(deviceState.device),
-                        requestedDevices = it.requestedDevices.minus(deviceState.device)
+                        availableDevices = it.availableDevices.minus(value.device),
+                        requestedDevices = it.requestedDevices.minus(value.device)
                     )
                 }
             }
@@ -81,11 +79,9 @@ class PairViewModel : ViewModel() {
     }
 
     fun sendPairRequest(info: DeviceInfo) {
-        DeviceProvider.get(info)
-    }
-
-    fun getConnected(): DeviceInfo? {
-        return DeviceProvider.currentConnectedDevices.firstOrNull()
+        DeviceProvider.get(info)?.apply {
+            pairOperation.requestPair()
+        }
     }
 
     override fun onCleared() {

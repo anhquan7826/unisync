@@ -32,6 +32,8 @@ class Device(
         )
     }
 
+    val pairOperation: PairingHandler.PairOperation get() = pairingHandler.operation
+
     val pairState: PairingHandler.PairState
         get() {
             return pairingHandler.state
@@ -43,7 +45,7 @@ class Device(
 
     override fun onMessage(message: DeviceMessage) {
         pairingHandler.onMessageReceived(message)
-        if (/*pairingHandler.state == PairingHandler.PairState.PAIRED*/true) {
+        if (pairingHandler.state == PairingHandler.PairState.PAIRED) {
             plugins.forEach { plugin ->
                 if (plugin.isPluginMessage(message)) {
                     plugin.onMessageReceived(message)
@@ -59,7 +61,9 @@ class Device(
     }
 
     override fun sendMessage(message: DeviceMessage) {
-        connection.send(message)
+        if (pairingHandler.state == PairingHandler.PairState.PAIRED || message.type == DeviceMessage.Type.PAIR) {
+            connection.send(message)
+        }
     }
 
     fun <T : UnisyncPlugin> getPlugin(type: Class<T>): T {

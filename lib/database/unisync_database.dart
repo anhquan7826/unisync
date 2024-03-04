@@ -26,7 +26,7 @@ class UnisyncDatabase {
       final String dbPath = join(appDocumentsDir.path, 'databases', 'unisync_database.db');
       _database = await databaseFactory.openDatabase(dbPath);
       try {
-        await _database.execute('CREATE TABLE $PAIRED_DEVICES(id VARCHAR(50) PRIMARY KEY, name VARCHAR(30), publicKey TEXT, deviceType VARCHAR(5))');
+        await _database.execute('CREATE TABLE $PAIRED_DEVICES(id VARCHAR(50) PRIMARY KEY, name VARCHAR(30), deviceType VARCHAR(5))');
         // await _database.execute(
         //     'CREATE TABLE $STORED_MESSAGES(id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, fromDeviceId VARCHAR(50), toDeviceId VARCHAR(50), plugin VARCHAR(20), function VARCHAR(20), extra TEXT)');
       } catch (_) {}

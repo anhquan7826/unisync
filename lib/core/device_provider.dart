@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:rxdart/rxdart.dart';
+import 'package:unisync/core/pairing_handler.dart';
 
 import '../models/device_info/device_info.model.dart';
 import '../utils/logger.dart';
@@ -15,7 +16,7 @@ class DeviceProvider {
 
   static final _devices = <DeviceInfo, Device>{};
 
-  static List<DeviceInfo> get devices => _devices.values.map((e) => e.info).toList();
+  static List<DeviceInfo> get devices => _devices.keys.toList();
 
   static void create({required DeviceInfo info, required SecureSocket socket, required Stream<Uint8List> inputStream}) {
     if (_devices.containsKey(info)) {
@@ -29,13 +30,29 @@ class DeviceProvider {
 
   static void remove(DeviceInfo info) {
     _devices.remove(info);
+    deviceNotifier.add(
+      DeviceNotification(
+        device: info,
+        connected: false,
+      ),
+    );
   }
 
   static Device? get(DeviceInfo info) {
     return _devices[info];
   }
 
-  static BehaviorSubject<DeviceInfo> currentRequestedDevices = BehaviorSubject();
+  static PublishSubject<DeviceNotification> deviceNotifier = PublishSubject();
+}
 
-  static List<DeviceInfo> get connectedDevices => _devices.keys.toList();
+class DeviceNotification {
+  DeviceNotification({
+    required this.device,
+    this.connected = true,
+    this.pairState,
+  });
+
+  final DeviceInfo device;
+  final bool connected;
+  final PairState? pairState;
 }

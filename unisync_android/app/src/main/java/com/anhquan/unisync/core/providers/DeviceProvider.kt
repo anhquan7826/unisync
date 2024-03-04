@@ -11,33 +11,15 @@ import javax.net.ssl.SSLSocket
 
 object DeviceProvider {
     private val _devices = mutableMapOf<DeviceInfo, Device>()
+    val devices: List<DeviceInfo> get() = _devices.keys.toList()
 
-    val currentConnectedDevices: List<DeviceInfo>
-        get() {
-            return _devices.keys.toList()
-        }
-
-    val currentConnectedDevicesUnpaired: List<DeviceInfo>
-        get() {
-            return _devices.filter { it.value.pairState == PairingHandler.PairState.NOT_PAIRED }.keys.toList()
-        }
-
-    val currentConnectedDevicesPaired: List<DeviceInfo>
-        get() {
-            return _devices.filter { it.value.pairState == PairingHandler.PairState.PAIRED }.keys.toList()
-        }
-
-    val currentConnectedDevicesPairing: List<DeviceInfo>
-        get() {
-            return _devices.filter { it.value.pairState == PairingHandler.PairState.REQUESTED }.keys.toList()
-        }
-
-    data class DeviceChangedState(
+    data class DeviceNotification(
         val device: DeviceInfo,
-        val connected: Boolean
+        val connected: Boolean = true,
+        val pairState: PairingHandler.PairState? = null
     )
 
-    val onChangeNotifier = PublishSubject.create<DeviceChangedState>()
+    val deviceNotifier = PublishSubject.create<DeviceNotification>()
 
     fun create(
         context: Context,
@@ -46,9 +28,6 @@ object DeviceProvider {
     ) {
         if (!_devices.containsKey(info)) {
             _devices[info] = Device(context, DeviceConnection(socket), info)
-            onChangeNotifier.onNext(
-                DeviceChangedState(info, true)
-            )
             infoLog("${this::class.simpleName}: Connected to ${info.name}@${info.ip}.")
         } else {
             socket.close()
@@ -58,8 +37,8 @@ object DeviceProvider {
 
     fun remove(info: DeviceInfo) {
         _devices.remove(info)
-        onChangeNotifier.onNext(
-            DeviceChangedState(info, false)
+        deviceNotifier.onNext(
+            DeviceNotification(info, false)
         )
     }
 

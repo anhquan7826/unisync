@@ -1,21 +1,21 @@
 package com.anhquan.unisync.core.device.dependencies
 
 import com.anhquan.unisync.core.device.Device
+import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.Database
-import com.anhquan.unisync.utils.NotificationUtil
+import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.listen
 
-class PairingHandler(private val device: Device) :
-    NotificationUtil.NotificationHandler(NotificationUtil.CHANNEL_ID_PAIR) {
-    interface PairingOperation {
+class PairingHandler(private val device: Device) {
+    interface PairOperation {
         fun requestPair()
 
         fun unpair()
     }
     
-    val operation = object : PairingOperation {
+    val operation = object : PairOperation {
         override fun requestPair() {
             if (state == PairState.NOT_PAIRED) {
                 device.sendMessage(
@@ -27,6 +27,7 @@ class PairingHandler(private val device: Device) :
                     )
                 )
                 state = PairState.REQUESTED
+                notifyDevice()
             }
         }
 
@@ -42,14 +43,16 @@ class PairingHandler(private val device: Device) :
                     )
                 )
                 state = PairState.NOT_PAIRED
+                notifyDevice()
             }
         }
-
     }
 
     init {
         Database.pairedDevice.exist(device.info.id).listen {
             state = if (it == 1) PairState.PAIRED else PairState.NOT_PAIRED
+            debugLog("${this::class.simpleName}@${device.info.name}: $state")
+            notifyDevice()
         }
     }
 
@@ -72,19 +75,28 @@ class PairingHandler(private val device: Device) :
                             name = device.info.name,
                             type = device.info.deviceType
                         )
-                    )
+                    ).listen {}
                     state = PairState.PAIRED
+                    notifyDevice()
                 }
 
                 "rejected" -> {
                     state = PairState.NOT_PAIRED
+                    notifyDevice()
                 }
 
                 "unpair" -> {
-                    Database.pairedDevice.remove(device.info.id)
+                    Database.pairedDevice.remove(device.info.id).listen {}
                     state = PairState.NOT_PAIRED
+                    notifyDevice()
                 }
             }
         }
+    }
+
+    private fun notifyDevice() {
+        DeviceProvider.deviceNotifier.onNext(
+            DeviceProvider.DeviceNotification(device.info, pairState = state)
+        )
     }
 }

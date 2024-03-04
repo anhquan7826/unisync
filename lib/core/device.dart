@@ -33,10 +33,12 @@ class Device with ConnectionListener, ConnectionEmitter {
 
   PairState get pairState => _pairingHandler.state;
 
+  PairOperation get pairOperation => _pairingHandler;
+
   @override
   void onMessage(DeviceMessage message) {
     _pairingHandler.onMessageReceived(message);
-    if (/*_pairingHandler.state == PairState.paired*/ true) {
+    if (_pairingHandler.state == PairState.paired) {
       for (final plugin in plugins) {
         if (plugin.isPluginMessage(message)) {
           plugin.onMessageReceived(message);
@@ -47,7 +49,9 @@ class Device with ConnectionListener, ConnectionEmitter {
 
   @override
   void sendMessage(DeviceMessage message) {
-    connection.send(message);
+    if (_pairingHandler.state == PairState.paired || message.type == DeviceMessage.Type.PAIR) {
+      connection.send(message);
+    }
   }
 
   T getPlugin<T extends UnisyncPlugin>() {
