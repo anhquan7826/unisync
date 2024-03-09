@@ -2,13 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/image.dart';
-import 'package:unisync/models/device_info/device_info.model.dart';
+import 'package:unisync/core/device.dart';
+import 'package:unisync/routes/routes.desktop.dart';
+import 'package:unisync/utils/extensions/scope.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
-import '../../utils/constants/device_types.dart';
 import 'connection.cubit.dart';
 import 'connection.state.dart';
 
@@ -26,13 +26,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       appBar: buildAppBar(),
       body: BlocBuilder<ConnectionCubit, DeviceConnectionState>(
         builder: (context, state) {
-          if (state.status == Status.loading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            return buildBody(state);
-          }
+          return buildBody(state);
         },
       ),
     );
@@ -47,7 +41,14 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
           if (context.canPop()) {
             context.pop();
           } else {
-            // TODO: go to last connected device?
+            getCubit<ConnectionCubit>().getLastConnected().then((value) {
+              value?.apply((it) {
+                context.goNamed(
+                  routes.home,
+                  pathParameters: {'id': it.id},
+                );
+              });
+            });
           }
         },
       ),
@@ -89,25 +90,21 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     );
   }
 
-  Widget buildRequestedDeviceTile(DeviceInfo device) {
+  Widget buildRequestedDeviceTile(Device device) {
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: UImage.asset(
-        device.deviceType == DeviceTypes.android
-            ? R.icon.android
-            : device.deviceType == DeviceTypes.linux
-                ? R.icon.linux
-                : R.icon.windows,
+        R.icon.android,
         width: 24,
       ),
-      title: Text(device.name),
-      subtitle: Text(device.ip),
+      title: Text(device.info.name),
+      subtitle: Text(device.ipAddress!),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
             onPressed: () {
-              getCubit<ConnectionCubit>().acceptPair(device);
+              getCubit<ConnectionCubit>().rejectPair(device);
             },
             icon: const Icon(Icons.close_rounded),
           ),
@@ -122,72 +119,18 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     );
   }
 
-  Widget buildDeviceTile(DeviceInfo device) {
+  Widget buildDeviceTile(Device device) {
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: UImage.asset(
-        device.deviceType == DeviceTypes.android
-            ? R.icon.android
-            : device.deviceType == DeviceTypes.linux
-                ? R.icon.linux
-                : R.icon.windows,
+        R.icon.android,
         width: 24,
       ),
-      title: Text(device.name),
-      subtitle: Text(device.ip),
+      title: Text(device.info.name),
+      subtitle: Text(device.ipAddress!),
       onTap: () {},
     );
   }
-
-// void showPairDialog(DeviceInfo device) {
-//   showDialog(
-//     context: context,
-//     builder: (context) {
-//       return AlertDialog(
-//         title: Text(device.name),
-//         content: Table(
-//           children: [
-//             TableRow(
-//               children: [
-//                 TableCell(
-//                   child: Text(R.string.deviceConnection.id).tr(),
-//                 ),
-//                 TableCell(child: Text(device.id)),
-//               ],
-//             ),
-//             TableRow(
-//               children: [
-//                 TableCell(
-//                   child: Text(R.string.devicePair.ipAddress).tr(),
-//                 ),
-//                 TableCell(child: Text(device.ip)),
-//               ],
-//             ),
-//           ],
-//         ),
-//         actions: [
-//           TextButton(
-//             onPressed: () {
-//               Navigator.of(context).pop();
-//             },
-//             child: Text(
-//               R.string.devicePair.cancel,
-//             ).tr(),
-//           ),
-//           TextButton(
-//             onPressed: () {
-//               // TODO: Send pair request
-//               Navigator.of(context).pop();
-//             },
-//             child: Text(
-//               R.string.devicePair.requestPair,
-//             ).tr(),
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
 }
 
 bool validate(String ip) {

@@ -1,4 +1,4 @@
-package com.anhquan.unisync.core.discovery
+package com.anhquan.unisync.core
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,7 +6,6 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import com.anhquan.unisync.constants.NetworkPorts
-import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.debugLog
@@ -151,8 +150,6 @@ class DeviceDiscovery(private val context: Context) {
             val info = gson.fromJson(
                 socket.inputStream.bufferedReader().readLine(),
                 DeviceInfo::class.java
-            ).copy(
-                ip = socket.inetAddress.hostAddress ?: ""
             )
             DeviceProvider.create(
                 context,

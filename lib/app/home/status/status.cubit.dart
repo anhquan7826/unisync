@@ -3,22 +3,22 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/app/home/status/status.state.dart';
 import 'package:unisync/components/enums/status.dart';
-import 'package:unisync/core/device_provider.dart';
+import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/battery.plugin.dart';
 import 'package:unisync/core/plugins/ring_phone.plugin.dart';
-import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
 
 class StatusCubit extends Cubit<StatusState> with BaseCubit {
-  StatusCubit(this.deviceInfo) : super(const StatusState(status: Status.loading)) {
+  StatusCubit(this.deviceId) : super(const StatusState(status: Status.loading)) {
     _listen();
   }
 
-  final DeviceInfo deviceInfo;
+  final String deviceId;
+  late final Device device = Device.fromId(deviceId);
 
-  BatteryPlugin get _statusPlugin => DeviceProvider.get(deviceInfo)!.getPlugin<BatteryPlugin>();
+  BatteryPlugin get _statusPlugin => device.getPlugin<BatteryPlugin>();
 
-  RingPhonePlugin get _ringPhonePlugin => DeviceProvider.get(deviceInfo)!.getPlugin<RingPhonePlugin>();
+  RingPhonePlugin get _ringPhonePlugin => device.getPlugin<RingPhonePlugin>();
 
   void getStatus() {
     _statusPlugin.getBatteryInfo();

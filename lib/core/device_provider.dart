@@ -14,45 +14,25 @@ import 'device_connection.dart';
 class DeviceProvider {
   DeviceProvider._();
 
-  static final _devices = <DeviceInfo, Device>{};
+  static final _devices = <DeviceInfo>{};
 
-  static List<DeviceInfo> get devices => _devices.keys.toList();
+  static List<DeviceInfo> get connectedDevices => _devices.toList();
 
   static void create({required DeviceInfo info, required SecureSocket socket, required Stream<Uint8List> inputStream}) {
-    if (_devices.containsKey(info)) {
-      infoLog('DeviceProvider: Duplicate connection to ${info.name}@${info.ip}. Closing connection...');
+    if (_devices.contains(info)) {
       socket.close();
     } else {
-      _devices[info] = Device(DeviceConnection(socket, inputStream, info));
-      infoLog('DeviceProvider: Connected to ${info.name}@${info.ip}.');
+      _devices.add(info);
+      final connection = DeviceConnection(socket, inputStream, () {
+        _devices.remove(info);
+      });
+      Device(info).connection = connection;
     }
   }
 
-  static void remove(DeviceInfo info) {
-    _devices.remove(info);
-    deviceNotifier.add(
-      DeviceNotification(
-        device: info,
-        connected: false,
-      ),
-    );
+  static final notifier = BehaviorSubject<List<DeviceInfo>>()..add(connectedDevices);
+
+  static void providerNotify() {
+    notifier.add(connectedDevices);
   }
-
-  static Device? get(DeviceInfo info) {
-    return _devices[info];
-  }
-
-  static PublishSubject<DeviceNotification> deviceNotifier = PublishSubject();
-}
-
-class DeviceNotification {
-  DeviceNotification({
-    required this.device,
-    this.connected = true,
-    this.pairState,
-  });
-
-  final DeviceInfo device;
-  final bool connected;
-  final PairState? pairState;
 }

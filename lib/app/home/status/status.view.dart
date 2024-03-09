@@ -11,9 +11,7 @@ import '../../../models/device_info/device_info.model.dart';
 import 'status.state.dart';
 
 class StatusScreen extends StatefulWidget {
-  const StatusScreen({super.key, required this.deviceInfo});
-
-  final DeviceInfo deviceInfo;
+  const StatusScreen({super.key});
 
   @override
   State<StatusScreen> createState() => _StatusScreenState();
@@ -114,7 +112,7 @@ class _StatusScreenState extends State<StatusScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            widget.deviceInfo.name,
+            'widget.deviceInfo.name',
             style: const TextStyle(
               fontSize: 64,
               fontWeight: FontWeight.bold,
@@ -122,7 +120,7 @@ class _StatusScreenState extends State<StatusScreen> {
           ),
           const SizedBox(height: 8),
           textWithLeading(
-            true ? 'Connected at ${widget.deviceInfo.ip}' : 'Disconnected',
+            true ? 'Connected at ${'widget.deviceInfo.ip'}' : 'Disconnected',
             leading: const Icon(
               Icons.circle,
               size: 12,

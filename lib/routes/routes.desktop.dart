@@ -5,8 +5,7 @@ import 'package:unisync/app/connections/connection.view.dart';
 import 'package:unisync/app/home/home.view.dart';
 import 'package:unisync/app/landing/landing.cubit.dart';
 import 'package:unisync/app/landing/landing.view.dart';
-
-import '../models/device_info/device_info.model.dart';
+import 'package:unisync/core/device.dart';
 
 const routes = (
   landing: 'landing',
@@ -29,11 +28,11 @@ final routerConfigs = GoRouter(
     ),
     GoRoute(
       name: routes.home,
-      path: '/home',
+      path: '/home/:id',
       builder: (context, state) {
-        final device = state.extra as DeviceInfo;
+        final deviceId = state.pathParameters['id'].toString();
         return HomeScreen(
-          device: device,
+          deviceId: deviceId,
         );
       },
     ),

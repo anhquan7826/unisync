@@ -3,7 +3,7 @@ package com.anhquan.unisync
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.anhquan.unisync.core.discovery.DeviceDiscovery
+import com.anhquan.unisync.core.DeviceDiscovery
 import com.anhquan.unisync.utils.NotificationUtil
 import com.anhquan.unisync.utils.infoLog
 

@@ -1,23 +1,17 @@
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 
+import '../device.dart';
+
 class BatteryPlugin extends UnisyncPlugin {
-  BatteryPlugin(super.emitter);
+  BatteryPlugin(Device device) : super(device, type: DeviceMessage.Type.BATTERY);
 
   @override
-  bool isPluginMessage(DeviceMessage message) {
-    return message.type == DeviceMessage.Type.BATTERY;
-  }
-
-  @override
-  void onMessageReceived(DeviceMessage message) {
-    notifier.add(message.body);
+  void onReceive(Map<String, dynamic> data) {
+    notifier.add(data);
   }
 
   void getBatteryInfo() {
-    emitter.sendMessage(DeviceMessage(
-      type: DeviceMessage.Type.BATTERY,
-      body: {'request': 'get_info'},
-    ));
+    send({'request': 'get_info'});
   }
 }

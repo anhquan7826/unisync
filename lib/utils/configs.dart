@@ -6,7 +6,6 @@ import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
 import 'package:unisync/utils/extensions/string.ext.dart';
 
-import '../database/unisync_database.dart';
 import '../models/device_info/device_info.model.dart';
 import 'constants/sp_key.dart';
 import 'cryptography/cert.dart';
@@ -37,14 +36,6 @@ class _DeviceConfig {
 
   Future<void> setDeviceInfo(DeviceInfo info) async {
     await AppPreferences.putString(SPKey.deviceInfo, info.toJson().toJsonString());
-  }
-
-  Future<List<DeviceInfo>> getPairedDevices() async {
-    return UnisyncDatabase.pairedDeviceDao.getAll();
-  }
-
-  Future<void> addPairedDevice(DeviceInfo device) async {
-    await UnisyncDatabase.pairedDeviceDao.add(device);
   }
 
   Future<DeviceInfo?> getLastUsedDevice() async {

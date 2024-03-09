@@ -25,7 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.anhquan.unisync.R
-import com.anhquan.unisync.constants.LoadState
+import com.anhquan.unisync.constants.Status
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.UDialog
 import com.anhquan.unisync.ui.theme.setView
@@ -64,7 +64,7 @@ class RunCommandActivity : ComponentActivity() {
                 showAddDialog = false
             }
         }
-        if (state.state == LoadState.Loading) {
+        if (state.state == Status.Loading) {
             CircularProgressIndicator()
         } else {
             Scaffold(topBar = {

@@ -9,8 +9,6 @@ class DeviceInfo {
   const DeviceInfo({
     required this.id,
     required this.name,
-    this.ip = '',
-    this.publicKey = '',
     required this.deviceType,
   });
 
@@ -18,8 +16,6 @@ class DeviceInfo {
 
   final String id;
   final String name;
-  final String ip;
-  final String publicKey;
   final String deviceType;
 
   Map<String, dynamic> toJson() => _$DeviceInfoToJson(this);
@@ -28,8 +24,6 @@ class DeviceInfo {
     return DeviceInfo(
       id: id ?? this.id,
       name: name ?? this.name,
-      ip: ip ?? this.ip,
-      publicKey: publicKey ?? this.publicKey,
       deviceType: deviceType ?? this.deviceType,
     );
   }

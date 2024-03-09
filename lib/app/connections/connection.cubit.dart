@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/components/enums/status.dart';
+import 'package:unisync/core/device.dart';
 import 'package:unisync/core/device_provider.dart';
 import 'package:unisync/core/pairing_handler.dart';
+import 'package:unisync/database/database.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
+import 'package:unisync/utils/extensions/scope.ext.dart';
 import 'package:unisync/utils/logger.dart';
 
 import 'connection.state.dart';
@@ -15,63 +18,49 @@ class ConnectionCubit extends Cubit<DeviceConnectionState> with BaseCubit {
     load();
   }
 
-  late StreamSubscription<DeviceNotification> _subscription;
+  late StreamSubscription<List<DeviceInfo>> _subscription;
 
   Future<void> load() async {
-    final available = DeviceProvider.devices.where((element) {
-      final device = DeviceProvider.get(element);
-      return device?.pairState == PairState.unpaired;
-    }).toSet();
-    final requested = DeviceProvider.devices.where((element) {
-      final device = DeviceProvider.get(element);
-      return device?.pairState == PairState.pairRequested;
-    }).toSet();
-    safeEmit(state.copyWith(
-      status: Status.loaded,
-      requestedDevices: requested,
-      availableDevices: available,
-    ));
-    _registerListener();
-  }
-
-  void _registerListener() {
-    _subscription = DeviceProvider.deviceNotifier.listen((value) {
-      debugLog(value.device.name);
-      debugLog(value.connected);
-      debugLog(value.pairState);
-      if (!value.connected) {
-        safeEmit(state.copyWith(
-          requestedDevices: {...state.requestedDevices}..remove(value.device),
-          availableDevices: {...state.availableDevices}..remove(value.device),
-        ));
-      } else {
-        switch (value.pairState!) {
-          case PairState.pairRequested:
-            safeEmit(state.copyWith(
-              requestedDevices: {...state.requestedDevices, value.device},
-              availableDevices: {...state.availableDevices}..remove(value.device),
-            ));
-          case PairState.paired:
-            safeEmit(state.copyWith(
-              requestedDevices: {...state.requestedDevices}..remove(value.device),
-              availableDevices: {...state.availableDevices}..remove(value.device),
-            ));
+    _subscription = DeviceProvider.notifier.listen((value) {
+      final available = <Device>[];
+      final requested = <Device>[];
+      for (final info in value) {
+        final device = Device(info);
+        switch (device.pairState) {
           case PairState.unpaired:
-            safeEmit(state.copyWith(
-              requestedDevices: {...state.requestedDevices}..remove(value.device),
-              availableDevices: {...state.availableDevices, value.device},
-            ));
+            available.add(device);
+            break;
+          case PairState.pairRequested:
+            requested.add(device);
+            break;
+          default:
+            break;
         }
       }
+      safeEmit(DeviceConnectionState(
+        availableDevices: available,
+        requestedDevices: requested,
+      ));
     });
   }
 
-  void acceptPair(DeviceInfo device) {
-    DeviceProvider.get(device)?.pairOperation.acceptPair();
+  void acceptPair(Device device) {
+    device.pairOperation.acceptPair();
   }
 
-  void rejectPair(DeviceInfo device) {
-    DeviceProvider.get(device)?.pairOperation.rejectPair();
+  void rejectPair(Device device) {
+    device.pairOperation.rejectPair();
+  }
+
+  Future<DeviceInfo?> getLastConnected() async {
+    final entity = await UnisyncDatabase.i.pairedDeviceDao.getLastUsed();
+    return entity?.let((it) {
+      return DeviceInfo(
+        id: it.id,
+        name: it.name,
+        deviceType: it.type,
+      );
+    });
   }
 
   @override

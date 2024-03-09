@@ -1,21 +1,15 @@
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 
+import '../device.dart';
+
 class RingPhonePlugin extends UnisyncPlugin {
-  RingPhonePlugin(super.emitter);
+  RingPhonePlugin(Device device) : super(device, type: DeviceMessage.Type.RING_PHONE);
 
   @override
-  bool isPluginMessage(DeviceMessage message) {
-    return message.type == DeviceMessage.Type.RING_PHONE;
-  }
-
-  @override
-  void onMessageReceived(DeviceMessage message) {}
+  void onReceive(Map<String, dynamic> data) {}
 
   void ringMyPhone() {
-    emitter.sendMessage(DeviceMessage(
-      type: DeviceMessage.Type.RING_PHONE,
-      body: {},
-    ));
+    send({});
   }
 }

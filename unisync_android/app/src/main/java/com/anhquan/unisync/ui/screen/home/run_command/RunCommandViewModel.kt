@@ -1,9 +1,9 @@
 package com.anhquan.unisync.ui.screen.home.run_command
 
 import androidx.lifecycle.ViewModel
-import com.anhquan.unisync.constants.LoadState
+import com.anhquan.unisync.constants.Status
+import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
-import com.anhquan.unisync.core.providers.DeviceProvider
 import com.anhquan.unisync.database.entity.DeviceCommandEntity
 import com.anhquan.unisync.utils.Database
 import com.anhquan.unisync.utils.listen
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 
 class RunCommandViewModel : ViewModel() {
     data class RunCommandState(
-        val state: LoadState = LoadState.Loading,
+        val state: Status = Status.Loading,
         val commands: Set<String> = setOf()
     )
 
@@ -26,7 +26,7 @@ class RunCommandViewModel : ViewModel() {
         Database.deviceCommand.get(deviceId).listen {
             _state.update { s ->
                 s.copy(
-                    state = LoadState.Loaded,
+                    state = Status.Loaded,
                     commands = it.map { c -> c.command }.toSet()
                 )
             }
@@ -49,6 +49,6 @@ class RunCommandViewModel : ViewModel() {
     }
 
     fun execute(command: String) {
-        DeviceProvider.get(deviceId)!!.getPlugin(RunCommandPlugin::class.java).execute(command)
+        Device.of(deviceId).getPlugin(RunCommandPlugin::class.java).execute(command)
     }
 }

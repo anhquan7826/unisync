@@ -1,5 +1,6 @@
 package com.anhquan.unisync.ui.screen.pair
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
@@ -33,9 +34,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.anhquan.unisync.R
+import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.UAppBar
+import com.anhquan.unisync.ui.screen.home.HomeActivity
 import com.anhquan.unisync.ui.theme.setView
+import com.anhquan.unisync.utils.gson
+import com.anhquan.unisync.utils.listen
 
 class PairActivity : ComponentActivity() {
     private val viewModel: PairViewModel by viewModels()
@@ -53,9 +58,6 @@ class PairActivity : ComponentActivity() {
         var manualDialog by remember {
             mutableStateOf(false)
         }
-        var currentDeviceDialog: DeviceInfo? by remember {
-            mutableStateOf(null)
-        }
         Scaffold(containerColor = Color.White,
             contentWindowInsets = WindowInsets(left = 16.dp, right = 16.dp),
             modifier = Modifier.systemBarsPadding(),
@@ -63,14 +65,6 @@ class PairActivity : ComponentActivity() {
                 BuildAppBar()
             }) { padding ->
             BuildBody(modifier = Modifier.padding(padding), state)
-        }
-
-        if (currentDeviceDialog != null) {
-            DeviceDialog(info = currentDeviceDialog!!, onDismiss = {
-                currentDeviceDialog = null
-            }) {
-                viewModel.sendPairRequest(currentDeviceDialog!!)
-            }
         }
     }
 
@@ -82,17 +76,15 @@ class PairActivity : ComponentActivity() {
             },
             leading = painterResource(id = R.drawable.arrow_back),
             onLeadingPressed = {
-//                val device = viewModel.getConnected()
-//                if (intent.extras?.getBoolean("isInitial") == true && device != null) {
-//                    startActivity(
-//                        Intent(
-//                            this@PairActivity,
-//                            HomeActivity::class.java
-//                        ).apply {
-//                            putExtra("device", gson.toJson(device))
-//                        })
-//                }
-                // TODO: go to ?
+                if (intent.extras?.getBoolean("isInitial") == true) {
+                    viewModel.getLastConnected().listen(onError = {}) {
+                        startActivity(Intent(
+                            this@PairActivity, HomeActivity::class.java
+                        ).apply {
+                            putExtra("device", gson.toJson(it))
+                        })
+                    }
+                }
                 finish()
             },
             actions = listOf(
@@ -112,13 +104,13 @@ class PairActivity : ComponentActivity() {
             if (state.requestedDevices.isNotEmpty()) {
                 Text(stringResource(R.string.requested_devices))
                 state.requestedDevices.forEach {
-                    DeviceTile(info = it)
+                    DeviceTile(device = it)
                 }
             }
             if (state.availableDevices.isNotEmpty()) {
                 Text(text = stringResource(id = R.string.available_devices))
                 state.availableDevices.forEach {
-                    DeviceTile(info = it) {
+                    DeviceTile(device = it) {
                         viewModel.sendPairRequest(it)
                     }
                 }
@@ -127,7 +119,7 @@ class PairActivity : ComponentActivity() {
     }
 
     @Composable
-    fun DeviceTile(info: DeviceInfo, onPair: (() -> Unit)? = null) {
+    fun DeviceTile(device: Device, onPair: (() -> Unit)? = null) {
         ListItem(leadingContent = {
             Image(
                 painterResource(id = R.drawable.computer),
@@ -135,9 +127,9 @@ class PairActivity : ComponentActivity() {
                 modifier = Modifier.size(32.dp)
             )
         }, headlineContent = {
-            Text(info.name)
+            Text(device.info.name)
         }, supportingContent = {
-            Text(info.ip)
+            device.ipAddress?.let { Text(it) }
         }, trailingContent = {
             if (onPair != null) IconButton(onClick = onPair) {
                 Icon(

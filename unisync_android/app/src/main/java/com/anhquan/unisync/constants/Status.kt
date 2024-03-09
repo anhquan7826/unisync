@@ -1,6 +1,6 @@
 package com.anhquan.unisync.constants
 
-enum class LoadState {
+enum class Status {
     Loading,
     Loaded,
     Error

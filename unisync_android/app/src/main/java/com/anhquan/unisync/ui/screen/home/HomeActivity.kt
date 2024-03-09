@@ -2,12 +2,9 @@ package com.anhquan.unisync.ui.screen.home
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -31,10 +28,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,16 +40,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
-import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
-import com.anhquan.unisync.core.plugins.volume.VolumePlugin
-import com.anhquan.unisync.core.providers.DeviceProvider
+import com.anhquan.unisync.constants.Status.*
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.UAppBar
-import com.anhquan.unisync.ui.screen.home.file_transfer.FileTransferActivity
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.settings.SettingsActivity
 import com.anhquan.unisync.ui.theme.setView
@@ -64,20 +55,13 @@ import kotlin.math.roundToInt
 class HomeActivity : ComponentActivity() {
     private lateinit var deviceInfo: DeviceInfo
 
-//    private val manageAllFilePermissionCheck = registerForActivityResult(
-//        ActivityResultContracts.RequestPermission()) {
-//        if (it) {
-//            startActivity(Intent(this@HomeActivity, FileTransferActivity::class.java))
-//        } else {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//                startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
-//            }
-//        }
-//    }
+    private val viewModel: HomeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         deviceInfo = gson.fromJson(intent.extras!!.getString("device"), DeviceInfo::class.java)
+        viewModel.setDevice(deviceInfo)
+        viewModel.load()
         setView {
             HomeScreen()
         }
@@ -86,116 +70,113 @@ class HomeActivity : ComponentActivity() {
     @SuppressLint("NewApi")
     @Composable
     private fun HomeScreen() {
+        val state by viewModel.state.collectAsState()
         Scaffold(containerColor = Color.White,
             contentWindowInsets = WindowInsets(left = 16.dp, right = 16.dp),
             modifier = Modifier.systemBarsPadding(),
             topBar = {
-                UAppBar(title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Image(
-                            painterResource(id = R.drawable.computer),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(42.dp)
-                                .padding(end = 8.dp)
-                        )
-                        Column {
-                            Text(
-                                deviceInfo.name,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(stringResource(R.string.connected), fontSize = 10.sp)
-                        }
-                    }
-                }, actions = listOf(
-                    painterResource(id = R.drawable.settings),
-                ), onActionPressed = listOf {
-                    startActivity(Intent(this@HomeActivity, SettingsActivity::class.java))
-                })
+                BuildAppBar()
             }) { padding ->
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = padding,
+            when (state.status) {
+                Loading, Error -> {}
+                Loaded -> {
+                    BuildBody(state = state, modifier = Modifier.padding(padding))
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun BuildAppBar() {
+        UAppBar(title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                item {
-                    FeatureTile(
-                        icon = painterResource(id = R.drawable.data_transfer),
-                        title = "Send files",
-                    ) {
-                        if (Environment.isExternalStorageManager()) {
-                            startActivity(Intent(this@HomeActivity, FileTransferActivity::class.java))
-                        }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            startActivity(
-                                Intent(
-                                    Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                                    Uri.parse("package:$packageName")
-                                )
-                            )
-                        }
-                    }
+                Image(
+                    painterResource(id = R.drawable.computer),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(42.dp)
+                        .padding(end = 8.dp)
+                )
+                Column {
+                    Text(
+                        deviceInfo.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold
+                    )
+                    Text(stringResource(R.string.connected), fontSize = 10.sp)
                 }
-                item {
-                    FeatureTile(
-                        icon = painterResource(id = R.drawable.clipboards),
-                        title = "Send clipboard",
-                    ) {
-                        DeviceProvider.get(deviceInfo)?.getPlugin(ClipboardPlugin::class.java)
-                            ?.apply {
-                                sendLatestClipboard()
-                            }
-                    }
-                }
-                item {
-//                    FeatureTile(
-//                        icon = painterResource(id = R.drawable.equalizer_control),
-//                        title = "Control multimedia",
-//                    ) {
+            }
+        }, actions = listOf(
+            painterResource(id = R.drawable.settings),
+        ), onActionPressed = listOf {
+            startActivity(Intent(this@HomeActivity, SettingsActivity::class.java))
+        })
+    }
+
+    @Composable
+    fun BuildBody(modifier: Modifier = Modifier, state: HomeViewModel.HomeState) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2), modifier = modifier
+        ) {
+            item {
+                FeatureTile(
+                    icon = painterResource(id = R.drawable.data_transfer),
+                    title = "Send files",
+                ) {
+//                    if (Environment.isExternalStorageManager()) {
+//                        startActivity(Intent(this@HomeActivity, FileTransferActivity::class.java))
+//                    }
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 //                        startActivity(
 //                            Intent(
-//                                this@HomeActivity, MultimediaControlActivity::class.java
+//                                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+//                                Uri.parse("package:$packageName")
 //                            )
 //                        )
 //                    }
-                    VolumeControl {
-                        DeviceProvider.get(deviceInfo)?.getPlugin(VolumePlugin::class.java)
-                            ?.apply {
-                                changeVolume(it)
-                            }
-                    }
                 }
-                item {
-                    FeatureTile(
-                        icon = painterResource(id = R.drawable.command_line),
-                        title = "Run command",
-                    ) {
-                        startActivity(
-                            Intent(
-                                this@HomeActivity,
-                                RunCommandActivity::class.java
-                            ).apply {
-                                putExtra("device", gson.toJson(deviceInfo))
-                            })
-                    }
+            }
+            item {
+                FeatureTile(
+                    icon = painterResource(id = R.drawable.clipboards),
+                    title = "Send clipboard",
+                ) {
+                    viewModel.sendClipboard()
                 }
-                item {
-                    FeatureTile(
-                        icon = painterResource(id = R.drawable.ssh),
-                        title = "SSH",
-                    ) {
+            }
+            item {
+                VolumeControl(
+                    volume = state.volume
+                ) {
+                    viewModel.setVolume(it)
+                }
+            }
+            item {
+                FeatureTile(
+                    icon = painterResource(id = R.drawable.command_line),
+                    title = "Run command",
+                ) {
+                    startActivity(Intent(
+                        this@HomeActivity, RunCommandActivity::class.java
+                    ).apply {
+                        putExtra("device", gson.toJson(deviceInfo))
+                    })
+                }
+            }
+            item {
+                FeatureTile(
+                    icon = painterResource(id = R.drawable.ssh),
+                    title = "SSH",
+                ) {
 
-                    }
                 }
-                item {
-                    FeatureTile(
-                        icon = painterResource(id = R.drawable.remote_control),
-                        title = "Remote desktop",
-                    ) {
+            }
+            item {
+                FeatureTile(
+                    icon = painterResource(id = R.drawable.remote_control),
+                    title = "Remote desktop",
+                ) {
 
-                    }
                 }
             }
         }
@@ -235,22 +216,16 @@ class HomeActivity : ComponentActivity() {
 
     @Composable
     private fun VolumeControl(
-        modifier: Modifier = Modifier,
-        initialValue: Float = 0F,
-        onChange: (Float) -> Unit
+        modifier: Modifier = Modifier, volume: Float, onChange: (Float) -> Unit
     ) {
         val mainColor = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
-        var value by remember {
-            mutableFloatStateOf(initialValue)
-        }
 
         fun bound(value: Float, max: Float, min: Float): Float {
-            return if (value > max) max else if (value < min) min else value;
+            return if (value > max) max else if (value < min) min else value
         }
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = Color.Unspecified
-            ),
+        Card(colors = CardDefaults.cardColors(
+            containerColor = Color.Unspecified
+        ),
             modifier = modifier
                 .padding(8.dp)
                 .fillMaxWidth()
@@ -258,21 +233,18 @@ class HomeActivity : ComponentActivity() {
                 .clip(RoundedCornerShape(12.dp))
                 .drawBehind {
                     drawRect(
-                        color = Color.Unspecified,
-                        size = size
+                        color = Color.Unspecified, size = size
                     )
                     drawRect(
-                        color = mainColor,
-                        size = size.copy(width = size.width * value)
+                        color = mainColor, size = size.copy(width = size.width * volume)
                     )
                 }
                 .pointerInput(true) {
                     detectDragGestures { _, dragAmount ->
-                        value = bound(value + dragAmount.x / 1000F, 1F, 0F)
+                        val value = bound(volume + dragAmount.x / 1000F, 1F, 0F)
                         onChange((value * 100).roundToInt() / 100F)
                     }
-                }
-        ) {
+                }) {
             Column(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
@@ -286,16 +258,8 @@ class HomeActivity : ComponentActivity() {
                         .size(48.dp)
                         .padding(bottom = 8.dp)
                 )
-                Text("Volume: ${(value * 100).roundToInt()}%")
+                Text("Volume: ${(volume * 100).roundToInt()}%")
             }
-        }
-    }
-
-    @Preview
-    @Composable
-    fun VolumeControlPreview() {
-        VolumeControl(initialValue = 0.5F) {
-
         }
     }
 }

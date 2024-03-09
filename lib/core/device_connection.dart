@@ -17,18 +17,14 @@ mixin ConnectionListener {
   void onDisconnected();
 }
 
-mixin ConnectionEmitter {
-  void sendMessage(DeviceMessage message);
-}
-
 class DeviceConnection {
-  DeviceConnection(this.socket, this.inputStream, this.info) {
+  DeviceConnection(this._socket, this._inputStream, [this._onDisconnect]) {
     _listenInputStream();
   }
 
-  final SecureSocket socket;
-  final Stream<Uint8List> inputStream;
-  final DeviceInfo info;
+  final SecureSocket _socket;
+  final Stream<Uint8List> _inputStream;
+  final void Function()? _onDisconnect;
 
   var _isConnected = true;
 
@@ -36,10 +32,11 @@ class DeviceConnection {
 
   ConnectionListener? connectionListener;
 
+  String get ipAddress => _socket.address.address;
+
   void _listenInputStream() {
-    _streamSubscription = inputStream.listen(
+    _streamSubscription = _inputStream.listen(
       (event) {
-        infoLog('DeviceConnection@${info.name}: Message received:');
         infoLog(event.string.toMap());
         connectionListener?.onMessage(DeviceMessage.fromJson(event.string.toMap()));
       },
@@ -50,8 +47,7 @@ class DeviceConnection {
 
   void send(DeviceMessage message) {
     if (_isConnected) {
-      socket.writeln(message.toJson().toJsonString());
-      infoLog('DeviceConnection@${info.name}: Message sent:');
+      _socket.writeln(message.toJson().toJsonString());
       infoLog(message.toJson());
     }
   }
@@ -59,9 +55,8 @@ class DeviceConnection {
   Future<void> disconnect() async {
     _isConnected = false;
     await _streamSubscription.cancel();
-    await socket.close();
+    await _socket.close();
+    _onDisconnect?.call();
     connectionListener?.onDisconnected();
-    DeviceProvider.remove(info);
-    infoLog('DeviceConnection: ${info.name} disconnected!');
   }
 }

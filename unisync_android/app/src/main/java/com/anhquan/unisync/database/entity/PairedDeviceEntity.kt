@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class  PairedDeviceEntity(
     @PrimaryKey val id: String,
     val name: String,
-    val type: String
+    val type: String,
+    val lastAccessed: Long = System.currentTimeMillis()
 )

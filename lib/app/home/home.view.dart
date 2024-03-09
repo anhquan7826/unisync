@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/image.dart';
+import 'package:unisync/core/device.dart';
 import 'package:unisync/routes/routes.desktop.dart';
 
 import '../../models/device_info/device_info.model.dart';
@@ -14,9 +15,9 @@ import 'notification/notification.view.dart';
 import 'status/status.view.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.device});
+  const HomeScreen({super.key, required this.deviceId});
 
-  final DeviceInfo device;
+  final String deviceId;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          widget.device.name,
+                          'widget.device.info.name',
                           maxLines: 1,
                           softWrap: false,
                           textAlign: TextAlign.center,
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               height: 16,
                             ),
                             const SizedBox(width: 8),
-                            Text(widget.device.name),
+                            Text('widget.device.info.name'),
                           ],
                         ),
                       ),
@@ -163,12 +164,10 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 BlocProvider(
-                  create: (context) => StatusCubit(widget.device),
-                  child: StatusScreen(deviceInfo: widget.device),
+                  create: (context) => StatusCubit(widget.deviceId),
+                  child: const StatusScreen(),
                 ),
-                FileTransferScreen(
-                  device: widget.device,
-                ),
+                const FileTransferScreen(),
                 const GalleryScreen(),
                 const MessagesScreen(),
                 const NotificationScreen(),

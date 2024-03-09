@@ -16,10 +16,9 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$DeviceConnectionState {
-  Status get status => throw _privateConstructorUsedError;
-  Set<DeviceInfo> get availableDevices => throw _privateConstructorUsedError;
-  Set<DeviceInfo> get pairedDevices => throw _privateConstructorUsedError;
-  Set<DeviceInfo> get requestedDevices => throw _privateConstructorUsedError;
+  List<Device> get availableDevices => throw _privateConstructorUsedError;
+  List<Device> get pairedDevices => throw _privateConstructorUsedError;
+  List<Device> get requestedDevices => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $DeviceConnectionStateCopyWith<DeviceConnectionState> get copyWith =>
@@ -33,10 +32,9 @@ abstract class $DeviceConnectionStateCopyWith<$Res> {
       _$DeviceConnectionStateCopyWithImpl<$Res, DeviceConnectionState>;
   @useResult
   $Res call(
-      {Status status,
-      Set<DeviceInfo> availableDevices,
-      Set<DeviceInfo> pairedDevices,
-      Set<DeviceInfo> requestedDevices});
+      {List<Device> availableDevices,
+      List<Device> pairedDevices,
+      List<Device> requestedDevices});
 }
 
 /// @nodoc
@@ -53,28 +51,23 @@ class _$DeviceConnectionStateCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? status = null,
     Object? availableDevices = null,
     Object? pairedDevices = null,
     Object? requestedDevices = null,
   }) {
     return _then(_value.copyWith(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as Status,
       availableDevices: null == availableDevices
           ? _value.availableDevices
           : availableDevices // ignore: cast_nullable_to_non_nullable
-              as Set<DeviceInfo>,
+              as List<Device>,
       pairedDevices: null == pairedDevices
           ? _value.pairedDevices
           : pairedDevices // ignore: cast_nullable_to_non_nullable
-              as Set<DeviceInfo>,
+              as List<Device>,
       requestedDevices: null == requestedDevices
           ? _value.requestedDevices
           : requestedDevices // ignore: cast_nullable_to_non_nullable
-              as Set<DeviceInfo>,
+              as List<Device>,
     ) as $Val);
   }
 }
@@ -89,10 +82,9 @@ abstract class _$$DeviceConnectionStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {Status status,
-      Set<DeviceInfo> availableDevices,
-      Set<DeviceInfo> pairedDevices,
-      Set<DeviceInfo> requestedDevices});
+      {List<Device> availableDevices,
+      List<Device> pairedDevices,
+      List<Device> requestedDevices});
 }
 
 /// @nodoc
@@ -107,28 +99,23 @@ class __$$DeviceConnectionStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? status = null,
     Object? availableDevices = null,
     Object? pairedDevices = null,
     Object? requestedDevices = null,
   }) {
     return _then(_$DeviceConnectionStateImpl(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as Status,
       availableDevices: null == availableDevices
           ? _value._availableDevices
           : availableDevices // ignore: cast_nullable_to_non_nullable
-              as Set<DeviceInfo>,
+              as List<Device>,
       pairedDevices: null == pairedDevices
           ? _value._pairedDevices
           : pairedDevices // ignore: cast_nullable_to_non_nullable
-              as Set<DeviceInfo>,
+              as List<Device>,
       requestedDevices: null == requestedDevices
           ? _value._requestedDevices
           : requestedDevices // ignore: cast_nullable_to_non_nullable
-              as Set<DeviceInfo>,
+              as List<Device>,
     ));
   }
 }
@@ -137,47 +124,45 @@ class __$$DeviceConnectionStateImplCopyWithImpl<$Res>
 
 class _$DeviceConnectionStateImpl implements _DeviceConnectionState {
   const _$DeviceConnectionStateImpl(
-      {this.status = Status.loading,
-      final Set<DeviceInfo> availableDevices = const {},
-      final Set<DeviceInfo> pairedDevices = const {},
-      final Set<DeviceInfo> requestedDevices = const {}})
+      {final List<Device> availableDevices = const [],
+      final List<Device> pairedDevices = const [],
+      final List<Device> requestedDevices = const []})
       : _availableDevices = availableDevices,
         _pairedDevices = pairedDevices,
         _requestedDevices = requestedDevices;
 
+  final List<Device> _availableDevices;
   @override
   @JsonKey()
-  final Status status;
-  final Set<DeviceInfo> _availableDevices;
-  @override
-  @JsonKey()
-  Set<DeviceInfo> get availableDevices {
-    if (_availableDevices is EqualUnmodifiableSetView) return _availableDevices;
+  List<Device> get availableDevices {
+    if (_availableDevices is EqualUnmodifiableListView)
+      return _availableDevices;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableSetView(_availableDevices);
+    return EqualUnmodifiableListView(_availableDevices);
   }
 
-  final Set<DeviceInfo> _pairedDevices;
+  final List<Device> _pairedDevices;
   @override
   @JsonKey()
-  Set<DeviceInfo> get pairedDevices {
-    if (_pairedDevices is EqualUnmodifiableSetView) return _pairedDevices;
+  List<Device> get pairedDevices {
+    if (_pairedDevices is EqualUnmodifiableListView) return _pairedDevices;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableSetView(_pairedDevices);
+    return EqualUnmodifiableListView(_pairedDevices);
   }
 
-  final Set<DeviceInfo> _requestedDevices;
+  final List<Device> _requestedDevices;
   @override
   @JsonKey()
-  Set<DeviceInfo> get requestedDevices {
-    if (_requestedDevices is EqualUnmodifiableSetView) return _requestedDevices;
+  List<Device> get requestedDevices {
+    if (_requestedDevices is EqualUnmodifiableListView)
+      return _requestedDevices;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableSetView(_requestedDevices);
+    return EqualUnmodifiableListView(_requestedDevices);
   }
 
   @override
   String toString() {
-    return 'DeviceConnectionState(status: $status, availableDevices: $availableDevices, pairedDevices: $pairedDevices, requestedDevices: $requestedDevices)';
+    return 'DeviceConnectionState(availableDevices: $availableDevices, pairedDevices: $pairedDevices, requestedDevices: $requestedDevices)';
   }
 
   @override
@@ -185,7 +170,6 @@ class _$DeviceConnectionStateImpl implements _DeviceConnectionState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$DeviceConnectionStateImpl &&
-            (identical(other.status, status) || other.status == status) &&
             const DeepCollectionEquality()
                 .equals(other._availableDevices, _availableDevices) &&
             const DeepCollectionEquality()
@@ -197,7 +181,6 @@ class _$DeviceConnectionStateImpl implements _DeviceConnectionState {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      status,
       const DeepCollectionEquality().hash(_availableDevices),
       const DeepCollectionEquality().hash(_pairedDevices),
       const DeepCollectionEquality().hash(_requestedDevices));
@@ -212,19 +195,16 @@ class _$DeviceConnectionStateImpl implements _DeviceConnectionState {
 
 abstract class _DeviceConnectionState implements DeviceConnectionState {
   const factory _DeviceConnectionState(
-      {final Status status,
-      final Set<DeviceInfo> availableDevices,
-      final Set<DeviceInfo> pairedDevices,
-      final Set<DeviceInfo> requestedDevices}) = _$DeviceConnectionStateImpl;
+      {final List<Device> availableDevices,
+      final List<Device> pairedDevices,
+      final List<Device> requestedDevices}) = _$DeviceConnectionStateImpl;
 
   @override
-  Status get status;
+  List<Device> get availableDevices;
   @override
-  Set<DeviceInfo> get availableDevices;
+  List<Device> get pairedDevices;
   @override
-  Set<DeviceInfo> get pairedDevices;
-  @override
-  Set<DeviceInfo> get requestedDevices;
+  List<Device> get requestedDevices;
   @override
   @JsonKey(ignore: true)
   _$$DeviceConnectionStateImplCopyWith<_$DeviceConnectionStateImpl>

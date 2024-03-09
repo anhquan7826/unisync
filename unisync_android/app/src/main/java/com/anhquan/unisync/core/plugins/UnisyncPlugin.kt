@@ -1,16 +1,23 @@
 package com.anhquan.unisync.core.plugins
 
-import android.content.Context
-import com.anhquan.unisync.core.device.dependencies.DeviceConnection
+import androidx.annotation.CallSuper
+import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceMessage
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
-abstract class UnisyncPlugin(private val context: Context, private val emitter: DeviceConnection.ConnectionEmitter) {
+abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage.Type) {
     val notifier = BehaviorSubject.create<Map<String, Any?>>()
+    var isClosed: Boolean = false
+        private set
 
-    abstract fun onMessageReceived(message: DeviceMessage)
+    abstract fun onReceive(data: Map<String, Any?>)
 
-    abstract fun isPluginMessage(message: DeviceMessage): Boolean
+    fun send(data: Map<String, Any?>) {
+        device.sendMessage(DeviceMessage(type = type, body = data))
+    }
 
-    abstract fun dispose()
+    @CallSuper
+    open fun dispose() {
+        isClosed = true
+    }
 }

@@ -3,16 +3,22 @@ import 'package:rxdart/rxdart.dart';
 import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 
-abstract class UnisyncPlugin {
-  UnisyncPlugin(this.emitter);
+import '../device.dart';
 
-  final ConnectionEmitter emitter;
+abstract class UnisyncPlugin {
+  UnisyncPlugin(this.device, {required this.type});
+
+  final Device device;
+  final String type;
+
   bool isClosed = false;
   final notifier = BehaviorSubject<Map<String, dynamic>>();
 
-  bool isPluginMessage(DeviceMessage message);
+  void send(Map<String, dynamic> data) {
+    device.sendMessage(DeviceMessage(type: type, body: data));
+  }
 
-  void onMessageReceived(DeviceMessage message);
+  void onReceive(Map<String, dynamic> data);
 
   @mustCallSuper
   void dispose() {

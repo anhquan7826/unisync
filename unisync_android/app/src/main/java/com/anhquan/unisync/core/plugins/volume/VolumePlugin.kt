@@ -1,32 +1,36 @@
 package com.anhquan.unisync.core.plugins.volume
 
-import android.content.Context
-import com.anhquan.unisync.core.device.dependencies.DeviceConnection
+import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 
 class VolumePlugin(
-    private val context: Context, private val emitter: DeviceConnection.ConnectionEmitter
-) : UnisyncPlugin(context, emitter) {
-    override fun onMessageReceived(message: DeviceMessage) {
+    private val device: Device,
+) : UnisyncPlugin(device, DeviceMessage.Type.VOLUME) {
+    private var _currentVolume: Double = 0.0
+    val currentVolume get() = _currentVolume
 
+    init {
+        send(
+            mapOf(
+                "get_volume" to "request"
+            )
+        )
     }
 
-    override fun isPluginMessage(message: DeviceMessage): Boolean {
-        return message.type == DeviceMessage.Type.VOLUME
-    }
-
-    override fun dispose() {
-
+    override fun onReceive(data: Map<String, Any?>) {
+        _currentVolume = data["volume"].toString().toDouble()
+        notifier.onNext(
+            mapOf(
+                "volume" to data["volume"]
+            )
+        )
     }
 
     fun changeVolume(value: Float) {
-        emitter.sendMessage(
-            DeviceMessage(
-                type = DeviceMessage.Type.VOLUME,
-                body = mapOf(
-                    "value" to value
-                )
+        send(
+            mapOf(
+                "set_volume" to value
             )
         )
     }

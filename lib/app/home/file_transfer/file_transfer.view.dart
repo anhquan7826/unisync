@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
 
 class FileTransferScreen extends StatefulWidget {
-  const FileTransferScreen({super.key, required this.device});
-
-  final DeviceInfo device;
+  const FileTransferScreen({super.key});
 
   @override
   State<FileTransferScreen> createState() => _FileTransferScreenState();
@@ -51,7 +49,7 @@ class _FileTransferScreenState extends State<FileTransferScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    buildDeviceName(widget.device.name),
+                    buildDeviceName('aaaaa'),
                     const Divider(),
                     Expanded(
                       child: buildListFolders(mockFilesMobile),
