@@ -10,6 +10,10 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
     var isClosed: Boolean = false
         private set
 
+    open val hasPermission: Boolean = true
+
+    open fun requestPermission() {}
+
     abstract fun onReceive(data: Map<String, Any?>)
 
     fun send(data: Map<String, Any?>) {

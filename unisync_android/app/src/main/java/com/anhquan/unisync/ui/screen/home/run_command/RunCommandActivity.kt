@@ -70,6 +70,15 @@ class RunCommandActivity : ComponentActivity() {
             Scaffold(topBar = {
                 TopAppBar(title = {
                     Text(text = "Run Command")
+                }, navigationIcon = {
+                    IconButton(onClick = {
+                        finish()
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.arrow_back),
+                            contentDescription = null
+                        )
+                    }
                 }, actions = {
                     IconButton(onClick = { showAddDialog = true }) {
                         Icon(

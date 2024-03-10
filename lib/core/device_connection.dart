@@ -6,10 +6,7 @@ import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/extensions/string.ext.dart';
 import 'package:unisync/utils/extensions/uint8list.ext.dart';
 
-import '../models/device_info/device_info.model.dart';
 import '../models/device_message/device_message.model.dart';
-import '../utils/logger.dart';
-import 'device_provider.dart';
 
 mixin ConnectionListener {
   void onMessage(DeviceMessage message);
@@ -37,7 +34,6 @@ class DeviceConnection {
   void _listenInputStream() {
     _streamSubscription = _inputStream.listen(
       (event) {
-        infoLog(event.string.toMap());
         connectionListener?.onMessage(DeviceMessage.fromJson(event.string.toMap()));
       },
       cancelOnError: true,
@@ -48,7 +44,6 @@ class DeviceConnection {
   void send(DeviceMessage message) {
     if (_isConnected) {
       _socket.writeln(message.toJson().toJsonString());
-      infoLog(message.toJson());
     }
   }
 

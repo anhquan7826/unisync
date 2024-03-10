@@ -10,6 +10,7 @@ import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
+import com.anhquan.unisync.utils.infoLog
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class Device private constructor(
@@ -42,11 +43,13 @@ class Device private constructor(
         set(value) {
             _connection = value
             if (value == null) {
+                infoLog("${this::class.simpleName}@${info.name}: Disconnected!")
                 disposePlugins()
                 if (pairState != PairingHandler.PairState.PAIRED) {
                     instances.remove(info)
                 }
             } else {
+                infoLog("${this::class.simpleName}@${info.name}: Connected!")
                 _connection!!.connectionListener = this
                 initiatePlugins()
             }
@@ -63,6 +66,7 @@ class Device private constructor(
     }
 
     override fun onMessage(message: DeviceMessage) {
+        infoLog("${this::class.simpleName}@${info.name}: Message received:\n$message")
         if (message.type == DeviceMessage.Type.PAIR) {
             pairingHandler.handle(message.body)
         } else if (pairingHandler.state == PairingHandler.PairState.PAIRED) {
@@ -81,6 +85,7 @@ class Device private constructor(
     fun sendMessage(message: DeviceMessage) {
         if (pairingHandler.state == PairingHandler.PairState.PAIRED || message.type == DeviceMessage.Type.PAIR) {
             connection?.send(message)
+            infoLog("${this::class.simpleName}@${info.name}: Message sent:\n$message")
         }
     }
 

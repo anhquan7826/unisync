@@ -7,6 +7,7 @@ import 'package:unisync/core/plugins/notification_plugin.dart';
 import 'package:unisync/core/plugins/ring_phone.plugin.dart';
 import 'package:unisync/core/plugins/run_command.plugin.dart';
 import 'package:unisync/core/plugins/volume.plugin.dart';
+import 'package:unisync/utils/logger.dart';
 
 import '../models/device_info/device_info.model.dart';
 import '../models/device_message/device_message.model.dart';
@@ -39,12 +40,14 @@ class Device with ConnectionListener {
   set connection(DeviceConnection? value) {
     _connection = value;
     if (value == null) {
+      infoLog('Device@${info.name}: Disconnected!');
       _disposePlugins();
       if (pairState != PairState.paired) {
         _instances.remove(info);
         notifier.close();
       }
     } else {
+      infoLog('Device@${info.name}: Connected!');
       _connection!.connectionListener = this;
       _initiatePlugins();
     }
@@ -74,6 +77,8 @@ class Device with ConnectionListener {
 
   @override
   void onMessage(DeviceMessage message) {
+    infoLog('Device@${info.name}: Message received:');
+    infoLog(message.toJson());
     if (message.type == DeviceMessage.Type.PAIR) {
       _pairingHandler.handle(message.body);
     } else if (_pairingHandler.state == PairState.paired) {
@@ -88,6 +93,8 @@ class Device with ConnectionListener {
   void sendMessage(DeviceMessage message) {
     if (_pairingHandler.state == PairState.paired || message.type == DeviceMessage.Type.PAIR) {
       connection?.send(message);
+      infoLog('Device@${info.name}: Message sent:');
+      infoLog(message.toJson());
     }
   }
 

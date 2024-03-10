@@ -1,9 +1,12 @@
 package com.anhquan.unisync.core.plugins.notification
 
 import android.app.Notification
+import android.content.Intent
+import android.provider.Settings
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
+
 
 class NotificationPlugin(
     private val device: Device,
@@ -12,6 +15,15 @@ class NotificationPlugin(
         NotificationReceiver.run(device.context) {
             it.addListener(this)
         }
+    }
+
+    private var _hasPermission = false
+    override val hasPermission: Boolean
+        get() = _hasPermission
+
+    override fun requestPermission() {
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        device.context.startActivity(intent)
     }
 
     override fun onReceive(data: Map<String, Any?>) {}
@@ -24,6 +36,7 @@ class NotificationPlugin(
     }
 
     override fun onNotificationReceived(notification: Notification) {
+        _hasPermission = true
         notification.extras.run {
             val title = getString(Notification.EXTRA_TITLE)
             val text = getString(Notification.EXTRA_TEXT)

@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,21 +21,16 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,17 +39,20 @@ import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
 import com.anhquan.unisync.constants.Status.*
 import com.anhquan.unisync.models.DeviceInfo
+import com.anhquan.unisync.ui.composables.SliderTile
+import com.anhquan.unisync.ui.composables.SliderTileController
 import com.anhquan.unisync.ui.composables.UAppBar
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.settings.SettingsActivity
 import com.anhquan.unisync.ui.theme.setView
 import com.anhquan.unisync.utils.gson
-import kotlin.math.roundToInt
 
 class HomeActivity : ComponentActivity() {
     private lateinit var deviceInfo: DeviceInfo
 
     private val viewModel: HomeViewModel by viewModels()
+
+    private val volumeController = SliderTileController()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,6 +112,8 @@ class HomeActivity : ComponentActivity() {
 
     @Composable
     fun BuildBody(modifier: Modifier = Modifier, state: HomeViewModel.HomeState) {
+        volumeController.value = state.volume
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(2), modifier = modifier
         ) {
@@ -145,8 +144,8 @@ class HomeActivity : ComponentActivity() {
                 }
             }
             item {
-                VolumeControl(
-                    volume = state.volume
+                SliderTile(
+                    controller = volumeController
                 ) {
                     viewModel.setVolume(it)
                 }
@@ -214,52 +213,59 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
-    @Composable
-    private fun VolumeControl(
-        modifier: Modifier = Modifier, volume: Float, onChange: (Float) -> Unit
-    ) {
-        val mainColor = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
-
-        fun bound(value: Float, max: Float, min: Float): Float {
-            return if (value > max) max else if (value < min) min else value
-        }
-        Card(colors = CardDefaults.cardColors(
-            containerColor = Color.Unspecified
-        ),
-            modifier = modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                .height(128.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .drawBehind {
-                    drawRect(
-                        color = Color.Unspecified, size = size
-                    )
-                    drawRect(
-                        color = mainColor, size = size.copy(width = size.width * volume)
-                    )
-                }
-                .pointerInput(true) {
-                    detectDragGestures { _, dragAmount ->
-                        val value = bound(volume + dragAmount.x / 1000F, 1F, 0F)
-                        onChange((value * 100).roundToInt() / 100F)
-                    }
-                }) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(16.dp)
-            ) {
-                Image(
-                    painterResource(id = R.drawable.volume_up),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(bottom = 8.dp)
-                )
-                Text("Volume: ${(volume * 100).roundToInt()}%")
-            }
-        }
-    }
+//    @Composable
+//    private fun VolumeControl(
+//        modifier: Modifier = Modifier, volume: Float, onChange: (Float) -> Unit
+//    ) {
+//        val mainColor = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
+//
+//        var value by remember {
+//            mutableFloatStateOf(volume)
+//        }
+//
+//        fun bound(value: Float, max: Float, min: Float): Float {
+//            return if (value > max) max else if (value < min) min else value
+//        }
+//        Card(colors = CardDefaults.cardColors(
+//            containerColor = Color.Unspecified
+//        ),
+//            modifier = modifier
+//                .padding(8.dp)
+//                .fillMaxWidth()
+//                .height(128.dp)
+//                .clip(RoundedCornerShape(12.dp))
+//                .drawBehind {
+//                    drawRect(
+//                        color = Color.Unspecified, size = size
+//                    )
+//                    drawRect(
+//                        color = mainColor, size = size.copy(width = size.width * value)
+//                    )
+//                }
+//                .pointerInput(true) {
+//                    detectDragGestures(
+//                        onDragEnd = {
+//                            onChange((value * 100).roundToInt() / 100F)
+//                        }
+//                    ) { _, dragAmount ->
+//                        value = bound(value + dragAmount.x / 1000F, 1F, 0F)
+//                    }
+//                }) {
+//            Column(
+//                verticalArrangement = Arrangement.Center,
+//                modifier = Modifier
+//                    .fillMaxHeight()
+//                    .padding(16.dp)
+//            ) {
+//                Image(
+//                    painterResource(id = R.drawable.volume_up),
+//                    contentDescription = null,
+//                    modifier = Modifier
+//                        .size(48.dp)
+//                        .padding(bottom = 8.dp)
+//                )
+//                Text("Volume: ${(value * 100).roundToInt()}%")
+//            }
+//        }
+//    }
 }

@@ -7,8 +7,8 @@ import com.anhquan.unisync.models.DeviceMessage
 class VolumePlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.VOLUME) {
-    private var _currentVolume: Double = 0.0
-    val currentVolume get() = _currentVolume
+    var currentVolume: Float = 0F
+        private set
 
     init {
         send(
@@ -19,7 +19,7 @@ class VolumePlugin(
     }
 
     override fun onReceive(data: Map<String, Any?>) {
-        _currentVolume = data["volume"].toString().toDouble()
+        currentVolume = data["volume"].toString().toFloat()
         notifier.onNext(
             mapOf(
                 "volume" to data["volume"]
@@ -28,6 +28,7 @@ class VolumePlugin(
     }
 
     fun changeVolume(value: Float) {
+        currentVolume = value
         send(
             mapOf(
                 "set_volume" to value

@@ -42,7 +42,7 @@ class HomeViewModel : ViewModel() {
         _state.update { state ->
             state.copy(
                 status = Status.Loaded,
-                volume = device.getPlugin(VolumePlugin::class.java).currentVolume.toFloat()
+                volume = device.getPlugin(VolumePlugin::class.java).currentVolume
             )
         }
     }

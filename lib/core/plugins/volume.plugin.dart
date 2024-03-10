@@ -3,18 +3,24 @@ import 'dart:async';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
-import 'package:unisync/utils/logger.dart';
 
 import '../device.dart';
 
 class VolumePlugin extends UnisyncPlugin {
-  VolumePlugin(Device device) : super(device, type: DeviceMessage.Type.NOTIFICATION) {
-    _notifier = _VolumeChangeNotifier((value) {
-      send({'volume': value});
+  VolumePlugin(Device device) : super(device, type: DeviceMessage.Type.VOLUME) {
+    _subscription = FlutterVolumeController.addListener((value) {
+      if (!_isChangingByPeer) {
+        send({'volume': value});
+      }
     });
   }
 
-  late final _VolumeChangeNotifier _notifier;
+  late final StreamSubscription<double> _subscription;
+
+  bool _isChangingByPeer = false;
+  late final debounce = _Debouncer(callback: () {
+    _isChangingByPeer = false;
+  });
 
   @override
   Future<void> onReceive(Map<String, dynamic> data) async {
@@ -28,42 +34,30 @@ class VolumePlugin extends UnisyncPlugin {
 
   Future<void> _setVolume(double value) async {
     await FlutterVolumeController.setVolume(value);
+    _isChangingByPeer = true;
+    debounce.execute();
   }
 
   @override
   void dispose() {
-    _notifier.stop();
+    _subscription.cancel();
     super.dispose();
   }
 }
 
-class _VolumeChangeNotifier {
-  _VolumeChangeNotifier(
-    this.listener, {
-    this.duration = const Duration(milliseconds: 100),
-  }) {
-    start();
-  }
+class _Debouncer {
+  _Debouncer({this.duration = const Duration(milliseconds: 500), required this.callback});
 
+  final void Function() callback;
   final Duration duration;
-  final void Function(double value) listener;
+  Timer? timer;
 
-  late Timer? _timer;
-  double _preVolume = 0;
-
-  void start() {
-    debugLog('alo');
-    _timer = Timer(duration, () async {
-      final volume = await FlutterVolumeController.getVolume();
-      if (volume != null && volume != _preVolume) {
-        _preVolume = volume;
-        listener(volume);
-      }
-    });
-  }
-
-  void stop() {
-    _timer?.cancel();
-    _timer = null;
+  void execute() {
+    if (timer == null || timer!.isActive) {
+      timer?.cancel();
+      timer = Timer(duration, callback);
+    } else {
+      timer = Timer(duration, callback);
+    }
   }
 }
