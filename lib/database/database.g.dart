@@ -134,6 +134,16 @@ class _$PairedDeviceDao extends PairedDeviceDao {
   }
 
   @override
+  Future<PairedDeviceEntity?> get(String id) async {
+    return _queryAdapter.query('SELECT * FROM paired_devices WHERE id = ?1',
+        mapper: (Map<String, Object?> row) => PairedDeviceEntity(
+            id: row['id'] as String,
+            name: row['name'] as String,
+            type: row['type'] as String),
+        arguments: [id]);
+  }
+
+  @override
   Future<void> remove(String id) async {
     await _queryAdapter.queryNoReturn(
         'DELETE FROM paired_devices WHERE id = ?1',

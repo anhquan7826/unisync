@@ -11,4 +11,17 @@
     <string name="request_pair">Request pair</string>
     <string name="persistent_indicator_text">Unisync is running in the background.</string>
     <string name="found_my_phone">Found my phone!</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="device_offline">This device is not reachable. Make sure to connect to the same network as this device!</string>
+    <string name="warning">Warning</string>
+    <string name="unpair_confirmation">Are you sure to unpair this device?</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="devices">Devices</string>
+    <string name="add_new_command">Add new command</string>
+    <string name="add">Add</string>
+    <string name="manage">Manage</string>
+    <string name="manage_devices">Manage devices</string>
+    <string name="connected_at">Connected at %1$s</string>
+    <string name="paired_devices">Paired devices</string>
 </resources>

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 fun runSingle(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
-    onError: (e: Throwable) -> Unit = { errorLog(it); it.printStackTrace() },
+    onError: (e: Throwable) -> Unit = { it.printStackTrace() },
     callback: () -> Unit,
 ): Disposable {
     return Single.create {

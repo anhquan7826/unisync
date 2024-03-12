@@ -2,41 +2,69 @@ package com.anhquan.unisync.core
 
 import android.content.Context
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
-import com.anhquan.unisync.core.plugins.battery.BatteryPlugin
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
 import com.anhquan.unisync.core.plugins.notification.NotificationPlugin
 import com.anhquan.unisync.core.plugins.ring_phone.RingPhonePlugin
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
+import com.anhquan.unisync.core.plugins.status.StatusPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
+import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.infoLog
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 class Device private constructor(
-    val context: Context, val info: DeviceInfo
+    val info: DeviceInfo
 ) : DeviceConnection.ConnectionListener {
     companion object {
-        private val instances = mutableMapOf<DeviceInfo, Device>()
+        data class InstantNotifyValue(
+            val added: Boolean, val instance: Device
+        )
 
-        fun of(context: Context, info: DeviceInfo): Device {
-            if (instances.containsKey(info)) return instances[info]!!
-            val device = Device(context, info)
-            instances[info] = device
-            return device
-        }
+        private val instances = mutableMapOf<DeviceInfo, Device>()
+        val instanceNotifier = PublishSubject.create<InstantNotifyValue>()
 
         fun of(info: DeviceInfo): Device {
-            return instances[info]!!
+            if (instances.containsKey(info)) return instances[info]!!
+            val device = Device(info)
+            instances[info] = device
+            instanceNotifier.onNext(
+                InstantNotifyValue(
+                    added = true, instance = device
+                )
+            )
+            return device
         }
 
         fun of(deviceId: String): Device {
             return instances[DeviceInfo(id = deviceId, name = "", deviceType = "")]!!
         }
+
+        private fun removeInstance(info: DeviceInfo) {
+            val device = instances.remove(info)
+            if (device != null) {
+                instanceNotifier.onNext(
+                    InstantNotifyValue(
+                        added = true, instance = device
+                    )
+                )
+            }
+        }
+
+        fun getAllDevices(callback: (List<Device>) -> Unit) {
+            ConfigUtil.Device.getAllPairedDevices {
+                it.forEach { info -> of(info) }
+                callback(instances.values.toList())
+            }
+        }
     }
 
     val ipAddress: String? get() = _connection?.ipAddress
     private var _connection: DeviceConnection? = null
+
+    val context: Context? get() = _connection?.context
 
     var connection: DeviceConnection?
         get() = _connection
@@ -44,14 +72,12 @@ class Device private constructor(
             _connection = value
             if (value == null) {
                 infoLog("${this::class.simpleName}@${info.name}: Disconnected!")
-                disposePlugins()
-                if (pairState != PairingHandler.PairState.PAIRED) {
-                    instances.remove(info)
+                if (pairingHandler.state != PairingHandler.PairState.PAIRED) {
+                    removeInstance(info)
                 }
             } else {
                 infoLog("${this::class.simpleName}@${info.name}: Connected!")
                 _connection!!.connectionListener = this
-                initiatePlugins()
             }
             notify()
         }
@@ -60,7 +86,7 @@ class Device private constructor(
     val pairState: PairingHandler.PairState get() = pairingHandler.state
     val pairOperation: PairingHandler.PairOperation get() = pairingHandler.operation
 
-    private lateinit var plugins: List<UnisyncPlugin>
+    private var plugins: List<UnisyncPlugin> = listOf()
     private val pairingHandler = PairingHandler(this) {
         notify()
     }
@@ -91,19 +117,13 @@ class Device private constructor(
 
     private fun initiatePlugins() {
         plugins = listOf(
-            BatteryPlugin(this),
+            StatusPlugin(this),
             ClipboardPlugin(this),
             NotificationPlugin(this),
             VolumePlugin(this),
             RunCommandPlugin(this),
             RingPhonePlugin(this),
         )
-    }
-
-    private fun disposePlugins() {
-        plugins.forEach {
-            it.dispose()
-        }
     }
 
     fun <T : UnisyncPlugin> getPlugin(type: Class<T>): T {
@@ -114,7 +134,9 @@ class Device private constructor(
 
     @JvmName("deviceNotify")
     private fun notify() {
-        DeviceProvider.providerNotify()
+        if (isOnline && pairState == PairingHandler.PairState.PAIRED) {
+            initiatePlugins()
+        }
         notifier.onNext(
             Notification(
                 connected = isOnline, pairState = pairState

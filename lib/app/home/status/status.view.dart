@@ -1,13 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/app/home/status/status.cubit.dart';
-import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
-import '../../../models/device_info/device_info.model.dart';
 import 'status.state.dart';
 
 class StatusScreen extends StatefulWidget {
@@ -21,7 +20,6 @@ class _StatusScreenState extends State<StatusScreen> {
   @override
   void initState() {
     super.initState();
-    getCubit<StatusCubit>().getStatus();
   }
 
   @override
@@ -64,7 +62,7 @@ class _StatusScreenState extends State<StatusScreen> {
         image: DecorationImage(
           image: Image.memory(state.wallpaper!).image,
           fit: BoxFit.fitWidth,
-          colorFilter: state.status == Status.loaded
+          colorFilter: state.isOnline
               ? null
               : const ColorFilter.mode(
                   Colors.grey,
@@ -112,7 +110,7 @@ class _StatusScreenState extends State<StatusScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'widget.deviceInfo.name',
+            state.info.name,
             style: const TextStyle(
               fontSize: 64,
               fontWeight: FontWeight.bold,
@@ -120,15 +118,15 @@ class _StatusScreenState extends State<StatusScreen> {
           ),
           const SizedBox(height: 8),
           textWithLeading(
-            true ? 'Connected at ${'widget.deviceInfo.ip'}' : 'Disconnected',
-            leading: const Icon(
+            state.isOnline ? R.string.status.connectedAt.tr(args: [state.ipAddress.toString()]) : R.string.status.disconnected.tr(),
+            leading: Icon(
               Icons.circle,
               size: 12,
-              color: true ? Colors.green : Colors.grey,
+              color: state.isOnline ? Colors.green : Colors.grey,
             ),
           ),
           const SizedBox(height: 12),
-          if (state.status == Status.loaded) ...[
+          if (state.isOnline) ...[
             Row(
               children: [
                 textWithLeading(

@@ -1,6 +1,6 @@
 package com.anhquan.unisync.core
 
-import com.anhquan.unisync.models.DeviceInfo
+import android.content.Context
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.fromJson
 import com.anhquan.unisync.utils.runSingle
@@ -12,6 +12,7 @@ import java.io.BufferedWriter
 import javax.net.ssl.SSLSocket
 
 class DeviceConnection(
+    val context: Context,
     private val socket: SSLSocket,
     private val onDisconnected: (() -> Unit)? = null
 ) {
@@ -24,7 +25,6 @@ class DeviceConnection(
     private val reader: BufferedReader = socket.inputStream.bufferedReader()
     private var writer: BufferedWriter = socket.outputStream.bufferedWriter()
 
-    lateinit var deviceInfo: DeviceInfo
     var connectionListener: ConnectionListener? = null
 
     private lateinit var inputStreamDisposable: Disposable
@@ -74,8 +74,8 @@ class DeviceConnection(
         try {
             inputStreamDisposable.dispose()
             socket.close()
-            connectionListener?.onDisconnected()
             onDisconnected?.invoke()
+            connectionListener?.onDisconnected()
         } catch (_: Exception) {
         }
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:unisync/utils/extensions/list.ext.dart';
 
 import 'clickable.dart';
 
@@ -48,25 +49,37 @@ class _ExpandableListState extends State<ExpandableList> {
   double initialHeight = 0;
 
   /// The height of all children when expanded.
-  double? fullHeight;
+  double fullHeight = 0;
 
   @override
   void initState() {
     super.initState();
     isExpanded = widget.initialExpand;
     // Calculate children's size after rendering.
+    _calculateSizes();
+  }
+
+  void _calculateSizes() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final childrenSize = widget.children.map((child) {
         final key = child.key as GlobalKey;
         final renderBox = key.currentContext!.findRenderObject() as RenderBox;
         return renderBox.size;
       }).toList();
-      initialHeight = childrenSize.take(widget.initialChildrenCount).fold(initialHeight, (previousValue, element) {
+      initialHeight = childrenSize.take(widget.initialChildrenCount).fold(0, (previousValue, element) {
         return previousValue + element.height;
       });
-      fullHeight = childrenSize.fold(0, (previousValue, element) => previousValue! + element.height);
+      fullHeight = childrenSize.fold(0, (previousValue, element) => previousValue + element.height);
       setState(() {});
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant ExpandableList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.children.differ(widget.children)) {
+      _calculateSizes();
+    }
   }
 
   @override
@@ -105,21 +118,22 @@ class _ExpandableListState extends State<ExpandableList> {
             ),
           ),
         ),
-        Clickable(
-          onTap: () {
-            setState(() {
-              isExpanded = !isExpanded;
-            });
-            widget.onExpansionChanged?.call(isExpanded);
-          },
-          child: () {
-            if (isExpanded) {
-              return widget.collapseWidget ?? expansionButton(expanded: isExpanded);
-            } else {
-              return widget.expandWidget ?? expansionButton(expanded: isExpanded);
-            }
-          }.call(),
-        ),
+        if (widget.children.length > 1)
+          Clickable(
+            onTap: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+              widget.onExpansionChanged?.call(isExpanded);
+            },
+            child: () {
+              if (isExpanded) {
+                return widget.collapseWidget ?? expansionButton(expanded: isExpanded);
+              } else {
+                return widget.expandWidget ?? expansionButton(expanded: isExpanded);
+              }
+            }.call(),
+          ),
       ],
     );
   }

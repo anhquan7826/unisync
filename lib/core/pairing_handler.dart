@@ -1,5 +1,6 @@
 import 'package:unisync/database/database.dart';
 import 'package:unisync/database/entity/paired_device.entity.dart';
+import 'package:unisync/utils/configs.dart';
 
 import '../models/device_message/device_message.model.dart';
 import 'device.dart';
@@ -27,9 +28,12 @@ class PairingHandler implements PairOperation {
   PairState get state => _state;
 
   Future<void> initiate() async {
-    final value = await UnisyncDatabase.i.pairedDeviceDao.exist(device.info.id);
-    if (value == 1) {
+    final info = await ConfigUtil.device.getPairedDeviceInfo(device.info.id);
+    if (info != null) {
       _state = PairState.paired;
+      if (info.toString() != device.info.toString()) {
+        ConfigUtil.device.addPairedDevice(device.info);
+      }
     } else {
       _state = PairState.unpaired;
     }
@@ -45,11 +49,7 @@ class PairingHandler implements PairOperation {
           'message': 'accepted',
         },
       ));
-      UnisyncDatabase.i.pairedDeviceDao.add(PairedDeviceEntity(
-        id: device.info.id,
-        name: device.info.name,
-        type: device.info.deviceType,
-      ));
+      ConfigUtil.device.addPairedDevice(device.info);
       _state = PairState.paired;
       onStateChanged(_state);
     }
@@ -78,7 +78,7 @@ class PairingHandler implements PairOperation {
           'message': 'unpair',
         },
       ));
-      UnisyncDatabase.i.pairedDeviceDao.remove(device.info.id);
+      ConfigUtil.device.removePairedDevice(device.info);
       _state = PairState.unpaired;
       onStateChanged(_state);
     }
@@ -96,7 +96,7 @@ class PairingHandler implements PairOperation {
         }
       case 'unpair':
         {
-          UnisyncDatabase.i.pairedDeviceDao.remove(device.info.id);
+          ConfigUtil.device.removePairedDevice(device.info);
           _state = PairState.unpaired;
           onStateChanged(_state);
           break;

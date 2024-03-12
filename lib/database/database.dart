@@ -9,13 +9,5 @@ part 'database.g.dart';
 
 @Database(version: 1, entities: [PairedDeviceEntity])
 abstract class UnisyncDatabase extends FloorDatabase {
-  static late final UnisyncDatabase _database;
-
-  static Future<void> initialize() async {
-    _database = await $FloorUnisyncDatabase.databaseBuilder('app_database.db').build();
-  }
-
-  static UnisyncDatabase get i => _database;
-
   PairedDeviceDao get pairedDeviceDao;
 }

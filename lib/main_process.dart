@@ -13,7 +13,7 @@ import 'utils/configs.dart';
 class MainProcess {
   Future<void> initialize() async {
     await ConfigUtil.authentication.prepareCryptography();
-    await UnisyncDatabase.initialize();
+    await ConfigUtil.initialize();
     if (!(await ConfigUtil.device.hasSetDeviceInfo())) {
       await ConfigUtil.device.setDeviceInfo(
         DeviceInfo(

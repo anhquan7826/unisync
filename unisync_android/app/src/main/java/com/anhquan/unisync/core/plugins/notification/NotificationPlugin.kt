@@ -12,9 +12,7 @@ class NotificationPlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.NOTIFICATION), NotificationReceiver.NotificationListener {
     init {
-        NotificationReceiver.run(device.context) {
-            it.addListener(this)
-        }
+        NotificationReceiver.addListener(this)
     }
 
     private var _hasPermission = false
@@ -23,16 +21,14 @@ class NotificationPlugin(
 
     override fun requestPermission() {
         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-        device.context.startActivity(intent)
+        context.startActivity(intent)
     }
 
     override fun onReceive(data: Map<String, Any?>) {}
 
     override fun dispose() {
+        NotificationReceiver.removeListener(this)
         super.dispose()
-        NotificationReceiver.run(device.context) {
-            it.removeListener(this)
-        }
     }
 
     override fun onNotificationReceived(notification: Notification) {

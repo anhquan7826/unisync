@@ -7,6 +7,9 @@ abstract class PairedDeviceDao {
   @Query('SELECT * FROM paired_devices')
   Future<List<PairedDeviceEntity>> getAll();
 
+  @Query('SELECT * FROM paired_devices WHERE id = :id')
+  Future<PairedDeviceEntity?> get(String id);
+
   @Insert(onConflict: OnConflictStrategy.replace)
   Future<void> add(PairedDeviceEntity device);
 

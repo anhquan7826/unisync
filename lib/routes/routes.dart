@@ -2,8 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unisync/app/connections/connection.cubit.dart';
 import 'package:unisync/app/connections/connection.view.dart';
+import 'package:unisync/app/home/home.cubit.dart';
 import 'package:unisync/app/home/home.view.dart';
-import 'package:unisync/app/landing/landing.cubit.dart';
 import 'package:unisync/app/landing/landing.view.dart';
 import 'package:unisync/core/device.dart';
 
@@ -20,19 +20,17 @@ final routerConfigs = GoRouter(
       name: routes.landing,
       path: '/landing',
       builder: (context, state) {
-        return BlocProvider(
-          create: (context) => LandingCubit(),
-          child: const LandingScreen(),
-        );
+        return const LandingScreen();
       },
     ),
     GoRoute(
       name: routes.home,
-      path: '/home/:id',
+      path: '/home',
       builder: (context, state) {
-        final deviceId = state.pathParameters['id'].toString();
-        return HomeScreen(
-          deviceId: deviceId,
+        final device = state.extra as Device;
+        return BlocProvider(
+          create: (context) => HomeCubit(device),
+          child: const HomeScreen(),
         );
       },
     ),

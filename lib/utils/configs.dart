@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:pointycastle/pointycastle.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unisync/database/database.dart';
+import 'package:unisync/database/entity/paired_device.entity.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
 import 'package:unisync/utils/extensions/string.ext.dart';
@@ -15,16 +17,24 @@ import 'preferences.dart';
 class ConfigUtil {
   ConfigUtil._();
 
+  static late final UnisyncDatabase _database;
+
+  static Future<void> initialize() async {
+    _database = await $FloorUnisyncDatabase.databaseBuilder('app_database.db').build();
+  }
+
   static const serviceType = '_unisync._tcp';
   static const serviceDomain = 'local';
   static const discoveryPort = 50810;
 
-  static final device = _DeviceConfig._();
+  static final device = _DeviceConfig._(_database);
   static final authentication = _AuthenticationConfig._();
 }
 
 class _DeviceConfig {
-  _DeviceConfig._();
+  _DeviceConfig._(this._database);
+
+  final UnisyncDatabase _database;
 
   Future<bool> hasSetDeviceInfo() async {
     return await AppPreferences.getString(SPKey.deviceInfo) != null;
@@ -39,16 +49,37 @@ class _DeviceConfig {
   }
 
   Future<DeviceInfo?> getLastUsedDevice() async {
-    return (await AppPreferences.getString(SPKey.lastUsedDevice)).let((it) {
-      if (it == null) {
-        return null;
-      }
-      return DeviceInfo.fromJson(it.toMap());
+    return (await _database.pairedDeviceDao.getLastUsed())?.let((it) {
+      return DeviceInfo(id: it.id, name: it.name, deviceType: it.type);
     });
   }
 
   Future<void> setLastUsedDevice(DeviceInfo device) async {
-    await AppPreferences.putString(SPKey.lastUsedDevice, device.toJson().toJsonString());
+    _database.pairedDeviceDao.setLastUsed(device.id, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future<void> addPairedDevice(DeviceInfo info) async {
+    await _database.pairedDeviceDao.add(PairedDeviceEntity(
+      id: info.id,
+      name: info.name,
+      type: info.deviceType,
+    ));
+  }
+
+  Future<void> removePairedDevice(DeviceInfo info) async {
+    await _database.pairedDeviceDao.remove(info.id);
+  }
+
+  Future<List<DeviceInfo>> getAllPairedDevices() async {
+    return (await _database.pairedDeviceDao.getAll()).map((e) {
+      return DeviceInfo(id: e.id, name: e.name, deviceType: e.type);
+    }).toList();
+  }
+
+  Future<DeviceInfo?> getPairedDeviceInfo(String id) async {
+    return (await _database.pairedDeviceDao.get(id))?.let((it) {
+      return DeviceInfo(id: it.id, name: it.name, deviceType: it.type);
+    });
   }
 }
 

@@ -1,9 +1,7 @@
 package com.anhquan.unisync.core
 
-import com.anhquan.unisync.database.entity.PairedDeviceEntity
 import com.anhquan.unisync.models.DeviceMessage
-import com.anhquan.unisync.utils.Database
-import com.anhquan.unisync.utils.listen
+import com.anhquan.unisync.utils.ConfigUtil
 
 class PairingHandler(private val device: Device, private val onStateChanged: (PairState) -> Unit) {
     interface PairOperation {
@@ -29,7 +27,7 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
 
         override fun unpair() {
             if (state == PairState.PAIRED) {
-                Database.pairedDevice.remove(device.info.id)
+                ConfigUtil.Device.removePairedDevice(device.info)
                 device.sendMessage(
                     DeviceMessage(
                         type = DeviceMessage.Type.PAIR, body = mapOf(
@@ -44,8 +42,15 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
     }
 
     init {
-        Database.pairedDevice.exist(device.info.id).listen {
-            state = if (it == 1) PairState.PAIRED else PairState.NOT_PAIRED
+        ConfigUtil.Device.getDeviceInfo(device.info.id) {
+            state = if (it != null) {
+                if (it.toString() != device.info.toString()) {
+                    ConfigUtil.Device.addPairedDevice(device.info)
+                }
+                PairState.PAIRED
+            } else {
+                PairState.NOT_PAIRED
+            }
             onStateChanged(state)
         }
     }
@@ -62,13 +67,7 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
     fun handle(data: Map<String, Any?>) {
         when (data["message"].toString()) {
             "accepted" -> {
-                Database.pairedDevice.add(
-                    PairedDeviceEntity(
-                        id = device.info.id,
-                        name = device.info.name,
-                        type = device.info.deviceType
-                    )
-                ).listen {}
+                ConfigUtil.Device.addPairedDevice(device.info)
                 state = PairState.PAIRED
                 onStateChanged(state)
             }
@@ -79,16 +78,10 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
             }
 
             "unpair" -> {
-                Database.pairedDevice.remove(device.info.id).listen {}
+                ConfigUtil.Device.removePairedDevice(device.info)
                 state = PairState.NOT_PAIRED
                 onStateChanged(state)
             }
         }
     }
-
-//    private fun notifyDevice() {
-//        DeviceProvider.deviceNotifier.onNext(
-//            DeviceProvider.DeviceNotification(device.info, pairState = state)
-//        )
-//    }
 }

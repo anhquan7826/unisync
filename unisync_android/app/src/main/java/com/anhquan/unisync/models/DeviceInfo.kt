@@ -13,4 +13,8 @@ data class DeviceInfo(
         if (other !is DeviceInfo) return false
         return id == other.id;
     }
+
+    override fun toString(): String {
+        return "$id:$name:$deviceType"
+    }
 }

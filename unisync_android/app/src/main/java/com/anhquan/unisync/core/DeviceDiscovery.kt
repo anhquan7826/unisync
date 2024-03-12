@@ -8,7 +8,6 @@ import android.os.Build
 import com.anhquan.unisync.constants.NetworkPorts
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.ConfigUtil
-import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.errorLog
 import com.anhquan.unisync.utils.extensions.isIPv4
 import com.anhquan.unisync.utils.gson
@@ -75,7 +74,6 @@ class DeviceDiscovery(private val context: Context) {
             }
 
             override fun onServiceFound(serviceInfo: NsdServiceInfo?) {
-                debugLog(serviceInfo)
                 if (serviceInfo != null) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                         nsdManager.registerServiceInfoCallback(

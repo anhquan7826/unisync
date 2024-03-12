@@ -2,12 +2,11 @@ package com.anhquan.unisync.core
 
 import android.content.Context
 import com.anhquan.unisync.models.DeviceInfo
-import io.reactivex.rxjava3.subjects.BehaviorSubject
+import com.anhquan.unisync.utils.infoLog
 import javax.net.ssl.SSLSocket
 
 object DeviceProvider {
     private val _devices = mutableSetOf<DeviceInfo>()
-    val connectedDevices: List<DeviceInfo> get() = _devices.toList()
 
     fun create(
         context: Context,
@@ -15,23 +14,19 @@ object DeviceProvider {
         socket: SSLSocket
     ) {
         if (_devices.contains(info)) {
+            infoLog("${this::class.simpleName}: Duplicate connection to ${info.name}. Disconnecting...")
             socket.close()
         } else {
             _devices.add(info)
-            val connection = DeviceConnection(socket) {
+            val connection = DeviceConnection(
+                context,
+                socket,
+            ) {
                 _devices.remove(info)
             }
-            Device.of(context, info).apply {
+            Device.of(info).apply {
                 this.connection = connection
             }
         }
-    }
-
-    val notifier = BehaviorSubject.create<List<DeviceInfo>>().apply {
-        onNext(connectedDevices)
-    }
-
-    fun providerNotify() {
-        notifier.onNext(connectedDevices)
     }
 }

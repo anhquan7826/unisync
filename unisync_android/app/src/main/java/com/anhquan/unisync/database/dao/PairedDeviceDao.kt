@@ -14,6 +14,9 @@ interface PairedDeviceDao {
     @Query("SELECT * FROM paired_devices")
     fun getAll(): Single<List<PairedDeviceEntity>>
 
+    @Query("SELECT * FROM paired_devices WHERE id = :id")
+    fun get(id: String): Single<PairedDeviceEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun add(value: PairedDeviceEntity): Completable
 

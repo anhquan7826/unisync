@@ -7,16 +7,30 @@ import 'package:unisync/core/plugins/notification_plugin.dart';
 import 'package:unisync/core/plugins/ring_phone.plugin.dart';
 import 'package:unisync/core/plugins/run_command.plugin.dart';
 import 'package:unisync/core/plugins/volume.plugin.dart';
+import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/logger.dart';
 
 import '../models/device_info/device_info.model.dart';
 import '../models/device_message/device_message.model.dart';
 import 'device_connection.dart';
-import 'device_provider.dart';
+
+class DeviceInstanceNotifyValue {
+  DeviceInstanceNotifyValue({required this.added, required this.instance});
+
+  final bool added;
+  final Device instance;
+}
 
 class Device with ConnectionListener {
   factory Device(DeviceInfo info) {
-    _instances[info] ??= Device._(info);
+    if (_instances.containsKey(info)) {
+      return _instances[info]!;
+    }
+    _instances[info] = Device._(info);
+    _instanceNotifier.add(DeviceInstanceNotifyValue(
+      added: true,
+      instance: _instances[info]!,
+    ));
     return _instances[info]!;
   }
 
@@ -29,6 +43,26 @@ class Device with ConnectionListener {
   }
 
   static final Map<DeviceInfo, Device> _instances = {};
+  static final _instanceNotifier = PublishSubject<DeviceInstanceNotifyValue>();
+
+  static Stream<DeviceInstanceNotifyValue> get instanceNotifier => _instanceNotifier.asBroadcastStream();
+
+  static void _removeInstance(DeviceInfo info) {
+    final instance = _instances.remove(info);
+    if (instance != null) {
+      _instanceNotifier.add(DeviceInstanceNotifyValue(
+        added: false,
+        instance: instance,
+      ));
+    }
+  }
+
+  static Future<List<Device>> getAllDevices() async {
+    for (final element in await ConfigUtil.device.getAllPairedDevices()) {
+      Device(element);
+    }
+    return _instances.values.toList();
+  }
 
   final DeviceInfo info;
 
@@ -40,25 +74,26 @@ class Device with ConnectionListener {
   set connection(DeviceConnection? value) {
     _connection = value;
     if (value == null) {
-      infoLog('Device@${info.name}: Disconnected!');
-      _disposePlugins();
       if (pairState != PairState.paired) {
-        _instances.remove(info);
-        notifier.close();
+        _removeInstance(info);
       }
+      infoLog('Device@${info.name}: Disconnected!');
     } else {
-      infoLog('Device@${info.name}: Connected!');
       _connection!.connectionListener = this;
-      _initiatePlugins();
+      infoLog('Device@${info.name}: Connected!');
     }
     _notify();
   }
 
-  late final _pairingHandler = PairingHandler(this, onStateChanged: (state) {});
+  late final _pairingHandler = PairingHandler(this, onStateChanged: (state) {
+    _notify();
+  });
 
   final List<UnisyncPlugin> plugins = [];
 
-  BehaviorSubject<DeviceNotification> notifier = BehaviorSubject();
+  final BehaviorSubject<DeviceNotification> _notifier = BehaviorSubject();
+
+  Stream<DeviceNotification> get notifier => _notifier.asBroadcastStream();
 
   bool get isOnline => _pairingHandler.isReady && connection != null;
 
@@ -104,7 +139,7 @@ class Device with ConnectionListener {
 
   void _initiatePlugins() {
     plugins.addAll([
-      BatteryPlugin(this),
+      StatusPlugin(this),
       ClipboardPlugin(this),
       NotificationPlugin(this),
       VolumePlugin(this),
@@ -121,11 +156,16 @@ class Device with ConnectionListener {
   }
 
   void _notify() {
-    DeviceProvider.providerNotify();
-    notifier.add(DeviceNotification(
+    debugLog('isOnline: $isOnline\npairState: $pairState');
+    _notifier.add(DeviceNotification(
       connected: isOnline,
       pairState: pairState,
     ));
+    if (isOnline && pairState == PairState.paired) {
+      _initiatePlugins();
+    } else {
+      _disposePlugins();
+    }
   }
 }
 

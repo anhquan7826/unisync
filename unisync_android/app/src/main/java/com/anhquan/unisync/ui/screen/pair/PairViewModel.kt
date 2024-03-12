@@ -2,15 +2,11 @@ package com.anhquan.unisync.ui.screen.pair
 
 import androidx.lifecycle.ViewModel
 import com.anhquan.unisync.core.Device
-import com.anhquan.unisync.core.DeviceProvider
 import com.anhquan.unisync.core.PairingHandler.PairState.NOT_PAIRED
+import com.anhquan.unisync.core.PairingHandler.PairState.PAIRED
 import com.anhquan.unisync.core.PairingHandler.PairState.REQUESTED
-import com.anhquan.unisync.models.DeviceInfo
-import com.anhquan.unisync.utils.Database
 import com.anhquan.unisync.utils.extensions.addTo
 import com.anhquan.unisync.utils.listen
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,30 +25,47 @@ class PairViewModel : ViewModel() {
     private val disposables = CompositeDisposable()
 
     init {
-        DeviceProvider.notifier.listen(
-            subscribeOn = AndroidSchedulers.mainThread(), observeOn = AndroidSchedulers.mainThread()
-        ) { value ->
-            val available = mutableListOf<Device>()
-            val requested = mutableListOf<Device>()
-            value.forEach { info ->
-                val device = Device.of(info)
-                when (device.pairState) {
-                    NOT_PAIRED -> {
-                        available.add(device)
+        Device.getAllDevices {
+            it.forEach { device -> listenDeviceChange(device) }
+            Device.instanceNotifier.listen { n ->
+                if (n.added) {
+                    listenDeviceChange(n.instance)
+                }
+            }
+        }
+    }
+
+    private fun listenDeviceChange(device: Device) {
+        device.notifier.listen {
+            _state.update { s ->
+                PairViewState(
+                    s.availableDevices.minus(device),
+                    s.requestedDevices.minus(device),
+                    s.pairedDevices.minus(device)
+                )
+            }
+            if (it.connected) {
+                when (it.pairState) {
+                    NOT_PAIRED -> _state.update { s ->
+                        s.copy(availableDevices = s.availableDevices.plus(device))
                     }
 
-                    REQUESTED -> {
-                        requested.add(device)
+                    PAIRED -> _state.update { s ->
+                        s.copy(pairedDevices = s.pairedDevices.plus(device))
+                    }
+
+                    REQUESTED -> _state.update { s ->
+                        s.copy(requestedDevices = s.requestedDevices.plus(device))
                     }
 
                     else -> {}
                 }
-            }
-            _state.update {
-                PairViewState(
-                    availableDevices = available,
-                    requestedDevices = requested,
-                )
+            } else {
+                if (it.pairState == PAIRED) {
+                    _state.update { s ->
+                        s.copy(pairedDevices = s.pairedDevices.plus(device))
+                    }
+                }
             }
         }.addTo(disposables)
     }
@@ -61,13 +74,17 @@ class PairViewModel : ViewModel() {
         device.pairOperation.requestPair()
     }
 
-    fun getLastConnected(): Single<DeviceInfo> {
-        return Database.pairedDevice.getLastUsed().map {
-            DeviceInfo(
-                id = it.id, name = it.name, deviceType = it.type
-            )
-        }
+    fun unpair(device: Device) {
+        device.pairOperation.unpair()
     }
+
+//    fun getLastConnected(): Single<DeviceInfo> {
+//        return Database.pairedDevice.getLastUsed().map {
+//            DeviceInfo(
+//                id = it.id, name = it.name, deviceType = it.type
+//            )
+//        }
+//    }
 
     override fun onCleared() {
         super.onCleared()

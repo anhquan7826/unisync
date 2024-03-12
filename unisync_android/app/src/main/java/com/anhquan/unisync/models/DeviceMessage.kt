@@ -10,8 +10,8 @@ data class DeviceMessage(
     enum class Type {
         @SerializedName("pair")
         PAIR,
-        @SerializedName("battery")
-        BATTERY,
+        @SerializedName("status")
+        STATUS,
         @SerializedName("clipboard")
         CLIPBOARD,
         @SerializedName("notification")
@@ -22,5 +22,13 @@ data class DeviceMessage(
         RUN_COMMAND,
         @SerializedName("ring_phone")
         RING_PHONE,
+    }
+
+    override fun toString(): String {
+        return """
+            time: $time,
+            type: $type,
+            body: $body
+        """.trimIndent()
     }
 }

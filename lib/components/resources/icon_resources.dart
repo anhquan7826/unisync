@@ -21,4 +21,7 @@ const _iconResources = (
     full: 'assets/icons/battery-full.svg',
   ),
   phoneRing: 'assets/icons/phone-ring.svg',
+  computer: 'assets/icons/computer.svg',
+  smartPhone: 'assets/icons/smartphone.svg',
+  edit: 'assets/icons/edit.svg'
 );

@@ -3,11 +3,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:rxdart/rxdart.dart';
-import 'package:unisync/core/pairing_handler.dart';
+import 'package:unisync/utils/logger.dart';
 
 import '../models/device_info/device_info.model.dart';
-import '../utils/logger.dart';
 import 'device.dart';
 import 'device_connection.dart';
 
@@ -20,6 +18,7 @@ class DeviceProvider {
 
   static void create({required DeviceInfo info, required SecureSocket socket, required Stream<Uint8List> inputStream}) {
     if (_devices.contains(info)) {
+      infoLog('DeviceProvider: Duplicate connection to ${info.name}. Disconnecting...');
       socket.close();
     } else {
       _devices.add(info);
@@ -28,11 +27,5 @@ class DeviceProvider {
       });
       Device(info).connection = connection;
     }
-  }
-
-  static final notifier = BehaviorSubject<List<DeviceInfo>>()..add(connectedDevices);
-
-  static void providerNotify() {
-    notifier.add(connectedDevices);
   }
 }

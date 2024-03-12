@@ -1,7 +1,7 @@
 part of 'resources.dart';
 
 const _stringResources = (
-  appName: 'Unisync',
+  appName: 'app_name',
   landing: (
     welcome: 'landing.welcome',
     description: 'landing.description',
@@ -20,11 +20,21 @@ const _stringResources = (
     noDeviceFound: 'device_connection.no_devices_found',
     noConnectedDevices: 'device_connection.no_connected_devices',
     availableDevices: 'device_connection.available_devices',
+    requestedDevices: 'device_connection.requested_devices',
     pairedDevices: 'device_connection.paired_devices',
     rescan: 'device_connection.rescan',
   ),
+  home: (
+    manageDevices: 'home.manage_devices',
+    information: 'home.information',
+    fileExplorer: 'home.file_explorer',
+    gallery: 'home.gallery',
+    messages: 'home.messages',
+    notifications: 'home.notifications',
+  ),
   status: (
     connected: 'status.connected',
-    status: 'status.disconnected',
+    disconnected: 'status.disconnected',
+    connectedAt: 'status.connected_at',
   ),
 );

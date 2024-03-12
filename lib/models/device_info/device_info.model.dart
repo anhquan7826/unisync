@@ -35,4 +35,9 @@ class DeviceInfo {
   bool operator ==(Object other) {
     return other is DeviceInfo && id == other.id;
   }
+
+  @override
+  String toString() {
+    return '$id:$name:$deviceType';
+  }
 }

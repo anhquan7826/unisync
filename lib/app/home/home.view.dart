@@ -1,13 +1,17 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:unisync/app/home/home.cubit.dart';
+import 'package:unisync/app/home/home.state.dart';
 import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/components/resources/resources.dart';
+import 'package:unisync/components/widgets/clickable.dart';
+import 'package:unisync/components/widgets/expandable_list.dart';
 import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/core/device.dart';
-import 'package:unisync/routes/routes.desktop.dart';
+import 'package:unisync/utils/extensions/context.ext.dart';
+import 'package:unisync/utils/extensions/state.ext.dart';
 
-import '../../models/device_info/device_info.model.dart';
 import 'file_transfer/file_transfer.view.dart';
 import 'gallery/gallery.view.dart';
 import 'messages/messages.view.dart';
@@ -15,167 +19,231 @@ import 'notification/notification.view.dart';
 import 'status/status.view.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.deviceId});
-
-  final String deviceId;
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentDest = 0;
-
   final pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          Container(
-            width: 120,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
+    return BlocBuilder<HomeCubit, HomeState>(
+      builder: (context, state) {
+        return Scaffold(
+          body: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                width: 260,
+                child: Column(
+                  children: [
+                    buildPairedDevices(state),
+                    Expanded(
+                      child: buildDeviceFeatures(state),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: PageView(
+                  scrollDirection: Axis.vertical,
+                  controller: pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    BlocProvider(
+                      create: (context) => StatusCubit(state.currentDevice),
+                      child: const StatusScreen(),
+                    ),
+                    const FileTransferScreen(),
+                    const GalleryScreen(),
+                    const MessagesScreen(),
+                    const NotificationScreen(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  int currentDest = 0;
+
+  Widget buildDeviceFeatures(HomeState state) {
+    Widget buildDestination(int index, {required String label, required Widget icon}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Clickable(
+          borderRadius: BorderRadius.circular(24),
+          onTap: () {
+            setState(() {
+              currentDest = index;
+              pageController.jumpToPage(index);
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: index == currentDest ? R.color.mainColor.withOpacity(0.2) : null,
+            ),
+            child: Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: PopupMenuButton(
-                    tooltip: '',
-                    icon: Column(
+                icon,
+                const SizedBox(
+                  width: 16,
+                ),
+                Text(label),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ListView(
+      children: [
+        buildDestination(
+          0,
+          icon: UImage.asset(R.icon.info),
+          label: R.string.home.information.tr(),
+        ),
+        buildDestination(
+          1,
+          icon: UImage.asset(R.icon.exchange),
+          label: R.string.home.fileExplorer.tr(),
+        ),
+        buildDestination(
+          2,
+          icon: UImage.asset(R.icon.gallery),
+          label: R.string.home.gallery.tr(),
+        ),
+        buildDestination(
+          3,
+          icon: UImage.asset(R.icon.messages),
+          label: R.string.home.messages.tr(),
+        ),
+        buildDestination(
+          4,
+          icon: UImage.asset(R.icon.notification),
+          label: R.string.home.notifications.tr(),
+        ),
+      ],
+    );
+  }
+
+  Widget buildPairedDevices(HomeState state) {
+    Widget buildDevice(Device device, [void Function()? onTap]) {
+      return Clickable(
+        key: GlobalKey(),
+        borderRadius: BorderRadius.circular(24),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              UImage.asset(
+                R.icon.smartPhone,
+                width: 24,
+                height: 24,
+              ),
+              const SizedBox(width: 8),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    device.info.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    device.isOnline ? R.string.status.connected.tr() : R.string.status.disconnected.tr(),
+                    style: context.labelM.copyWith(
+                      color: device.isOnline ? Colors.green : Colors.grey,
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            UImage.asset(
+              R.icon.computer,
+              width: 42,
+              height: 42,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    R.string.appName,
+                    style: context.displayS.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ).tr(),
+                  if (state.myDevice != null)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.phone_android_outlined,
-                          weight: 200,
+                        Flexible(
+                          child: Text(
+                            state.myDevice!.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'widget.device.info.name',
-                          maxLines: 1,
-                          softWrap: false,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(overflow: TextOverflow.ellipsis),
+                        const SizedBox(width: 8),
+                        Clickable(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {},
+                          child: Padding(
+                            padding: const EdgeInsets.all(2),
+                            child: UImage.asset(
+                              R.icon.edit,
+                              width: 14,
+                              height: 14,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    position: PopupMenuPosition.under,
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            UImage.asset(
-                              R.icon.android,
-                              width: 16,
-                              height: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Text('widget.device.info.name'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        height: 1,
-                        enabled: false,
-                        child: Divider(),
-                      ),
-                      PopupMenuItem(
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.add_rounded,
-                              weight: 100,
-                            ),
-                            SizedBox(width: 8),
-                            Text('Add new device'),
-                          ],
-                        ),
-                        onTap: () {
-                          context.pushNamed(routes.pair);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Divider(
-                    color: Colors.black,
-                    height: 1,
-                  ),
-                ),
-                Expanded(
-                  child: NavigationRail(
-                    selectedIndex: currentDest,
-                    labelType: NavigationRailLabelType.all,
-                    destinations: [
-                      NavigationRailDestination(
-                        icon: UImage.asset(R.icon.info),
-                        label: const Text('Information'),
-                      ),
-                      NavigationRailDestination(
-                        icon: UImage.asset(R.icon.exchange),
-                        label: const Text('File Explorer'),
-                      ),
-                      NavigationRailDestination(
-                        icon: UImage.asset(R.icon.gallery),
-                        label: const Text('Gallery'),
-                      ),
-                      NavigationRailDestination(
-                        icon: UImage.asset(R.icon.messages),
-                        label: const Text('Messages'),
-                      ),
-                      NavigationRailDestination(
-                        icon: UImage.asset(R.icon.notification),
-                        label: const Text('Notifications'),
-                      ),
-                    ],
-                    onDestinationSelected: (index) {
-                      setState(() {
-                        currentDest = index;
-                        pageController.animateToPage(
-                          index,
-                          duration: const Duration(milliseconds: 500),
-                          curve: Curves.ease,
-                        );
-                      });
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: UImage.asset(
-                    R.icon.settings,
-                    width: 32,
-                    height: 32,
-                  ),
-                  onPressed: () {},
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const VerticalDivider(
-            width: 1,
-          ),
-          Expanded(
-            child: PageView(
-              scrollDirection: Axis.vertical,
-              controller: pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                BlocProvider(
-                  create: (context) => StatusCubit(widget.deviceId),
-                  child: const StatusScreen(),
-                ),
-                const FileTransferScreen(),
-                const GalleryScreen(),
-                const MessagesScreen(),
-                const NotificationScreen(),
-              ],
+          ],
+        ),
+        const SizedBox(height: 16),
+        ExpandableList(
+          initialChildrenCount: 1,
+          children: [
+            buildDevice(state.currentDevice),
+            ...state.pairedDevices.map((e) => buildDevice(e, () {
+                  getCubit<HomeCubit>().setDevice(e);
+                })),
+            TextButton(
+              key: GlobalKey(),
+              onPressed: () {},
+              child: Text(R.string.home.manageDevices).tr(),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }

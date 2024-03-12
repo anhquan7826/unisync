@@ -2,47 +2,46 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/app/home/status/status.state.dart';
-import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/battery.plugin.dart';
 import 'package:unisync/core/plugins/ring_phone.plugin.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
 
 class StatusCubit extends Cubit<StatusState> with BaseCubit {
-  StatusCubit(this.deviceId) : super(const StatusState(status: Status.loading)) {
+  StatusCubit(this.device) : super(StatusState(info: device.info)) {
     _listen();
   }
 
-  final String deviceId;
-  late final Device device = Device.fromId(deviceId);
+  final Device device;
 
-  BatteryPlugin get _statusPlugin => device.getPlugin<BatteryPlugin>();
+  StreamSubscription? _deviceSubscription;
+  StreamSubscription? _statusSubscription;
 
-  RingPhonePlugin get _ringPhonePlugin => device.getPlugin<RingPhonePlugin>();
-
-  void getStatus() {
-    _statusPlugin.getBatteryInfo();
+  void _listen() {
+    _deviceSubscription = device.notifier.listen((value) {
+      safeEmit(state.copyWith(
+        isOnline: value.connected,
+        ipAddress: device.ipAddress,
+      ));
+      if (value.connected) {
+        _statusSubscription = device.getPlugin<StatusPlugin>().notifier.listen((status) {
+          safeEmit(state.copyWith(
+            batteryLevel: status['level'],
+            isCharging: status['isCharging'],
+          ));
+        });
+      }
+    });
   }
 
   void ringMyPhone() {
-    _ringPhonePlugin.ringMyPhone();
-  }
-
-  StreamSubscription? _subscription;
-
-  void _listen() {
-    _subscription = _statusPlugin.notifier.listen((value) {
-      safeEmit(state.copyWith(
-        status: Status.loaded,
-        batteryLevel: value['level'],
-        isCharging: value['isCharging'],
-      ));
-    });
+    device.getPlugin<RingPhonePlugin>().ringMyPhone();
   }
 
   @override
   Future<void> close() async {
-    await _subscription?.cancel();
+    await _deviceSubscription?.cancel();
+    await _statusSubscription?.cancel();
     return super.close();
   }
 }

@@ -3,8 +3,8 @@ import 'package:unisync/models/device_message/device_message.model.dart';
 
 import '../device.dart';
 
-class BatteryPlugin extends UnisyncPlugin {
-  BatteryPlugin(Device device) : super(device, type: DeviceMessage.Type.BATTERY);
+class StatusPlugin extends UnisyncPlugin {
+  StatusPlugin(Device device) : super(device, type: DeviceMessage.Type.STATUS);
 
   @override
   void onReceive(Map<String, dynamic> data) {

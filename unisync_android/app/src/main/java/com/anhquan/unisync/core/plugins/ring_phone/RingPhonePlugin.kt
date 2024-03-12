@@ -9,9 +9,9 @@ import com.anhquan.unisync.utils.NotificationUtil
 class RingPhonePlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.RING_PHONE) {
-    private val notificationManager = device.context.getSystemService(NotificationManager::class.java)
+    private val notificationManager = context.getSystemService(NotificationManager::class.java)
 
     override fun onReceive(data: Map<String, Any?>) {
-        notificationManager.notify(1, NotificationUtil.buildFindMyPhoneNotification(device.context))
+        notificationManager.notify(1, NotificationUtil.buildFindMyPhoneNotification(context))
     }
 }

@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/core/device.dart';
-import 'package:unisync/routes/routes.desktop.dart';
+import 'package:unisync/routes/routes.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
@@ -58,9 +58,23 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   Widget buildBody(DeviceConnectionState state) {
     return CustomScrollView(
       slivers: [
+        if (state.pairedDevices.isNotEmpty) ...[
+          SliverAppBar(
+            title: Text(R.string.deviceConnection.pairedDevices).tr(),
+            automaticallyImplyLeading: false,
+            primary: false,
+            floating: true,
+            pinned: true,
+          ),
+          SliverList.list(
+            children: state.pairedDevices.map((e) {
+              return buildDeviceTile(e);
+            }).toList(),
+          ),
+        ],
         if (state.requestedDevices.isNotEmpty) ...[
-          const SliverAppBar(
-            title: Text('Requested devices'),
+          SliverAppBar(
+            title: Text(R.string.deviceConnection.requestedDevices).tr(),
             automaticallyImplyLeading: false,
             primary: false,
             floating: true,
@@ -127,7 +141,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
         width: 24,
       ),
       title: Text(device.info.name),
-      subtitle: Text(device.ipAddress!),
+      subtitle: Text(device.ipAddress ?? ''),
       onTap: () {},
     );
   }

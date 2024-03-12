@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.anhquan.unisync.R
 import com.anhquan.unisync.constants.Status
 import com.anhquan.unisync.models.DeviceInfo
@@ -64,7 +65,7 @@ class RunCommandActivity : ComponentActivity() {
                 showAddDialog = false
             }
         }
-        if (state.state == Status.Loading) {
+        if (state.status == Status.Loading) {
             CircularProgressIndicator()
         } else {
             Scaffold(topBar = {
@@ -111,12 +112,17 @@ class RunCommandActivity : ComponentActivity() {
         var command by remember {
             mutableStateOf("")
         }
-        UDialog(title = "Add new command", content = {
+        UDialog(
+            title = stringResource(R.string.add_new_command),
+            cancelText = stringResource(id = R.string.cancel),
+            confirmText = stringResource(R.string.add),
+            onCancel = onDismiss,
+            onConfirm = {
+                onAdd(command)
+            }) {
             TextField(value = command, onValueChange = {
                 command = it
             })
-        }, cancelText = "Cancel", confirmText = "Add", onCancel = onDismiss) {
-            onAdd(command)
         }
     }
 }

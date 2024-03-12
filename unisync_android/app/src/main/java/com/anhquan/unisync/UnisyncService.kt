@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import com.anhquan.unisync.core.DeviceDiscovery
+import com.anhquan.unisync.core.plugins.notification.NotificationReceiver
 import com.anhquan.unisync.utils.NotificationUtil
 import com.anhquan.unisync.utils.infoLog
 
@@ -17,6 +18,8 @@ class UnisyncService : Service() {
         deviceDiscovery.start()
         super.onCreate()
         infoLog("${this::class.simpleName}: service created.")
+
+        startService(Intent(this, NotificationReceiver::class.java))
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

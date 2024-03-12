@@ -19,7 +19,7 @@ class DeviceMessage {
 
   static const Type = (
     PAIR: 'pair',
-    BATTERY: 'battery',
+    STATUS: 'status',
     CLIPBOARD: 'clipboard',
     NOTIFICATION: 'notification',
     VOLUME: 'volume',

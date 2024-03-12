@@ -16,7 +16,9 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$StatusState {
-  Status get status => throw _privateConstructorUsedError;
+  DeviceInfo get info => throw _privateConstructorUsedError;
+  bool get isOnline => throw _privateConstructorUsedError;
+  String? get ipAddress => throw _privateConstructorUsedError;
   int get batteryLevel => throw _privateConstructorUsedError;
   bool get isCharging => throw _privateConstructorUsedError;
   Uint8List? get wallpaper => throw _privateConstructorUsedError;
@@ -33,7 +35,12 @@ abstract class $StatusStateCopyWith<$Res> {
       _$StatusStateCopyWithImpl<$Res, StatusState>;
   @useResult
   $Res call(
-      {Status status, int batteryLevel, bool isCharging, Uint8List? wallpaper});
+      {DeviceInfo info,
+      bool isOnline,
+      String? ipAddress,
+      int batteryLevel,
+      bool isCharging,
+      Uint8List? wallpaper});
 }
 
 /// @nodoc
@@ -49,16 +56,26 @@ class _$StatusStateCopyWithImpl<$Res, $Val extends StatusState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? status = null,
+    Object? info = null,
+    Object? isOnline = null,
+    Object? ipAddress = freezed,
     Object? batteryLevel = null,
     Object? isCharging = null,
     Object? wallpaper = freezed,
   }) {
     return _then(_value.copyWith(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as Status,
+      info: null == info
+          ? _value.info
+          : info // ignore: cast_nullable_to_non_nullable
+              as DeviceInfo,
+      isOnline: null == isOnline
+          ? _value.isOnline
+          : isOnline // ignore: cast_nullable_to_non_nullable
+              as bool,
+      ipAddress: freezed == ipAddress
+          ? _value.ipAddress
+          : ipAddress // ignore: cast_nullable_to_non_nullable
+              as String?,
       batteryLevel: null == batteryLevel
           ? _value.batteryLevel
           : batteryLevel // ignore: cast_nullable_to_non_nullable
@@ -84,7 +101,12 @@ abstract class _$$StatusStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {Status status, int batteryLevel, bool isCharging, Uint8List? wallpaper});
+      {DeviceInfo info,
+      bool isOnline,
+      String? ipAddress,
+      int batteryLevel,
+      bool isCharging,
+      Uint8List? wallpaper});
 }
 
 /// @nodoc
@@ -98,16 +120,26 @@ class __$$StatusStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? status = null,
+    Object? info = null,
+    Object? isOnline = null,
+    Object? ipAddress = freezed,
     Object? batteryLevel = null,
     Object? isCharging = null,
     Object? wallpaper = freezed,
   }) {
     return _then(_$StatusStateImpl(
-      status: null == status
-          ? _value.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as Status,
+      info: null == info
+          ? _value.info
+          : info // ignore: cast_nullable_to_non_nullable
+              as DeviceInfo,
+      isOnline: null == isOnline
+          ? _value.isOnline
+          : isOnline // ignore: cast_nullable_to_non_nullable
+              as bool,
+      ipAddress: freezed == ipAddress
+          ? _value.ipAddress
+          : ipAddress // ignore: cast_nullable_to_non_nullable
+              as String?,
       batteryLevel: null == batteryLevel
           ? _value.batteryLevel
           : batteryLevel // ignore: cast_nullable_to_non_nullable
@@ -128,14 +160,21 @@ class __$$StatusStateImplCopyWithImpl<$Res>
 
 class _$StatusStateImpl implements _StatusState {
   const _$StatusStateImpl(
-      {this.status = Status.idle,
+      {required this.info,
+      this.isOnline = false,
+      this.ipAddress = null,
       this.batteryLevel = -1,
       this.isCharging = false,
       this.wallpaper = null});
 
   @override
+  final DeviceInfo info;
+  @override
   @JsonKey()
-  final Status status;
+  final bool isOnline;
+  @override
+  @JsonKey()
+  final String? ipAddress;
   @override
   @JsonKey()
   final int batteryLevel;
@@ -148,7 +187,7 @@ class _$StatusStateImpl implements _StatusState {
 
   @override
   String toString() {
-    return 'StatusState(status: $status, batteryLevel: $batteryLevel, isCharging: $isCharging, wallpaper: $wallpaper)';
+    return 'StatusState(info: $info, isOnline: $isOnline, ipAddress: $ipAddress, batteryLevel: $batteryLevel, isCharging: $isCharging, wallpaper: $wallpaper)';
   }
 
   @override
@@ -156,7 +195,11 @@ class _$StatusStateImpl implements _StatusState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$StatusStateImpl &&
-            (identical(other.status, status) || other.status == status) &&
+            (identical(other.info, info) || other.info == info) &&
+            (identical(other.isOnline, isOnline) ||
+                other.isOnline == isOnline) &&
+            (identical(other.ipAddress, ipAddress) ||
+                other.ipAddress == ipAddress) &&
             (identical(other.batteryLevel, batteryLevel) ||
                 other.batteryLevel == batteryLevel) &&
             (identical(other.isCharging, isCharging) ||
@@ -165,8 +208,8 @@ class _$StatusStateImpl implements _StatusState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, status, batteryLevel, isCharging,
-      const DeepCollectionEquality().hash(wallpaper));
+  int get hashCode => Object.hash(runtimeType, info, isOnline, ipAddress,
+      batteryLevel, isCharging, const DeepCollectionEquality().hash(wallpaper));
 
   @JsonKey(ignore: true)
   @override
@@ -177,13 +220,19 @@ class _$StatusStateImpl implements _StatusState {
 
 abstract class _StatusState implements StatusState {
   const factory _StatusState(
-      {final Status status,
+      {required final DeviceInfo info,
+      final bool isOnline,
+      final String? ipAddress,
       final int batteryLevel,
       final bool isCharging,
       final Uint8List? wallpaper}) = _$StatusStateImpl;
 
   @override
-  Status get status;
+  DeviceInfo get info;
+  @override
+  bool get isOnline;
+  @override
+  String? get ipAddress;
   @override
   int get batteryLevel;
   @override
