@@ -1,17 +1,24 @@
 package com.anhquan.unisync.core.plugins.notification
 
-import android.app.Notification
+import android.content.Context
 import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 
 class NotificationReceiver : NotificationListenerService() {
     interface NotificationListener {
-        fun onNotificationReceived(notification: Notification)
+        fun onNotificationReceived(sbn: StatusBarNotification)
     }
 
     companion object {
+        private var isStarted: Boolean = false
         private val listeners = mutableListOf<NotificationListener>()
+
+        fun startService(context: Context) {
+            if (isStarted) return
+            context.startService(Intent(context, NotificationReceiver::class.java))
+            isStarted = true
+        }
 
         fun addListener(listener: NotificationListener) {
             listeners.add(listener)
@@ -29,12 +36,8 @@ class NotificationReceiver : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
         sbn?.apply {
-//            if (notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0) return
-//            if (notification.flags and Notification.FLAG_ONGOING_EVENT != 0) return
-//            if (notification.flags and Notification.FLAG_LOCAL_ONLY != 0) return
-//            if (notification.flags and NotificationCompat.FLAG_GROUP_SUMMARY != 0) return
             listeners.forEach {
-                it.onNotificationReceived(notification)
+                it.onNotificationReceived(this)
             }
         }
     }

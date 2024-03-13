@@ -3,12 +3,12 @@ package com.anhquan.unisync.core
 import android.content.Context
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.fromJson
+import com.anhquan.unisync.utils.gson
 import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
-import com.anhquan.unisync.utils.toJson
 import io.reactivex.rxjava3.disposables.Disposable
 import java.io.BufferedReader
-import java.io.BufferedWriter
+import java.io.OutputStream
 import javax.net.ssl.SSLSocket
 
 class DeviceConnection(
@@ -23,7 +23,7 @@ class DeviceConnection(
     }
 
     private val reader: BufferedReader = socket.inputStream.bufferedReader()
-    private var writer: BufferedWriter = socket.outputStream.bufferedWriter()
+    private var writer: OutputStream = socket.outputStream
 
     var connectionListener: ConnectionListener? = null
 
@@ -60,7 +60,7 @@ class DeviceConnection(
         if (isConnected) {
             runSingle(callback = {
                 writer.apply {
-                    write(toJson(message))
+                    write(gson.toJson(message).toByteArray(Charsets.UTF_8))
                     flush()
                 }
             }, onError = {

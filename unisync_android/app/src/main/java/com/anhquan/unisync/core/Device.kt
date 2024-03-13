@@ -11,6 +11,7 @@ import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ConfigUtil
+import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.infoLog
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -126,6 +127,12 @@ class Device private constructor(
         )
     }
 
+    private fun disposePlugins() {
+        for (plugin in plugins) {
+            plugin.onDispose()
+        }
+    }
+
     fun <T : UnisyncPlugin> getPlugin(type: Class<T>): T {
         return plugins.filterIsInstance(type).first()
     }
@@ -134,8 +141,11 @@ class Device private constructor(
 
     @JvmName("deviceNotify")
     private fun notify() {
+        debugLog("${info.name}\nisOnline: $isOnline\nisPaired: $pairState");
         if (isOnline && pairState == PairingHandler.PairState.PAIRED) {
             initiatePlugins()
+        } else {
+            disposePlugins()
         }
         notifier.onNext(
             Notification(

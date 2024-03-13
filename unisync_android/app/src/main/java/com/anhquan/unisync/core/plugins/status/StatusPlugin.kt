@@ -6,19 +6,20 @@ import com.anhquan.unisync.models.DeviceMessage
 
 
 class StatusPlugin(
-    device: Device,
+    private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.STATUS), StatusReceiver.StatusDataListener {
     init {
+        StatusReceiver.registerBroadcast(context)
         StatusReceiver.addListener(this)
-        device.context?.let { StatusReceiver.registerBroadcast(it) }
     }
 
-    override fun dispose() {
+    override fun onDispose() {
         StatusReceiver.removeListener(this)
-        super.dispose()
+        super.onDispose()
     }
 
     override fun onReceive(data: Map<String, Any?>) {}
+
     override fun onStatusChanged(batteryLevel: Int, isCharging: Boolean) {
         send(
             mapOf(

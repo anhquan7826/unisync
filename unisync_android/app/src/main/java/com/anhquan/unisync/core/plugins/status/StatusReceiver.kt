@@ -12,8 +12,11 @@ class StatusReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        private val listeners = mutableSetOf<StatusDataListener>()
+        private val listeners = mutableListOf<StatusDataListener>()
         private var hasRegistered = false
+
+        private var lastBatteryLevel: Int = -1
+        private var lastChargingState: Boolean = false
 
         fun registerBroadcast(context: Context) {
             if (hasRegistered) return
@@ -29,6 +32,7 @@ class StatusReceiver : BroadcastReceiver() {
 
         fun addListener(listener: StatusDataListener) {
             listeners.add(listener)
+            listener.onStatusChanged(lastBatteryLevel, lastChargingState)
         }
 
         fun removeListener(listener: StatusDataListener) {
@@ -41,6 +45,10 @@ class StatusReceiver : BroadcastReceiver() {
             BatteryManager.EXTRA_STATUS, -1
         ) == BatteryManager.BATTERY_STATUS_CHARGING
         val level = intent?.getIntExtra("level", -1) ?: -1
-        listeners.forEach { it.onStatusChanged(level, isCharging) }
+        if (lastBatteryLevel != level || lastChargingState != isCharging) {
+            lastBatteryLevel = level
+            lastChargingState = isCharging
+            listeners.forEach { it.onStatusChanged(level, isCharging) }
+        }
     }
 }

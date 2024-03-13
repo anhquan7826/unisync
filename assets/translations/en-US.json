@@ -33,6 +33,7 @@
   "status": {
     "connected": "Connected",
     "disconnected": "Disconnected",
-    "connected_at": "Connected at {}"
+    "connected_at": "Connected at {}",
+    "device_offline": "This device is not reachable. Make sure to connect to the same network as this device!"
   }
 }

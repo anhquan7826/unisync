@@ -24,4 +24,5 @@
     <string name="manage_devices">Manage devices</string>
     <string name="connected_at">Connected at %1$s</string>
     <string name="paired_devices">Paired devices</string>
+    <string name="rename_this_device">Rename this device</string>
 </resources>

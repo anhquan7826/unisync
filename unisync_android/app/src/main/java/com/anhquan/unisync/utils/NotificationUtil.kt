@@ -54,6 +54,7 @@ object NotificationUtil {
             ).apply {
                 description = "This channel is used for Find my phone notification."
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                importance = NotificationManager.IMPORTANCE_HIGH
             }))
         }
     }
@@ -65,7 +66,9 @@ object NotificationUtil {
     }
 
     fun buildPersistentNotification(context: Context): Notification {
-        return Notification.Builder(context, CHANNEL_ID_PERSISTENCE).setOngoing(true)
+        return Notification.Builder(context, CHANNEL_ID_PERSISTENCE)
+            .setOngoing(true)
+            .setSmallIcon(R.drawable.app_icon_monochrome)
             .setContentTitle(context.getString(R.string.app_name))
             .setContentText(context.getString(R.string.persistent_indicator_text))
             .setContentIntent(
@@ -87,10 +90,10 @@ object NotificationUtil {
             .setFullScreenIntent(
                 PendingIntent.getActivity(
                     context,
-                    1,
+                    0,
                     Intent(context, FindMyPhoneActivity::class.java).apply {
-                        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     },
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                 ), true

@@ -116,7 +116,7 @@ class HomeActivity : ComponentActivity() {
             var textFieldValue by remember {
                 mutableStateOf(viewModel.thisDeviceInfo.name)
             }
-            UDialog(title = "Rename this device",
+            UDialog(title = stringResource(R.string.rename_this_device),
                 cancelText = stringResource(id = R.string.cancel),
                 confirmText = stringResource(id = R.string.confirm),
                 onCancel = {

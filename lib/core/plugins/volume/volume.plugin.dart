@@ -4,7 +4,7 @@ import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 
-import '../device.dart';
+import '../../device.dart';
 
 class VolumePlugin extends UnisyncPlugin {
   VolumePlugin(Device device) : super(device, type: DeviceMessage.Type.VOLUME) {

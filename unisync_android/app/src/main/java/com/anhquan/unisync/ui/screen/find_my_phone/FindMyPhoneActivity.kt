@@ -3,12 +3,21 @@ package com.anhquan.unisync.ui.screen.find_my_phone
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.anhquan.unisync.R
 import com.anhquan.unisync.ui.theme.setView
 
 
@@ -29,10 +38,25 @@ class FindMyPhoneActivity : ComponentActivity() {
     @Composable
     private fun FindMyPhoneScreen() {
         Scaffold {
-            Box(
-                modifier = Modifier.padding(it)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Found it")
+                Icon(
+                    painterResource(id = R.drawable.phone_ring),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(64.dp)
+                        .padding(bottom = 16.dp)
+                )
+                TextButton(onClick = {
+                    finish()
+                }) {
+                    Text("Found it")
+                }
             }
         }
     }

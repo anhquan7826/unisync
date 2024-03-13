@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:unisync/models/device_info/device_info.model.dart';
+import 'package:unisync/components/resources/resources.dart';
+import 'package:unisync/components/widgets/image.dart';
 
 class FileTransferScreen extends StatefulWidget {
   const FileTransferScreen({super.key});
@@ -9,80 +10,77 @@ class FileTransferScreen extends StatefulWidget {
 }
 
 class _FileTransferScreenState extends State<FileTransferScreen> {
-  final mockFilesPc = ['boot', 'bin', 'dev', 'etc', 'lib', 'home', 'mnt', 'media', 'opt', 'root', 'tmp', 'sbin', 'usr', 'var'];
-  final mockFilesMobile = [
-    'Alarms',
-    'Android',
-    'Audiobooks',
-    'DCIM',
-    'Documents',
-    'Downloads',
-    'Movies',
-    'Music',
-    'Pictures',
-    'Podcasts',
-    'Recordings',
-    'Ringtones'
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    buildDeviceName('Your PC'),
-                    const Divider(),
-                    Expanded(
-                      child: buildListFolders(mockFilesPc),
-                    ),
-                  ],
-                ),
-              ),
-              const VerticalDivider(
-                width: 0,
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    buildDeviceName('aaaaa'),
-                    const Divider(),
-                    Expanded(
-                      child: buildListFolders(mockFilesMobile),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          UImage.asset(
+            R.icon.error,
+            width: 64,
+            height: 128,
           ),
-        ),
-        const Divider(
-          height: 0,
-        ),
-        SizedBox(
-          height: 70,
-          child: Row(
-            children: [
-              Expanded(
-                child: buildPendingFiles([]),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.send),
-                  label: const Text('Send'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+          const Text('Feature is not available!'),
+        ],
+      ),
     );
+    // return Column(
+    //   children: [
+    //     Expanded(
+    //       child: Row(
+    //         children: [
+    //           Expanded(
+    //             child: Column(
+    //               children: [
+    //                 buildDeviceName('Your PC'),
+    //                 const Divider(),
+    //                 Expanded(
+    //                   child: buildListFolders(mockFilesPc),
+    //                 ),
+    //               ],
+    //             ),
+    //           ),
+    //           const VerticalDivider(
+    //             width: 0,
+    //           ),
+    //           Expanded(
+    //             child: Column(
+    //               children: [
+    //                 buildDeviceName('aaaaa'),
+    //                 const Divider(),
+    //                 Expanded(
+    //                   child: buildListFolders(mockFilesMobile),
+    //                 ),
+    //               ],
+    //             ),
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //     const Divider(
+    //       height: 0,
+    //     ),
+    //     SizedBox(
+    //       height: 70,
+    //       child: Row(
+    //         children: [
+    //           Expanded(
+    //             child: buildPendingFiles([]),
+    //           ),
+    //           Padding(
+    //             padding: const EdgeInsets.symmetric(horizontal: 16),
+    //             child: TextButton.icon(
+    //               onPressed: () {},
+    //               icon: const Icon(Icons.send),
+    //               label: const Text('Send'),
+    //             ),
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //   ],
+    // );
   }
 
   Widget buildDeviceName(String name) {

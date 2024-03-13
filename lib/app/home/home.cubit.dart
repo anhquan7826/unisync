@@ -7,6 +7,7 @@ import 'package:unisync/core/pairing_handler.dart';
 import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
 import 'package:unisync/utils/extensions/list.ext.dart';
+import 'package:unisync/utils/extensions/scope.ext.dart';
 
 class HomeCubit extends Cubit<HomeState> with BaseCubit {
   HomeCubit(Device device)
@@ -19,37 +20,56 @@ class HomeCubit extends Cubit<HomeState> with BaseCubit {
 
   Future<void> _load() async {
     final myDevice = await ConfigUtil.device.getDeviceInfo();
-    final devices = (await ConfigUtil.device.getAllPairedDevices()).map((e) => Device(e));
     safeEmit(state.copyWith(
       myDevice: myDevice,
-      pairedDevices: devices.toList()..remove(state.currentDevice),
     ));
-    for (final device in devices) {
-      _subscriptions[device] = device.notifier.listen((event) {
-        if (event.pairState == PairState.unpaired) {
-          safeEmit(state.copyWith(
-            timestamp: DateTime.now().millisecondsSinceEpoch,
-            pairedDevices: state.pairedDevices.minus(device),
-          ));
-          _subscriptions[device]?.cancel();
-          _subscriptions.remove(device);
-        } else {
-          safeEmit(state.copyWith(
-            timestamp: DateTime.now().millisecondsSinceEpoch,
-          ));
+    Device.instanceNotifier.listen((devices) {
+      devices.forEach(_listenNewDevice);
+      _subscriptions.removeWhere((key, value) {
+        final toRemove = !devices.contains(key);
+        if (toRemove) {
+          value.cancel();
         }
+        return toRemove;
       });
-    }
+    });
+    Device.getAllDevices();
   }
 
   final Map<Device, StreamSubscription> _subscriptions = {};
 
+  void _listenNewDevice(Device device) {
+    if (_subscriptions.containsKey(device)) {
+      return;
+    }
+    _subscriptions[device] = device.notifier.listen((event) {
+      if (event.pairState == PairState.unpaired) {
+        safeEmit(state.copyWith(
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          pairedDevices: state.pairedDevices.minus(device),
+        ));
+      } else if (event.pairState == PairState.paired) {
+        safeEmit(state.copyWith(
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          pairedDevices: state.pairedDevices.let((it) {
+            if (it.contains(device)) {
+              return it;
+            }
+            return it.plus(device);
+          }),
+        ));
+      }
+    });
+  }
+
   void setDevice(Device value) {
+    if (state.currentDevice == value) {
+      return;
+    }
     safeEmit(state.copyWith(
-        timestamp: DateTime.now().millisecondsSinceEpoch,
-        currentDevice: value,
-        pairedDevices: state.pairedDevices
-          ..remove(value)
-          ..insert(0, state.currentDevice)));
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      currentDevice: value,
+    ));
+    ConfigUtil.device.setLastUsedDevice(value.info);
   }
 }

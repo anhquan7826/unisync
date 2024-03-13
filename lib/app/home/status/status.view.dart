@@ -5,12 +5,15 @@ import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/components/widgets/image.dart';
+import 'package:unisync/core/device.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
 import 'status.state.dart';
 
 class StatusScreen extends StatefulWidget {
-  const StatusScreen({super.key});
+  const StatusScreen({super.key, required this.device});
+
+  final Device device;
 
   @override
   State<StatusScreen> createState() => _StatusScreenState();
@@ -20,6 +23,15 @@ class _StatusScreenState extends State<StatusScreen> {
   @override
   void initState() {
     super.initState();
+    getCubit<StatusCubit>().device = widget.device;
+  }
+
+  @override
+  void didUpdateWidget(covariant StatusScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.device != widget.device) {
+      getCubit<StatusCubit>().device = widget.device;
+    }
   }
 
   @override
@@ -38,11 +50,10 @@ class _StatusScreenState extends State<StatusScreen> {
                     left: 64,
                   ),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       buildStatus(state),
-                      buildButtons(),
+                      if (state.isOnline) buildButtons() else Expanded(child: buildDisconnected()),
                     ],
                   ),
                 ),
@@ -101,6 +112,25 @@ class _StatusScreenState extends State<StatusScreen> {
     );
   }
 
+  Widget buildDisconnected() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        UImage.asset(
+          R.icon.warning,
+          width: 64,
+          height: 64,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          R.string.status.deviceOffline,
+          textAlign: TextAlign.center,
+        ).tr(),
+      ],
+    );
+  }
+
   Widget buildStatus(StatusState state) {
     return Padding(
       padding: const EdgeInsets.only(
@@ -110,7 +140,7 @@ class _StatusScreenState extends State<StatusScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            state.info.name,
+            state.device?.info.name ?? 'null',
             style: const TextStyle(
               fontSize: 64,
               fontWeight: FontWeight.bold,

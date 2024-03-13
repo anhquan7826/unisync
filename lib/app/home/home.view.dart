@@ -1,14 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:unisync/app/home/home.cubit.dart';
 import 'package:unisync/app/home/home.state.dart';
+import 'package:unisync/app/home/notification/notification.cubit.dart';
 import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/components/widgets/expandable_list.dart';
 import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/core/device.dart';
+import 'package:unisync/routes/routes.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
@@ -54,13 +57,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     BlocProvider(
-                      create: (context) => StatusCubit(state.currentDevice),
-                      child: const StatusScreen(),
+                      create: (context) => StatusCubit(),
+                      child: StatusScreen(
+                        key: ValueKey(state.currentDevice.info.hashCode),
+                        device: state.currentDevice,
+                      ),
                     ),
                     const FileTransferScreen(),
                     const GalleryScreen(),
                     const MessagesScreen(),
-                    const NotificationScreen(),
+                    BlocProvider(
+                      create: (context) => NotificationCubit(),
+                      child: NotificationScreen(
+                        key: ValueKey(state.currentDevice.info.hashCode + 4),
+                        device: state.currentDevice,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -137,13 +149,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildPairedDevices(HomeState state) {
-    Widget buildDevice(Device device, [void Function()? onTap]) {
+    Widget buildDevice(Device device, {bool isSelected = false, void Function()? onTap}) {
       return Clickable(
         key: GlobalKey(),
         borderRadius: BorderRadius.circular(24),
         onTap: onTap,
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: isSelected ? R.color.mainColor.withOpacity(0.2) : null,
+          ),
           child: Row(
             children: [
               UImage.asset(
@@ -211,7 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(width: 8),
                         Clickable(
                           borderRadius: BorderRadius.circular(16),
-                          onTap: () {},
+                          onTap: () {
+                            // TODO: edit name
+                          },
                           child: Padding(
                             padding: const EdgeInsets.all(2),
                             child: UImage.asset(
@@ -228,17 +246,31 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: buildDevice(state.currentDevice),
+        ),
         ExpandableList(
-          initialChildrenCount: 1,
           children: [
-            buildDevice(state.currentDevice),
-            ...state.pairedDevices.map((e) => buildDevice(e, () {
-                  getCubit<HomeCubit>().setDevice(e);
-                })),
+            Padding(
+              key: GlobalKey(),
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                R.string.deviceConnection.pairedDevices,
+              ).tr(),
+            ),
+            ...state.pairedDevices.map((e) => buildDevice(
+                  e,
+                  isSelected: e == state.currentDevice,
+                  onTap: () {
+                    getCubit<HomeCubit>().setDevice(e);
+                  },
+                )),
             TextButton(
               key: GlobalKey(),
-              onPressed: () {},
+              onPressed: () {
+                context.pushNamed(routes.pair);
+              },
               child: Text(R.string.home.manageDevices).tr(),
             ),
           ],

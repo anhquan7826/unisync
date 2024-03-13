@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:unisync/core/device.dart';
 import 'package:unisync/core/pairing_handler.dart';
 import 'package:unisync/models/device_info/device_info.model.dart';
@@ -16,16 +15,27 @@ class ConnectionCubit extends Cubit<DeviceConnectionState> with BaseCubit {
     load();
   }
 
-  final _subscriptions = CompositeSubscription();
+  late final StreamSubscription _deviceSubscription;
+  final _subscriptions = <Device, StreamSubscription>{};
 
   Future<void> load() async {
-    (await Device.getAllDevices()).forEach(_listenDeviceChange);
-
-    Device.instanceNotifier.listen((event) {
-      if (event.added) {
-        _listenDeviceChange(event.instance);
+    _deviceSubscription = Device.instanceNotifier.listen((event) {
+      for (final device in event) {
+        if (_subscriptions.containsKey(device)) {
+          continue;
+        } else {
+          _listenDeviceChange(device);
+        }
       }
-    }).addTo(_subscriptions);
+      _subscriptions.removeWhere((key, value) {
+        final toRemove = !event.contains(key);
+        if (toRemove) {
+          value.cancel();
+        }
+        return toRemove;
+      });
+    });
+    await Device.getAllDevices();
     // _subscription = DeviceProvider.notifier.listen((value) {
     //   final available = <Device>[];
     //   final requested = <Device>[];
@@ -50,7 +60,7 @@ class ConnectionCubit extends Cubit<DeviceConnectionState> with BaseCubit {
   }
 
   void _listenDeviceChange(Device device) {
-    device.notifier.listen((event) {
+    _subscriptions[device] = device.notifier.listen((event) {
       safeEmit(state.copyWith(
         availableDevices: state.availableDevices.minus(device),
         requestedDevices: state.requestedDevices.minus(device),
@@ -83,7 +93,7 @@ class ConnectionCubit extends Cubit<DeviceConnectionState> with BaseCubit {
           ));
         }
       }
-    }).addTo(_subscriptions);
+    });
   }
 
   void acceptPair(Device device) {
@@ -100,7 +110,10 @@ class ConnectionCubit extends Cubit<DeviceConnectionState> with BaseCubit {
 
   @override
   Future<void> close() {
-    _subscriptions.cancel();
+    _subscriptions.forEach((key, value) {
+      value.cancel();
+    });
+    _deviceSubscription.cancel();
     return super.close();
   }
 }

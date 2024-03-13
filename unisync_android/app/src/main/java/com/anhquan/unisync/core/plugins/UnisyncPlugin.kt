@@ -5,18 +5,9 @@ import androidx.annotation.CallSuper
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.infoLog
-import com.anhquan.unisync.utils.listen
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage.Type) {
-    init {
-        device.notifier.listen {
-            if (!it.connected) {
-                dispose()
-            }
-        }
-    }
-
     val notifier = BehaviorSubject.create<Map<String, Any?>>()
     var isClosed: Boolean = false
         private set
@@ -34,7 +25,7 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
     }
 
     @CallSuper
-    open fun dispose() {
+    open fun onDispose() {
         isClosed = true
         infoLog("${this::class.simpleName}@${device.info.name}: Disposed!")
     }

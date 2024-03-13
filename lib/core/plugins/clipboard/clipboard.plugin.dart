@@ -4,7 +4,7 @@ import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
 
-import '../device.dart';
+import '../../device.dart';
 
 class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
   ClipboardPlugin(Device device) : super(device, type: DeviceMessage.Type.CLIPBOARD) {

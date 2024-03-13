@@ -36,5 +36,6 @@ const _stringResources = (
     connected: 'status.connected',
     disconnected: 'status.disconnected',
     connectedAt: 'status.connected_at',
+    deviceOffline: 'status.device_offline',
   ),
 );

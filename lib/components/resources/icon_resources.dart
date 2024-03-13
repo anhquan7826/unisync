@@ -23,5 +23,7 @@ const _iconResources = (
   phoneRing: 'assets/icons/phone-ring.svg',
   computer: 'assets/icons/computer.svg',
   smartPhone: 'assets/icons/smartphone.svg',
-  edit: 'assets/icons/edit.svg'
+  edit: 'assets/icons/edit.svg',
+  warning: 'assets/icons/warning.svg',
+  error: 'assets/icons/error.svg',
 );
