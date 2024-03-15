@@ -22,6 +22,8 @@ data class DeviceMessage(
         RUN_COMMAND,
         @SerializedName("ring_phone")
         RING_PHONE,
+        @SerializedName("telephony")
+        TELEPHONY,
     }
 
     override fun toString(): String {

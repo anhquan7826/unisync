@@ -86,11 +86,10 @@ object NotificationUtil {
             .setSmallIcon(R.drawable.phone_ring)
             .setContentTitle(context.getString(R.string.found_my_phone))
             .setAutoCancel(true)
-            .setOngoing(true)
             .setFullScreenIntent(
                 PendingIntent.getActivity(
                     context,
-                    0,
+                    1,
                     Intent(context, FindMyPhoneActivity::class.java).apply {
 //                        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
 //                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

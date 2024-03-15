@@ -25,5 +25,6 @@ class DeviceMessage {
     VOLUME: 'volume',
     RUN_COMMAND: 'run_command',
     RING_PHONE: 'ring_phone',
+    TELEPHONY: 'telephony',
   );
 }

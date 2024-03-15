@@ -21,7 +21,7 @@ class NotificationReceiver : NotificationListenerService() {
         }
 
         fun addListener(listener: NotificationListener) {
-            listeners.add(listener)
+            if (!listeners.contains(listener)) listeners.add(listener)
         }
 
         fun removeListener(listener: NotificationListener) {
@@ -35,6 +35,8 @@ class NotificationReceiver : NotificationListenerService() {
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         super.onNotificationPosted(sbn)
+        // Skip Unisync notifications.
+        if (sbn?.packageName == packageName) return
         sbn?.apply {
             listeners.forEach {
                 it.onNotificationReceived(this)

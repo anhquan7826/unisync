@@ -7,6 +7,7 @@ import com.anhquan.unisync.core.plugins.notification.NotificationPlugin
 import com.anhquan.unisync.core.plugins.ring_phone.RingPhonePlugin
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
 import com.anhquan.unisync.core.plugins.status.StatusPlugin
+import com.anhquan.unisync.core.plugins.telephony.TelephonyPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
@@ -124,6 +125,7 @@ class Device private constructor(
             VolumePlugin(this),
             RunCommandPlugin(this),
             RingPhonePlugin(this),
+            TelephonyPlugin(this)
         )
     }
 

@@ -14,11 +14,13 @@ class NotificationPlugin extends UnisyncPlugin {
   @override
   void onReceive(Map<String, dynamic> data) {
     _addNotification(NotificationData(
+      timestamp: int.tryParse(data['timestamp']) ?? -1,
+      appName: data['app_name'].toString(),
       title: data['title'].toString(),
       text: data['text'].toString(),
     ));
     PushNotification.showNotification(
-      title: data['title'].toString(),
+      title: '${data['app_name']} • ${data['title']}',
       text: data['text'].toString(),
     );
   }
@@ -40,10 +42,14 @@ class NotificationPlugin extends UnisyncPlugin {
 
 class NotificationData {
   NotificationData({
+    required this.timestamp,
+    required this.appName,
     required this.title,
     required this.text,
   });
 
+  final int timestamp;
+  final String appName;
   final String title;
   final String text;
 }

@@ -31,13 +31,18 @@ class NotificationPlugin(
         }
     }
 
+    private val packageManager = context.packageManager
+
     private val disposables = CompositeDisposable()
 
-    private var _hasPermission = false
     override val hasPermission: Boolean
-        get() = _hasPermission
+        get() {
+            val notificationListenerList =
+                Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners")
+            return notificationListenerList.contains(context.packageName)
+        }
 
-    override fun requestPermission() {
+    override fun requestPermission(callback: (Boolean) -> Unit) {
         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
         context.startActivity(intent)
     }
@@ -51,9 +56,11 @@ class NotificationPlugin(
     }
 
     override fun onNotificationReceived(sbn: StatusBarNotification) {
-        _hasPermission = true
         val notification = sbn.notification
         notification.extras.apply {
+            val appName = packageManager.getApplicationInfo(sbn.packageName, 0).let {
+                packageManager.getApplicationLabel(it).toString()
+            }
             val title = getString(Notification.EXTRA_TITLE)
             val text = getString(Notification.EXTRA_TEXT)
             runTask(task = {
@@ -67,6 +74,8 @@ class NotificationPlugin(
             }, subscribeOn = Schedulers.computation(), onResult = {
                 send(
                     mapOf(
+                        "timestamp" to sbn.postTime,
+                        "app_name" to appName,
                         "title" to title,
                         "text" to text,
 //                        "icon" to it["icon"],
@@ -78,7 +87,6 @@ class NotificationPlugin(
     }
 
     private fun extractPicture(statusBarNotification: StatusBarNotification): ByteArray? {
-        val extras = statusBarNotification.notification.extras
         val drawable = statusBarNotification.notification.getLargeIcon().loadDrawable(context)
         if (drawable != null) {
             return convertBitmapToByteArray(drawableToBitmap(drawable))

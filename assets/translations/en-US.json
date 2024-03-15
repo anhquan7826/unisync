@@ -35,5 +35,11 @@
     "disconnected": "Disconnected",
     "connected_at": "Connected at {}",
     "device_offline": "This device is not reachable. Make sure to connect to the same network as this device!"
+  },
+  "messages": {
+    "conversations": "Conversations",
+    "conversation_not_chosen": "Choose a conversation or start a new conversation.",
+    "hint": "Enter your message...",
+    "me": "Me: {}"
   }
 }

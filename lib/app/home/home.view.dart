@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:unisync/app/home/home.cubit.dart';
 import 'package:unisync/app/home/home.state.dart';
+import 'package:unisync/app/home/messages/messages.cubit.dart';
 import 'package:unisync/app/home/notification/notification.cubit.dart';
 import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/components/resources/resources.dart';
@@ -33,7 +34,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
+    return BlocConsumer<HomeCubit, HomeState>(
+      listener: (context, state) {
+        if (!state.currentDevice.isOnline) {
+          currentDest = 0;
+          pageController.jumpToPage(currentDest);
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           body: Row(
@@ -65,7 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const FileTransferScreen(),
                     const GalleryScreen(),
-                    const MessagesScreen(),
+                    BlocProvider(
+                      create: (context) => MessagesCubit(),
+                      child: MessagesScreen(
+                        key: ValueKey(state.currentDevice.info.hashCode + 3),
+                        device: state.currentDevice,
+                      ),
+                    ),
                     BlocProvider(
                       create: (context) => NotificationCubit(),
                       child: NotificationScreen(
@@ -86,31 +99,41 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentDest = 0;
 
   Widget buildDeviceFeatures(HomeState state) {
-    Widget buildDestination(int index, {required String label, required Widget icon}) {
+    Widget buildDestination(
+      int index, {
+      bool enabled = true,
+      required String label,
+      required Widget icon,
+    }) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Clickable(
           borderRadius: BorderRadius.circular(24),
-          onTap: () {
-            setState(() {
-              currentDest = index;
-              pageController.jumpToPage(index);
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: index == currentDest ? R.color.mainColor.withOpacity(0.2) : null,
-            ),
-            child: Row(
-              children: [
-                icon,
-                const SizedBox(
-                  width: 16,
-                ),
-                Text(label),
-              ],
+          onTap: !enabled
+              ? null
+              : () {
+                  setState(() {
+                    currentDest = index;
+                    pageController.jumpToPage(index);
+                  });
+                },
+          child: Opacity(
+            opacity: enabled ? 1 : 0.25,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: index == currentDest ? R.color.mainColor.withOpacity(0.2) : null,
+              ),
+              child: Row(
+                children: [
+                  icon,
+                  const SizedBox(
+                    width: 16,
+                  ),
+                  Text(label),
+                ],
+              ),
             ),
           ),
         ),
@@ -126,21 +149,25 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         buildDestination(
           1,
+          enabled: state.currentDevice.isOnline,
           icon: UImage.asset(R.icon.exchange),
           label: R.string.home.fileExplorer.tr(),
         ),
         buildDestination(
           2,
+          enabled: state.currentDevice.isOnline,
           icon: UImage.asset(R.icon.gallery),
           label: R.string.home.gallery.tr(),
         ),
         buildDestination(
           3,
+          enabled: state.currentDevice.isOnline,
           icon: UImage.asset(R.icon.messages),
           label: R.string.home.messages.tr(),
         ),
         buildDestination(
           4,
+          enabled: state.currentDevice.isOnline,
           icon: UImage.asset(R.icon.notification),
           label: R.string.home.notifications.tr(),
         ),

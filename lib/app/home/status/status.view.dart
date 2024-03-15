@@ -19,7 +19,7 @@ class StatusScreen extends StatefulWidget {
   State<StatusScreen> createState() => _StatusScreenState();
 }
 
-class _StatusScreenState extends State<StatusScreen> {
+class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClientMixin<StatusScreen> {
   @override
   void initState() {
     super.initState();
@@ -36,6 +36,7 @@ class _StatusScreenState extends State<StatusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: BlocBuilder<StatusCubit, StatusState>(
         builder: (context, state) {
@@ -256,4 +257,7 @@ class _StatusScreenState extends State<StatusScreen> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -4,6 +4,7 @@ import 'package:unisync/app/home/notification/notification.cubit.dart';
 import 'package:unisync/app/home/notification/notification.state.dart';
 import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/notification/notification_plugin.dart';
+import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -15,7 +16,7 @@ class NotificationScreen extends StatefulWidget {
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _NotificationScreenState extends State<NotificationScreen> with AutomaticKeepAliveClientMixin<NotificationScreen> {
   @override
   void initState() {
     super.initState();
@@ -32,6 +33,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocBuilder<NotificationCubit, NotificationState>(
       builder: (context, state) {
         return Scaffold(
@@ -61,19 +63,71 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Widget buildNotification(NotificationData notification) {
-    return ListTile(
+    return Container(
       key: ValueKey(notification),
-      title: Text(notification.title),
-      subtitle: Text(notification.text),
-      trailing: IconButton(
-        onPressed: () {
-          getCubit<NotificationCubit>().delete(notification);
-        },
-        icon: const Icon(
-          Icons.delete,
-          color: Colors.red,
-        ),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 100),
+      padding: const EdgeInsets.symmetric(
+        vertical: 8,
+        horizontal: 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.black.withOpacity(0.1),
+        //     blurRadius: 16,
+        //     spreadRadius: 4,
+        //   ),
+        // ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  notification.appName,
+                  style: context.labelM.copyWith(
+                    color: Colors.grey,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: 8,
+                    bottom: 4,
+                  ),
+                  child: Text(
+                    notification.title,
+                    style: context.bodyM.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Text(
+                  notification.text,
+                  style: context.bodyS,
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              getCubit<NotificationCubit>().delete(notification);
+            },
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          )
+        ],
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

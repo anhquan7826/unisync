@@ -31,7 +31,7 @@ class StatusReceiver : BroadcastReceiver() {
         }
 
         fun addListener(listener: StatusDataListener) {
-            listeners.add(listener)
+            if (!listeners.contains(listener)) listeners.add(listener)
             listener.onStatusChanged(lastBatteryLevel, lastChargingState)
         }
 

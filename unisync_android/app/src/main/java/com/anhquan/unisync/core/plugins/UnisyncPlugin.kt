@@ -1,6 +1,8 @@
 package com.anhquan.unisync.core.plugins
 
 import android.content.Context
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.CallSuper
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceMessage
@@ -12,11 +14,15 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
     var isClosed: Boolean = false
         private set
 
-    val context: Context get() = device.context!!
+    val context: Context get() = device.context!!.applicationContext
 
     open val hasPermission: Boolean = true
 
-    open fun requestPermission() {}
+    open fun requestPermission(activity: ComponentActivity, callback: (Boolean) -> Unit): ActivityResultLauncher<String>? {
+        return null
+    }
+
+    open fun requestPermission(callback: (Boolean) -> Unit) {}
 
     abstract fun onReceive(data: Map<String, Any?>)
 

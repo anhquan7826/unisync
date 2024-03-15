@@ -38,4 +38,10 @@ const _stringResources = (
     connectedAt: 'status.connected_at',
     deviceOffline: 'status.device_offline',
   ),
+  messages: (
+    conversations: 'messages.conversations',
+    conversationNotChosen: 'messages.conversation_not_chosen',
+    hint: 'messages.hint',
+    me: 'messages.me'
+  ),
 );
