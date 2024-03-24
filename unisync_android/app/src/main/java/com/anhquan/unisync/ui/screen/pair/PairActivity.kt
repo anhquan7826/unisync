@@ -1,5 +1,6 @@
 package com.anhquan.unisync.ui.screen.pair
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.anhquan.unisync.R
+import com.anhquan.unisync.UnisyncActivity
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.theme.setView
@@ -74,9 +76,10 @@ class PairActivity : ComponentActivity() {
 //                                    })
 //                                }
 //                            }
+                        startActivity(Intent(this@PairActivity, UnisyncActivity::class.java))
                         finish()
                     }) {
-                        painterResource(id = R.drawable.arrow_back)
+                        Icon(painterResource(id = R.drawable.arrow_back), contentDescription = null)
                     }
                 },
             )
