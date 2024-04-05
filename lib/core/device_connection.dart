@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/extensions/string.ext.dart';
 import 'package:unisync/utils/extensions/uint8list.ext.dart';
+import 'package:unisync/utils/logger.dart';
 
 import '../models/device_message/device_message.model.dart';
 
@@ -29,21 +30,46 @@ class DeviceConnection {
 
   ConnectionListener? connectionListener;
 
-  String get ipAddress => _socket.address.address;
+  String get ipAddress => _socket.remoteAddress.address;
 
   void _listenInputStream() {
     _streamSubscription = _inputStream.listen(
       (event) {
-        connectionListener?.onMessage(DeviceMessage.fromJson(event.string.toMap()));
+        connectionListener?.onMessage(DeviceMessage.fromJson(
+          event.string.toMap(),
+        ));
       },
       cancelOnError: true,
       onDone: disconnect,
     );
   }
 
-  void send(DeviceMessage message) {
+  Future<void> send(DeviceMessage message, Uint8List? data) async {
     if (_isConnected) {
-      _socket.writeln(message.toJson().toJsonString());
+      final payloadServer = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
+      _socket.writeln(
+        message
+            .copyWith(
+              payload: data == null
+                  ? null
+                  : DeviceMessagePayload(
+                      port: payloadServer.port,
+                      size: data.length,
+                    ),
+            )
+            .toJson()
+            .toJsonString(),
+      );
+      if (data != null) {
+        infoLog('Opening server socket for payload...');
+        final payloadSocket = await payloadServer.first;
+        infoLog('Payload socket server found a connection!');
+        infoLog('Sending payload of size ${data.length}...');
+        payloadSocket
+          ..writeAll(data)
+          ..flush()
+          ..close();
+      }
     }
   }
 

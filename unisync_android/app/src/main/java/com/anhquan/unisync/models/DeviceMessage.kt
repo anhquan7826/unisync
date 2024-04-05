@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class DeviceMessage(
     val time: Long = System.currentTimeMillis(),
     val type: Type,
+    val payload: Payload? = null,
     val body: Map<String, Any?> = mapOf()
 ) {
     enum class Type {
@@ -33,4 +34,9 @@ data class DeviceMessage(
             body: $body
         """.trimIndent()
     }
+
+    data class Payload(
+        val port: Int = -1,
+        val size: Int,
+    )
 }

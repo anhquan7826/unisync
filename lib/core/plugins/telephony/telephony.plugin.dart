@@ -8,7 +8,7 @@ class TelephonyPlugin extends UnisyncPlugin {
   List<Conversation> conversations = [];
 
   @override
-  void onReceive(Map<String, dynamic> data) {
+  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
     if (data.containsKey('messages')) {
       conversations = (data['messages'] as List).map((e) => Conversation.fromJson(e)).toList();
       notifier.add({

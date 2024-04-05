@@ -94,7 +94,7 @@ class Device private constructor(
     }
 
     override fun onMessage(message: DeviceMessage) {
-        infoLog("${this::class.simpleName}@${info.name}: Message received:\n$message")
+        infoLog("${this::class.simpleName}@${info.name}: Message received${if (message.payload != null) " with payload" else ""}:\n$message")
         if (message.type == DeviceMessage.Type.PAIR) {
             pairingHandler.handle(message.body)
         } else if (pairingHandler.state == PairingHandler.PairState.PAIRED) {
@@ -110,10 +110,10 @@ class Device private constructor(
         connection = null
     }
 
-    fun sendMessage(message: DeviceMessage) {
+    fun sendMessage(message: DeviceMessage, payloadData: ByteArray? = null) {
         if (pairingHandler.state == PairingHandler.PairState.PAIRED || message.type == DeviceMessage.Type.PAIR) {
-            connection?.send(message)
-            infoLog("${this::class.simpleName}@${info.name}: Message sent:\n$message")
+            connection?.send(message, payloadData)
+            infoLog("${this::class.simpleName}@${info.name}: Message sent:\n$message${if (message.payload != null) "\nwith payload ${message.payload}" else ""}")
         }
     }
 

@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit
 
 fun runSingle(
     subscribeOn: Scheduler = Schedulers.io(),
-    observeOn: Scheduler = Schedulers.io(),
     onError: (e: Throwable) -> Unit = { it.printStackTrace() },
     callback: () -> Unit,
 ): Disposable {
@@ -19,10 +18,10 @@ fun runSingle(
         try {
             callback.invoke()
             it.onSuccess(Unit)
-        } catch (e: Throwable) {
+        } catch (e: Exception) {
             it.onError(e)
         }
-    }.subscribeOn(subscribeOn).observeOn(observeOn).subscribe({}, onError)
+    }.subscribeOn(subscribeOn).subscribe({}, onError)
 }
 
 fun runPeriodic(
@@ -40,12 +39,16 @@ fun <T : Any> runTask(
     observeOn: Scheduler = Schedulers.io(),
     task: (ObservableEmitter<T>) -> Unit,
     onResult: (T) -> Unit = {},
-    onError: (Throwable) -> Unit = { errorLog(it); it.printStackTrace() },
+    onError: (Throwable) -> Unit = { it.printStackTrace() },
     onComplete: () -> Unit = {}
 ): Disposable {
     return Observable
         .create {
-            task.invoke(it)
+            try {
+                task.invoke(it)
+            } catch (e: Exception) {
+//                it.onError(e)
+            }
         }
         .subscribeOn(subscribeOn)
         .observeOn(observeOn)

@@ -9,7 +9,7 @@ class RunCommandPlugin extends UnisyncPlugin {
   RunCommandPlugin(Device device) : super(device, type: DeviceMessage.Type.RUN_COMMAND);
 
   @override
-  void onReceive(Map<String, dynamic> data) {
+  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
     final command = data['command']!.toString().split(' ');
     final executable = command[0];
     final arguments = command.getRange(1, command.length).toList();

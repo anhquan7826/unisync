@@ -7,7 +7,7 @@ class StatusPlugin extends UnisyncPlugin {
   StatusPlugin(Device device) : super(device, type: DeviceMessage.Type.STATUS);
 
   @override
-  void onReceive(Map<String, dynamic> data) {
+  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
     notifier.add(data);
   }
 

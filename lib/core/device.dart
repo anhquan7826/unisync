@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:rxdart/rxdart.dart';
 import 'package:unisync/core/pairing_handler.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
@@ -107,15 +109,15 @@ class Device with ConnectionListener {
     } else if (_pairingHandler.state == PairState.paired) {
       for (final plugin in plugins) {
         if (plugin.type == message.type) {
-          plugin.onReceive(message.body);
+          plugin.onReceive(message.body, message.payload);
         }
       }
     }
   }
 
-  void sendMessage(DeviceMessage message) {
+  void sendMessage(DeviceMessage message, [Uint8List? data]) {
     if (_pairingHandler.state == PairState.paired || message.type == DeviceMessage.Type.PAIR) {
-      connection?.send(message);
+      connection?.send(message, data);
       infoLog('Device@${info.name}: Message sent:');
       infoLog(message.toJson());
     }

@@ -1,5 +1,3 @@
-import 'package:unisync/database/database.dart';
-import 'package:unisync/database/entity/paired_device.entity.dart';
 import 'package:unisync/utils/configs.dart';
 
 import '../models/device_message/device_message.model.dart';
@@ -44,6 +42,7 @@ class PairingHandler implements PairOperation {
   void acceptPair() {
     if (_state == PairState.pairRequested) {
       device.sendMessage(DeviceMessage(
+        time: DateTime.now().millisecondsSinceEpoch,
         type: DeviceMessage.Type.PAIR,
         body: {
           'message': 'accepted',
@@ -59,6 +58,7 @@ class PairingHandler implements PairOperation {
   void rejectPair() {
     if (_state == PairState.pairRequested) {
       device.sendMessage(DeviceMessage(
+        time: DateTime.now().millisecondsSinceEpoch,
         type: DeviceMessage.Type.PAIR,
         body: {
           'message': 'rejected',
@@ -73,6 +73,7 @@ class PairingHandler implements PairOperation {
   void unpair() {
     if (_state == PairState.paired) {
       device.sendMessage(DeviceMessage(
+        time: DateTime.now().millisecondsSinceEpoch,
         type: DeviceMessage.Type.PAIR,
         body: {
           'message': 'unpair',

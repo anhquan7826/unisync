@@ -18,7 +18,10 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
 
     open val hasPermission: Boolean = true
 
-    open fun requestPermission(activity: ComponentActivity, callback: (Boolean) -> Unit): ActivityResultLauncher<String>? {
+    open fun requestPermission(
+        activity: ComponentActivity,
+        callback: (Boolean) -> Unit
+    ): ActivityResultLauncher<String>? {
         return null
     }
 
@@ -26,8 +29,17 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
 
     abstract fun onReceive(data: Map<String, Any?>)
 
-    fun send(data: Map<String, Any?>) {
-        device.sendMessage(DeviceMessage(type = type, body = data))
+    fun send(data: Map<String, Any?>, payloadData: ByteArray? = null) {
+        device.sendMessage(
+            DeviceMessage(
+                type = type,
+                body = data,
+                payload = payloadData?.let {
+                    DeviceMessage.Payload(size = it.size,)
+                }
+            ),
+            payloadData = payloadData
+        )
     }
 
     @CallSuper

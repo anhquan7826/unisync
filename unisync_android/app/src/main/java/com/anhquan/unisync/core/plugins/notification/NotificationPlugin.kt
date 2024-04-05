@@ -23,7 +23,8 @@ import java.io.IOException
 
 class NotificationPlugin(
     private val device: Device,
-) : UnisyncPlugin(device, DeviceMessage.Type.NOTIFICATION), NotificationReceiver.NotificationListener {
+) : UnisyncPlugin(device, DeviceMessage.Type.NOTIFICATION),
+    NotificationReceiver.NotificationListener {
     init {
         NotificationReceiver.apply {
             addListener(this@NotificationPlugin)
@@ -80,7 +81,8 @@ class NotificationPlugin(
                         "text" to text,
 //                        "icon" to it["icon"],
 //                        "picture" to it["picture"],
-                    )
+                    ),
+                    payloadData = it["icon"]
                 )
             }).addTo(disposables)
         }

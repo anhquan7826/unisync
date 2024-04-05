@@ -1,21 +1,22 @@
 // ignore_for_file: constant_identifier_names
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'device_message.model.g.dart';
+part 'device_message.model.freezed.dart';
 
-@JsonSerializable(includeIfNull: true, explicitToJson: true)
-class DeviceMessage {
-  DeviceMessage({required this.type, required this.body});
+@freezed
+class DeviceMessage with _$DeviceMessage {
+  factory DeviceMessage({
+    required int time,
+    required String type,
+    DeviceMessagePayload? payload,
+    @Default({}) Map<String, dynamic> body,
+  }) = _DeviceMessage;
 
-  factory DeviceMessage.fromJson(Map<String, dynamic> json) => _$DeviceMessageFromJson(json);
-
-  final int time = DateTime.now().millisecondsSinceEpoch;
-  final String type;
-  final Map<String, dynamic> body;
-
-  Map<String, dynamic> toJson() => _$DeviceMessageToJson(this);
+  factory DeviceMessage.fromJson(Map<String, dynamic> json) =>
+      _$DeviceMessageFromJson(json);
 
   static const Type = (
     PAIR: 'pair',
@@ -27,4 +28,15 @@ class DeviceMessage {
     RING_PHONE: 'ring_phone',
     TELEPHONY: 'telephony',
   );
+}
+
+@freezed
+class DeviceMessagePayload with _$DeviceMessagePayload {
+  factory DeviceMessagePayload({
+    required int port,
+    required int size,
+  }) = _DeviceMessagePayload;
+
+  factory DeviceMessagePayload.fromJson(Map<String, dynamic> json) =>
+      _$DeviceMessagePayloadFromJson(json);
 }

@@ -23,7 +23,8 @@ class VolumePlugin extends UnisyncPlugin {
   });
 
   @override
-  Future<void> onReceive(Map<String, dynamic> data) async {
+  Future<void> onReceive(
+      Map<String, dynamic> data, DeviceMessagePayload? payload) async {
     if (data.containsKey('set_volume')) {
       _setVolume(data['set_volume']);
     }
@@ -46,7 +47,9 @@ class VolumePlugin extends UnisyncPlugin {
 }
 
 class _Debouncer {
-  _Debouncer({this.duration = const Duration(milliseconds: 500), required this.callback});
+  _Debouncer(
+      {this.duration = const Duration(milliseconds: 500),
+      required this.callback});
 
   final void Function() callback;
   final Duration duration;

@@ -7,7 +7,7 @@ class RingPhonePlugin extends UnisyncPlugin {
   RingPhonePlugin(Device device) : super(device, type: DeviceMessage.Type.RING_PHONE);
 
   @override
-  void onReceive(Map<String, dynamic> data) {}
+  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {}
 
   void ringMyPhone() {
     send({});

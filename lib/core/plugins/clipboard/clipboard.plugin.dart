@@ -25,7 +25,7 @@ class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
   var _latestClipboard = '';
 
   @override
-  void onReceive(Map<String, dynamic> data) {
+  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
     data['clipboard']?.toString().let((it) async {
       if (_latestClipboard == it) {
         return;
