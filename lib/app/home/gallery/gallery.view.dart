@@ -17,7 +17,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           UImage.asset(
-            R.icon.error,
+            R.vectors.error,
             width: 64,
             height: 128,
           ),

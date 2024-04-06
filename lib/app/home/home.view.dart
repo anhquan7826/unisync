@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
-                color: index == currentDest ? R.color.mainColor.withOpacity(0.2) : null,
+                color: index == currentDest ? Color(R.colors.main_color).withOpacity(0.2) : null,
               ),
               child: Row(
                 children: [
@@ -144,32 +144,32 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         buildDestination(
           0,
-          icon: UImage.asset(R.icon.info),
-          label: R.string.home.information.tr(),
+          icon: UImage.asset(R.vectors.info),
+          label: R.strings.home.information.tr(),
         ),
         buildDestination(
           1,
           enabled: state.currentDevice.isOnline,
-          icon: UImage.asset(R.icon.exchange),
-          label: R.string.home.fileExplorer.tr(),
+          icon: UImage.asset(R.vectors.exchange),
+          label: R.strings.home.file_explorer.tr(),
         ),
         buildDestination(
           2,
           enabled: state.currentDevice.isOnline,
-          icon: UImage.asset(R.icon.gallery),
-          label: R.string.home.gallery.tr(),
+          icon: UImage.asset(R.vectors.gallery),
+          label: R.strings.home.gallery.tr(),
         ),
         buildDestination(
           3,
           enabled: state.currentDevice.isOnline,
-          icon: UImage.asset(R.icon.messages),
-          label: R.string.home.messages.tr(),
+          icon: UImage.asset(R.vectors.messages),
+          label: R.strings.home.messages.tr(),
         ),
         buildDestination(
           4,
           enabled: state.currentDevice.isOnline,
-          icon: UImage.asset(R.icon.notification),
-          label: R.string.home.notifications.tr(),
+          icon: UImage.asset(R.vectors.notification),
+          label: R.strings.home.notifications.tr(),
         ),
       ],
     );
@@ -185,12 +185,12 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            color: isSelected ? R.color.mainColor.withOpacity(0.2) : null,
+            color: isSelected ? Color(R.colors.main_color).withOpacity(0.2) : null,
           ),
           child: Row(
             children: [
               UImage.asset(
-                R.icon.smartPhone,
+                R.vectors.smartphone,
                 width: 24,
                 height: 24,
               ),
@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    device.isOnline ? R.string.status.connected.tr() : R.string.status.disconnected.tr(),
+                    device.isOnline ? R.strings.status.connected.tr() : R.strings.status.disconnected.tr(),
                     style: context.labelM.copyWith(
                       color: device.isOnline ? Colors.green : Colors.grey,
                     ),
@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(
           children: [
             UImage.asset(
-              R.icon.computer,
+              R.vectors.computer,
               width: 42,
               height: 42,
             ),
@@ -235,7 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    R.string.appName,
+                    R.strings.app_name,
                     style: context.displayS.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
@@ -260,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(2),
                             child: UImage.asset(
-                              R.icon.edit,
+                              R.vectors.edit,
                               width: 14,
                               height: 14,
                             ),
@@ -283,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
               key: GlobalKey(),
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
-                R.string.deviceConnection.pairedDevices,
+                R.strings.device_connection.paired_devices,
               ).tr(),
             ),
             ...state.pairedDevices.map((e) => buildDevice(
@@ -298,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 context.pushNamed(routes.pair);
               },
-              child: Text(R.string.home.manageDevices).tr(),
+              child: Text(R.strings.home.manage_devices).tr(),
             ),
           ],
         ),

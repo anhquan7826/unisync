@@ -61,7 +61,7 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
   Widget buildConversationPanel(MessagesState state) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(R.string.messages.conversations).tr(),
+        title: Text(R.strings.messages.conversations).tr(),
         centerTitle: true,
       ),
       body: ListView(
@@ -87,7 +87,7 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Text(
-            R.string.messages.conversationNotChosen,
+            R.strings.messages.conversation_not_chosen,
             textAlign: TextAlign.center,
           ).tr(),
         ),
@@ -140,7 +140,7 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
                   focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide.none,
                   ),
-                  hintText: R.string.messages.hint.tr(),
+                  hintText: R.strings.messages.hint.tr(),
                 ),
                 textInputAction: TextInputAction.send,
                 keyboardType: TextInputType.text,
@@ -172,7 +172,7 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
       borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? R.color.mainColor.withOpacity(0.2) : null,
+          color: isSelected ? Color(R.colors.main_color).withOpacity(0.2) : null,
           borderRadius: BorderRadius.circular(16),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -190,7 +190,7 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    (it.sender == null) ? R.string.messages.me.tr(args: [it.content]) : it.content,
+                    (it.sender == null) ? R.strings.messages.me.tr(args: [it.content]) : it.content,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.bodyS.copyWith(
@@ -229,7 +229,7 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: m.sender == null ? Colors.grey.withOpacity(0.5) : R.color.mainColor.withOpacity(0.25),
+              color: m.sender == null ? Colors.grey.withOpacity(0.5) : Color(R.colors.main_color).withOpacity(0.25),
             ),
             child: Text(m.content),
           ),

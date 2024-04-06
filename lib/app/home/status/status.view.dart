@@ -119,13 +119,13 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         UImage.asset(
-          R.icon.warning,
+          R.vectors.warning,
           width: 64,
           height: 64,
         ),
         const SizedBox(height: 16),
         Text(
-          R.string.status.deviceOffline,
+          R.strings.status.device_offline,
           textAlign: TextAlign.center,
         ).tr(),
       ],
@@ -149,7 +149,7 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
           ),
           const SizedBox(height: 8),
           textWithLeading(
-            state.isOnline ? R.string.status.connectedAt.tr(args: [state.ipAddress.toString()]) : R.string.status.disconnected.tr(),
+            state.isOnline ? R.strings.status.connected_at.tr(args: [state.ipAddress.toString()]) : R.strings.status.disconnected.tr(),
             leading: Icon(
               Icons.circle,
               size: 12,
@@ -166,21 +166,21 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
                     colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
                     child: UImage.asset(() {
                       if (state.isCharging) {
-                        return R.icon.battery.charging;
+                        return R.vectors.battery_bolt;
                       } else {
                         if (state.batteryLevel <= 20) {
-                          return R.icon.battery.empty;
+                          return R.vectors.battery_empty;
                         }
                         if (state.batteryLevel <= 40) {
-                          return R.icon.battery.quarter;
+                          return R.vectors.battery_quarter;
                         }
                         if (state.batteryLevel <= 60) {
-                          return R.icon.battery.half;
+                          return R.vectors.battery_half;
                         }
                         if (state.batteryLevel <= 80) {
-                          return R.icon.battery.threeQuarter;
+                          return R.vectors.battery_three_quarters;
                         }
-                        return R.icon.battery.full;
+                        return R.vectors.battery_full;
                       }
                     }.call()),
                   ),
@@ -244,7 +244,7 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
             buildButton(
               label: 'Find my phone',
               icon: UImage.asset(
-                R.icon.phoneRing,
+                R.vectors.phone_ring,
                 width: 32,
                 height: 32,
               ),

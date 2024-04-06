@@ -34,7 +34,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   AppBar buildAppBar() {
     return AppBar(
-      title: Text(R.string.deviceConnection.connectToDevice).tr(),
+      title: Text(R.strings.device_connection.connect_to_device).tr(),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
         onPressed: () {
@@ -60,7 +60,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       slivers: [
         if (state.pairedDevices.isNotEmpty) ...[
           SliverAppBar(
-            title: Text(R.string.deviceConnection.pairedDevices).tr(),
+            title: Text(R.strings.device_connection.paired_devices).tr(),
             automaticallyImplyLeading: false,
             primary: false,
             floating: true,
@@ -74,7 +74,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
         ],
         if (state.requestedDevices.isNotEmpty) ...[
           SliverAppBar(
-            title: Text(R.string.deviceConnection.requestedDevices).tr(),
+            title: Text(R.strings.device_connection.requested_devices).tr(),
             automaticallyImplyLeading: false,
             primary: false,
             floating: true,
@@ -88,7 +88,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
         ],
         if (state.availableDevices.isNotEmpty) ...[
           SliverAppBar(
-            title: Text(R.string.deviceConnection.availableDevices).tr(),
+            title: Text(R.strings.device_connection.available_devices).tr(),
             automaticallyImplyLeading: false,
             primary: false,
             floating: true,
@@ -108,7 +108,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: UImage.asset(
-        R.icon.android,
+        R.vectors.android,
         width: 24,
       ),
       title: Text(device.info.name),
@@ -137,7 +137,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
     return ListTile(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       leading: UImage.asset(
-        R.icon.android,
+        R.vectors.android,
         width: 24,
       ),
       title: Text(device.info.name),

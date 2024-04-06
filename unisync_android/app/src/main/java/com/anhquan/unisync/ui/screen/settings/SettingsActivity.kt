@@ -45,7 +45,7 @@ class SettingsActivity : ComponentActivity() {
             modifier = Modifier.systemBarsPadding(),
             topBar = {
                 UAppBar(
-                    title = { Text(stringResource(R.string.settings)) },
+                    title = { Text(stringResource(R.strings.settings)) },
                     leading = painterResource(id = R.drawable.arrow_back),
                     onLeadingPressed = { finish() })
             }
@@ -60,7 +60,7 @@ class SettingsActivity : ComponentActivity() {
                             modifier = Modifier.padding(horizontal = 16.dp)
                         ) {
                             Text(
-                                stringResource(R.string.connected_devices),
+                                stringResource(R.strings.connected_devices),
                                 modifier = Modifier.weight(1f),
                                 fontSize = 12.sp
                             )
@@ -74,7 +74,7 @@ class SettingsActivity : ComponentActivity() {
                                     )
                                 }
                             ) {
-                                Text(stringResource(R.string.find_new_device))
+                                Text(stringResource(R.strings.find_new_device))
                             }
                         }
                         Divider(modifier = Modifier.fillMaxWidth())

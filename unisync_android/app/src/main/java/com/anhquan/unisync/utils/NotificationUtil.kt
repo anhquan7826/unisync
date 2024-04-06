@@ -33,29 +33,31 @@ object NotificationUtil {
 
     private fun registerChannels() {
         notiManager.apply {
-            createNotificationChannels(listOf(NotificationChannel(
-                CHANNEL_ID_PERSISTENCE,
-                "Persistent Notification",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "This channel is used for Unisync background service."
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            }, NotificationChannel(
-                CHANNEL_ID_PAIR,
-                "Location Update Notification",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "This channel is used for pairing notification."
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            }, NotificationChannel(
-                CHANNEL_ID_RING_PHONE,
-                "Find my phone Notifition",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "This channel is used for Find my phone notification."
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                importance = NotificationManager.IMPORTANCE_HIGH
-            }))
+            createNotificationChannels(
+                listOf(NotificationChannel(
+                    CHANNEL_ID_PERSISTENCE,
+                    "Persistent Notification",
+                    NotificationManager.IMPORTANCE_LOW
+                ).apply {
+                    description = "This channel is used for Unisync background service."
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                }, NotificationChannel(
+                    CHANNEL_ID_PAIR,
+                    "Location Update Notification",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "This channel is used for pairing notification."
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                }, NotificationChannel(
+                    CHANNEL_ID_RING_PHONE,
+                    "Find my phone Notifition",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "This channel is used for Find my phone notification."
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    importance = NotificationManager.IMPORTANCE_HIGH
+                })
+            )
         }
     }
 
@@ -69,8 +71,8 @@ object NotificationUtil {
         return Notification.Builder(context, CHANNEL_ID_PERSISTENCE)
             .setOngoing(true)
             .setSmallIcon(R.drawable.app_icon_monochrome)
-            .setContentTitle(context.getString(R.string.app_name))
-            .setContentText(context.getString(R.string.persistent_indicator_text))
+            .setContentTitle(context.getString(R.strings.app_name))
+            .setContentText(context.getString(R.strings.persistent_indicator_text))
             .setContentIntent(
                 PendingIntent.getActivity(
                     context,
@@ -84,7 +86,7 @@ object NotificationUtil {
     fun buildFindMyPhoneNotification(context: Context): Notification {
         return Notification.Builder(context, CHANNEL_ID_RING_PHONE)
             .setSmallIcon(R.drawable.phone_ring)
-            .setContentTitle(context.getString(R.string.found_my_phone))
+            .setContentTitle(context.getString(R.strings.found_my_phone))
             .setAutoCancel(true)
             .setFullScreenIntent(
                 PendingIntent.getActivity(
