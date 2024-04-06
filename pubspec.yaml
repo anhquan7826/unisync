@@ -40,6 +40,7 @@ dependencies:
   floor: ^1.4.2
   sqflite: ^2.3.2
   freezed: ^2.4.7
+  pigeon: ^17.1.3
 #  flutter_volume_controller: ^1.3.1
 
 dev_dependencies:

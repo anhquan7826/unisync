@@ -11,8 +11,7 @@ import 'package:unisync/utils/push_notification.dart';
 import '../../device.dart';
 
 class NotificationPlugin extends UnisyncPlugin {
-  NotificationPlugin(Device device)
-      : super(device, type: DeviceMessage.Type.NOTIFICATION);
+  NotificationPlugin(Device device) : super(device, type: DeviceMessage.Type.NOTIFICATION);
 
   final List<NotificationData> _notifications = [];
 
@@ -33,7 +32,7 @@ class NotificationPlugin extends UnisyncPlugin {
     if (payload != null) {
       handlePayload(device.ipAddress!, payload).then(
         (value) {
-          debugLog(value);
+          infoLog('Received payload of size ${value.length}!');
         },
         onError: (e) {
           errorLog(e);
@@ -71,8 +70,8 @@ class NotificationData {
   final String text;
 }
 
-Future<Uint8List> handlePayload(
-    String address, DeviceMessagePayload payload) async {
+Future<Uint8List> handlePayload(String address, DeviceMessagePayload payload) async {
+  debugLog('Start receiving payload from $address:${payload.port}...');
   return Isolate.run<Uint8List>(() async {
     final completer = Completer<Uint8List>();
     try {
@@ -81,7 +80,7 @@ Future<Uint8List> handlePayload(
       var progress = 0;
       infoLog('Progress: 0%');
       socket.listen((event) {
-        data.addAll(event);
+        data.setRange(progress, progress + event.length, event);
         progress += event.length;
         infoLog('Progress: ${(progress / payload.size) * 100}%');
         if (progress == payload.size) {

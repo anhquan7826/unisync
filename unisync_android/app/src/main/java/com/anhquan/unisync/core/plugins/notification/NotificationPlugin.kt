@@ -15,6 +15,7 @@ import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.extensions.addTo
 import com.anhquan.unisync.utils.runTask
+import com.anhquan.unisync.utils.warningLog
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.ByteArrayOutputStream
@@ -57,34 +58,36 @@ class NotificationPlugin(
     }
 
     override fun onNotificationReceived(sbn: StatusBarNotification) {
-        val notification = sbn.notification
-        notification.extras.apply {
-            val appName = packageManager.getApplicationInfo(sbn.packageName, 0).let {
-                packageManager.getApplicationLabel(it).toString()
-            }
-            val title = getString(Notification.EXTRA_TITLE)
-            val text = getString(Notification.EXTRA_TEXT)
-            runTask(task = {
-                val icon = extractIcon(sbn)
-                val picture = extractPicture(sbn)
-                it.onNext(
-                    mapOf(
-                        "icon" to icon, "picture" to picture
+        try {
+            val notification = sbn.notification
+            notification.extras.apply {
+                val appName = packageManager.getApplicationInfo(sbn.packageName, 0).let {
+                    packageManager.getApplicationLabel(it).toString()
+                }
+                val title = getString(Notification.EXTRA_TITLE)
+                val text = getString(Notification.EXTRA_TEXT)
+                runTask(task = {
+                    val icon = extractIcon(sbn)
+                    val picture = extractPicture(sbn)
+                    it.onNext(
+                        mapOf(
+                            "icon" to icon, "picture" to picture
+                        )
                     )
-                )
-            }, subscribeOn = Schedulers.computation(), onResult = {
-                send(
-                    mapOf(
-                        "timestamp" to sbn.postTime,
-                        "app_name" to appName,
-                        "title" to title,
-                        "text" to text,
-//                        "icon" to it["icon"],
-//                        "picture" to it["picture"],
-                    ),
-                    payloadData = it["icon"]
-                )
-            }).addTo(disposables)
+                }, subscribeOn = Schedulers.computation(), onResult = {
+                    send(
+                        mapOf(
+                            "timestamp" to sbn.postTime,
+                            "app_name" to appName,
+                            "title" to title,
+                            "text" to text,
+                        ),
+                        payloadData = it["icon"]
+                    )
+                }).addTo(disposables)
+            }
+        } catch (e: Exception) {
+            warningLog("Something went wrong at ${this::class.simpleName}:\n${e.message}")
         }
     }
 
