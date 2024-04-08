@@ -1,5 +1,4 @@
 part 'script_resources.dart';
-part 'icon_resources.dart';
 part 'font_resources.dart';
 part 'vector_resources.dart';
 part 'string_resources.dart';

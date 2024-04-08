@@ -71,6 +71,9 @@ class Device with ConnectionListener {
     } else {
       _connection!.connectionListener = this;
       infoLog('Device@${info.name}: Connected!');
+      if (pairState == PairState.markUnpaired) {
+        pairOperation.unpair();
+      }
     }
     _notify();
   }

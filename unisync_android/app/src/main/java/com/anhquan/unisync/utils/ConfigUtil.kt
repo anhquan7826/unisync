@@ -61,14 +61,15 @@ object ConfigUtil {
             }
         }
 
-        fun getDeviceInfo(id: String, callback: (DeviceInfo?) -> Unit) {
+        fun getDeviceInfo(id: String, callback: (DeviceInfo?, Boolean?) -> Unit) {
             database.pairedDeviceDao().get(id).listen(onError = {
-                callback(null)
+                callback(null, null)
             }) {
                 callback(
                     DeviceInfo(
                         id = it.id, name = it.name, deviceType = it.type
-                    )
+                    ),
+                    it.unpaired
                 )
             }
         }

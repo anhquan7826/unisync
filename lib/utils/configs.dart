@@ -6,7 +6,6 @@ import 'package:unisync/database/database.dart';
 import 'package:unisync/database/entity/paired_device.entity.dart';
 import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
-import 'package:unisync/utils/extensions/string.ext.dart';
 
 import '../models/device_info/device_info.model.dart';
 import 'constants/sp_key.dart';
@@ -76,9 +75,12 @@ class _DeviceConfig {
     }).toList();
   }
 
-  Future<DeviceInfo?> getPairedDeviceInfo(String id) async {
+  Future<(DeviceInfo, bool)?> getPairedDeviceInfo(String id) async {
     return (await _database.pairedDeviceDao.get(id))?.let((it) {
-      return DeviceInfo(id: it.id, name: it.name, deviceType: it.type);
+      return (
+        DeviceInfo(id: it.id, name: it.name, deviceType: it.type),
+        it.unpaired,
+      );
     });
   }
 }

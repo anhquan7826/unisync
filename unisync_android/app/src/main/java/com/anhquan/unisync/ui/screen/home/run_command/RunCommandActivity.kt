@@ -113,9 +113,9 @@ class RunCommandActivity : ComponentActivity() {
             mutableStateOf("")
         }
         UDialog(
-            title = stringResource(R.strings.add_new_command),
-            cancelText = stringResource(id = R.strings.cancel),
-            confirmText = stringResource(R.strings.add),
+            title = stringResource(R.string.add_new_command),
+            cancelText = stringResource(id = R.string.cancel),
+            confirmText = stringResource(R.string.add),
             onCancel = onDismiss,
             onConfirm = {
                 onAdd(command)

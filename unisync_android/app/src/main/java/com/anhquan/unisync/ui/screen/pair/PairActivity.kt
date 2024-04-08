@@ -62,7 +62,7 @@ class PairActivity : ComponentActivity() {
         Scaffold(contentWindowInsets = WindowInsets(left = 16.dp, right = 16.dp), topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(R.strings.manage_devices))
+                    Text(text = stringResource(R.string.manage_devices))
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -88,19 +88,19 @@ class PairActivity : ComponentActivity() {
                 modifier = Modifier.padding(padding)
             ) {
                 if (state.pairedDevices.isNotEmpty()) {
-                    Text(stringResource(R.strings.paired_devices))
+                    Text(stringResource(R.string.paired_devices))
                     state.pairedDevices.forEach {
                         PairedDeviceTile(device = it)
                     }
                 }
                 if (state.requestedDevices.isNotEmpty()) {
-                    Text(stringResource(R.strings.requested_devices))
+                    Text(stringResource(R.string.requested_devices))
                     state.requestedDevices.forEach {
                         RequestedDeviceTile(device = it)
                     }
                 }
                 if (state.availableDevices.isNotEmpty()) {
-                    Text(text = stringResource(id = R.strings.available_devices))
+                    Text(text = stringResource(id = R.string.available_devices))
                     state.availableDevices.forEach {
                         AvailableDeviceTile(device = it)
                     }
@@ -133,7 +133,7 @@ class PairActivity : ComponentActivity() {
                         .padding(end = 8.dp)
                 )
                 Text(
-                    stringResource(id = R.strings.request_pair),
+                    stringResource(id = R.string.request_pair),
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
@@ -175,12 +175,12 @@ class PairActivity : ComponentActivity() {
         }, supportingContent = {
             if (device.isOnline) {
                 if (device.ipAddress != null) {
-                    Text(stringResource(R.strings.connected_at, device.ipAddress ?: ""))
+                    Text(stringResource(R.string.connected_at, device.ipAddress ?: ""))
                 } else {
-                    Text(stringResource(id = R.strings.connected))
+                    Text(stringResource(id = R.string.connected))
                 }
             } else {
-                Text(stringResource(id = R.strings.disconnected))
+                Text(stringResource(id = R.string.disconnected))
             }
         }, trailingContent = {
             IconButton(onClick = {
@@ -206,7 +206,7 @@ class PairActivity : ComponentActivity() {
                     Divider(modifier = Modifier.fillMaxWidth())
                     Row {
                         TextButton(onClick = onAccept) {
-                            Text(stringResource(R.strings.request_pair))
+                            Text(stringResource(R.string.request_pair))
                         }
                     }
                 }

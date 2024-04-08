@@ -8,5 +8,6 @@ data class  PairedDeviceEntity(
     @PrimaryKey val id: String,
     val name: String,
     val type: String,
-    val lastAccessed: Long = System.currentTimeMillis()
+    val lastAccessed: Long = System.currentTimeMillis(),
+    val unpaired: Boolean = false
 )

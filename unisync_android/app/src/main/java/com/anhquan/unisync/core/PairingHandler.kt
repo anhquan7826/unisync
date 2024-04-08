@@ -42,12 +42,16 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
     }
 
     init {
-        ConfigUtil.Device.getDeviceInfo(device.info.id) {
-            state = if (it != null) {
-                if (it.toString() != device.info.toString()) {
-                    ConfigUtil.Device.addPairedDevice(device.info)
+        ConfigUtil.Device.getDeviceInfo(device.info.id) { info, markUnpaired ->
+            state = if (info != null) {
+                if (markUnpaired == true) {
+                    PairState.MARK_UNPAIRED
+                } else {
+                    if (info.toString() != device.info.toString()) {
+                        ConfigUtil.Device.addPairedDevice(device.info)
+                    }
+                    PairState.PAIRED
                 }
-                PairState.PAIRED
             } else {
                 PairState.NOT_PAIRED
             }
@@ -56,7 +60,7 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
     }
 
     enum class PairState {
-        UNKNOWN, NOT_PAIRED, PAIRED, REQUESTED,
+        UNKNOWN, NOT_PAIRED, PAIRED, MARK_UNPAIRED, REQUESTED,
     }
 
     val isReady: Boolean get() = state != PairState.UNKNOWN

@@ -104,6 +104,10 @@ class ConnectionCubit extends Cubit<DeviceConnectionState> with BaseCubit {
     device.pairOperation.rejectPair();
   }
 
+  void unpair(Device device) {
+    device.pairOperation.unpair();
+  }
+
   Future<DeviceInfo?> getLastConnected() {
     return ConfigUtil.device.getLastUsedDevice();
   }

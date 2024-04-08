@@ -85,7 +85,7 @@ class _$UnisyncDatabase extends UnisyncDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `paired_devices` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `lastAccessed` INTEGER NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `paired_devices` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `type` TEXT NOT NULL, `lastAccessed` INTEGER NOT NULL, `unpaired` INTEGER NOT NULL, PRIMARY KEY (`id`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -112,7 +112,8 @@ class _$PairedDeviceDao extends PairedDeviceDao {
                   'id': item.id,
                   'name': item.name,
                   'type': item.type,
-                  'lastAccessed': item.lastAccessed
+                  'lastAccessed': item.lastAccessed,
+                  'unpaired': item.unpaired ? 1 : 0
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -130,7 +131,8 @@ class _$PairedDeviceDao extends PairedDeviceDao {
         mapper: (Map<String, Object?> row) => PairedDeviceEntity(
             id: row['id'] as String,
             name: row['name'] as String,
-            type: row['type'] as String));
+            type: row['type'] as String,
+            unpaired: (row['unpaired'] as int) != 0));
   }
 
   @override
@@ -139,7 +141,15 @@ class _$PairedDeviceDao extends PairedDeviceDao {
         mapper: (Map<String, Object?> row) => PairedDeviceEntity(
             id: row['id'] as String,
             name: row['name'] as String,
-            type: row['type'] as String),
+            type: row['type'] as String,
+            unpaired: (row['unpaired'] as int) != 0),
+        arguments: [id]);
+  }
+
+  @override
+  Future<void> markUnpaired(String id) async {
+    await _queryAdapter.queryNoReturn(
+        'UPDATE paired_devices SET unpaired = true WHERE id = ?1',
         arguments: [id]);
   }
 
@@ -165,7 +175,8 @@ class _$PairedDeviceDao extends PairedDeviceDao {
         mapper: (Map<String, Object?> row) => PairedDeviceEntity(
             id: row['id'] as String,
             name: row['name'] as String,
-            type: row['type'] as String));
+            type: row['type'] as String,
+            unpaired: (row['unpaired'] as int) != 0));
   }
 
   @override

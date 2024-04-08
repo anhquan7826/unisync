@@ -13,6 +13,9 @@ abstract class PairedDeviceDao {
   @Insert(onConflict: OnConflictStrategy.replace)
   Future<void> add(PairedDeviceEntity device);
 
+  @Query('UPDATE ${DBTables.PAIRED_DEVICES} SET unpaired = true WHERE id = :id')
+  Future<void> markUnpaired(String id);
+
   @Query('DELETE FROM ${DBTables.PAIRED_DEVICES} WHERE id = :id')
   Future<void> remove(String id);
 

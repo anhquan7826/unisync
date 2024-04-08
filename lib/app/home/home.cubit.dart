@@ -72,4 +72,15 @@ class HomeCubit extends Cubit<HomeState> with BaseCubit {
     ));
     ConfigUtil.device.setLastUsedDevice(value.info);
   }
+
+  Future<void> renameMyDevice(String newName) async {
+    final newDeviceInfo = state.myDevice!.copy(
+      name: newName,
+    );
+    await ConfigUtil.device.setDeviceInfo(newDeviceInfo);
+    safeEmit(state.copyWith(
+      myDevice: newDeviceInfo,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+    ));
+  }
 }

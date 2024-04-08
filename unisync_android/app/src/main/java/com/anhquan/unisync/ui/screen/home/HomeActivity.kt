@@ -60,7 +60,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
-import com.anhquan.unisync.constants.Status.*
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.SliderTile
@@ -98,9 +97,9 @@ class HomeActivity : ComponentActivity() {
 
         if (unlinkDialog) {
             UDialog(painter = painterResource(id = R.drawable.warning),
-                title = stringResource(id = R.strings.warning),
-                cancelText = stringResource(id = R.strings.cancel),
-                confirmText = stringResource(id = R.strings.confirm),
+                title = stringResource(id = R.string.warning),
+                cancelText = stringResource(id = R.string.cancel),
+                confirmText = stringResource(id = R.string.confirm),
                 onCancel = {
                     unlinkDialog = false
                 },
@@ -108,7 +107,7 @@ class HomeActivity : ComponentActivity() {
                     unlinkDialog = false
                     viewModel.unpair()
                 }) {
-                Text(stringResource(id = R.strings.unpair_confirmation))
+                Text(stringResource(id = R.string.unpair_confirmation))
             }
         }
 
@@ -116,9 +115,9 @@ class HomeActivity : ComponentActivity() {
             var textFieldValue by remember {
                 mutableStateOf(viewModel.thisDeviceInfo.name)
             }
-            UDialog(title = stringResource(R.strings.rename_this_device),
-                cancelText = stringResource(id = R.strings.cancel),
-                confirmText = stringResource(id = R.strings.confirm),
+            UDialog(title = stringResource(R.string.rename_this_device),
+                cancelText = stringResource(id = R.string.cancel),
+                confirmText = stringResource(id = R.string.confirm),
                 onCancel = {
                     renameDialog = false
                 },
@@ -165,7 +164,7 @@ class HomeActivity : ComponentActivity() {
                             modifier = Modifier.weight(1F),
                         ) {
                             Text(
-                                stringResource(R.strings.app_name),
+                                stringResource(R.string.app_name),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -182,11 +181,11 @@ class HomeActivity : ComponentActivity() {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.strings.devices))
+                        Text(stringResource(R.string.devices))
                         TextButton(onClick = {
                             startActivity(Intent(this@HomeActivity, PairActivity::class.java))
                         }) {
-                            Text(stringResource(R.strings.manage))
+                            Text(stringResource(R.string.manage))
                         }
                     }
                     viewModel.pairedDevices.forEach {
@@ -228,8 +227,8 @@ class HomeActivity : ComponentActivity() {
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    if (state.isOnline) stringResource(R.strings.connected) else stringResource(
-                                        R.strings.disconnected
+                                    if (state.isOnline) stringResource(R.string.connected) else stringResource(
+                                        R.string.disconnected
                                     ), fontSize = 10.sp
                                 )
                             }
@@ -332,7 +331,7 @@ class HomeActivity : ComponentActivity() {
                                 )
                         )
                         Text(
-                            stringResource(R.strings.device_offline),
+                            stringResource(R.string.device_offline),
                             color = Color.Gray,
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center
@@ -395,7 +394,7 @@ class HomeActivity : ComponentActivity() {
             Text(device.info.name)
         }, supportingContent = {
             Text(
-                if (device.isOnline) stringResource(R.strings.connected) else stringResource(R.strings.disconnected),
+                if (device.isOnline) stringResource(R.string.connected) else stringResource(R.string.disconnected),
                 fontSize = 12.sp,
                 color = Color.Gray
             )

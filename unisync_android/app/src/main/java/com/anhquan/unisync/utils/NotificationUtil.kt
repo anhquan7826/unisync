@@ -71,8 +71,8 @@ object NotificationUtil {
         return Notification.Builder(context, CHANNEL_ID_PERSISTENCE)
             .setOngoing(true)
             .setSmallIcon(R.drawable.app_icon_monochrome)
-            .setContentTitle(context.getString(R.strings.app_name))
-            .setContentText(context.getString(R.strings.persistent_indicator_text))
+            .setContentTitle(context.getString(R.string.app_name))
+            .setContentText(context.getString(R.string.persistent_indicator_text))
             .setContentIntent(
                 PendingIntent.getActivity(
                     context,
@@ -86,7 +86,7 @@ object NotificationUtil {
     fun buildFindMyPhoneNotification(context: Context): Notification {
         return Notification.Builder(context, CHANNEL_ID_RING_PHONE)
             .setSmallIcon(R.drawable.phone_ring)
-            .setContentTitle(context.getString(R.strings.found_my_phone))
+            .setContentTitle(context.getString(R.string.found_my_phone))
             .setAutoCancel(true)
             .setFullScreenIntent(
                 PendingIntent.getActivity(

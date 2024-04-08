@@ -3,7 +3,7 @@ import 'package:unisync/utils/configs.dart';
 import '../models/device_message/device_message.model.dart';
 import 'device.dart';
 
-enum PairState { unpaired, paired, pairRequested, unknown }
+enum PairState { unpaired, paired, pairRequested, markUnpaired, unknown }
 
 abstract interface class PairOperation {
   void acceptPair();
@@ -26,11 +26,17 @@ class PairingHandler implements PairOperation {
   PairState get state => _state;
 
   Future<void> initiate() async {
-    final info = await ConfigUtil.device.getPairedDeviceInfo(device.info.id);
-    if (info != null) {
-      _state = PairState.paired;
-      if (info.toString() != device.info.toString()) {
-        ConfigUtil.device.addPairedDevice(device.info);
+    final result = await ConfigUtil.device.getPairedDeviceInfo(device.info.id);
+    final info = result?.$1;
+    final markUnpaired = result?.$2;
+    if (result != null) {
+      if (markUnpaired == true) {
+        _state = PairState.markUnpaired;
+      } else {
+        _state = PairState.paired;
+        if (info.toString() != device.info.toString()) {
+          ConfigUtil.device.addPairedDevice(device.info);
+        }
       }
     } else {
       _state = PairState.unpaired;

@@ -5,7 +5,7 @@
     "description": "A tool to connect your phone and your PC together."
   },
   "device_connection": {
-    "connect_to_device": "Connect to a device",
+    "manage_devices": "manage_devices",
     "add_manually": "Add device manually",
     "id": "ID",
     "ip_address": "IP Address",
@@ -20,7 +20,11 @@
     "available_devices": "Available devices",
     "requested_devices": "Requested devices",
     "paired_devices": "Paired devices",
-    "rescan": "Rescan"
+    "rescan": "Rescan",
+    "warning": "Warning",
+    "delete_device_confirmation": "Are you sure to unpair this device?",
+    "unpair": "Unpair",
+    "pair_hint": "To pair a new device, go to Manage devices in your phone and select this device."
   },
   "home": {
     "manage_devices": "Manage devices",
@@ -28,7 +32,10 @@
     "file_explorer": "File Explorer",
     "gallery": "Gallery",
     "messages": "Messages",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "rename_this_device": "Rename this device",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "status": {
     "connected": "Connected",

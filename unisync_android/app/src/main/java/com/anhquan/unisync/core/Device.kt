@@ -78,8 +78,11 @@ class Device private constructor(
                     removeInstance(info)
                 }
             } else {
-                infoLog("${this::class.simpleName}@${info.name}: Connected!")
                 _connection!!.connectionListener = this
+                infoLog("${this::class.simpleName}@${info.name}: Connected!")
+                if (pairState == PairingHandler.PairState.MARK_UNPAIRED) {
+                    pairOperation.unpair()
+                }
             }
             notify()
         }

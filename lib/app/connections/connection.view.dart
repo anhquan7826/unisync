@@ -6,6 +6,7 @@ import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/core/device.dart';
 import 'package:unisync/routes/routes.dart';
+import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
@@ -34,7 +35,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
 
   AppBar buildAppBar() {
     return AppBar(
-      title: Text(R.strings.device_connection.connect_to_device).tr(),
+      title: Text(R.strings.device_connection.manage_devices).tr(),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
         onPressed: () {
@@ -58,6 +59,18 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
   Widget buildBody(DeviceConnectionState state) {
     return CustomScrollView(
       slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              R.strings.device_connection.pair_hint.tr(),
+              style: context.labelS.copyWith(
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
         if (state.pairedDevices.isNotEmpty) ...[
           SliverAppBar(
             title: Text(R.strings.device_connection.paired_devices).tr(),
@@ -86,20 +99,20 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             }).toList(),
           ),
         ],
-        if (state.availableDevices.isNotEmpty) ...[
-          SliverAppBar(
-            title: Text(R.strings.device_connection.available_devices).tr(),
-            automaticallyImplyLeading: false,
-            primary: false,
-            floating: true,
-            pinned: true,
-          ),
-          SliverList.list(
-            children: state.availableDevices.map((e) {
-              return buildDeviceTile(e);
-            }).toList(),
-          ),
-        ],
+        // if (state.availableDevices.isNotEmpty) ...[
+        //   SliverAppBar(
+        //     title: Text(R.strings.device_connection.available_devices).tr(),
+        //     automaticallyImplyLeading: false,
+        //     primary: false,
+        //     floating: true,
+        //     pinned: true,
+        //   ),
+        //   SliverList.list(
+        //     children: state.availableDevices.map((e) {
+        //       return buildDeviceTile(e);
+        //     }).toList(),
+        //   ),
+        // ],
       ],
     );
   }
@@ -142,7 +155,54 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
       ),
       title: Text(device.info.name),
       subtitle: Text(device.ipAddress ?? ''),
-      onTap: () {},
+      trailing: IconButton(
+        icon: const Icon(Icons.delete_outline_rounded),
+        color: Colors.red,
+        onPressed: () {
+          showDialog<bool?>(
+            context: context,
+            builder: (context) {
+              return const _DeleteConfirmationDialog();
+            },
+          ).then((value) {
+            if (value == true) {
+              // TODO: Delete device,
+              getCubit<ConnectionCubit>().unpair(device);
+            }
+          });
+        },
+      ),
+    );
+  }
+}
+
+class _DeleteConfirmationDialog extends StatelessWidget {
+  const _DeleteConfirmationDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(R.strings.device_connection.warning.tr()),
+      content: Text(R.strings.device_connection.delete_device_confirmation.tr()),
+      actions: [
+        TextButton(
+          onPressed: () {
+            context.pop();
+          },
+          child: Text(R.strings.device_connection.cancel.tr()),
+        ),
+        TextButton(
+          onPressed: () {
+            context.pop(true);
+          },
+          child: Text(
+            R.strings.device_connection.unpair.tr(),
+            style: context.bodyM.copyWith(
+              color: Colors.red,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

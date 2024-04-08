@@ -48,12 +48,10 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 width: 260,
-                child: Column(
+                child: ListView(
                   children: [
                     buildPairedDevices(state),
-                    Expanded(
-                      child: buildDeviceFeatures(state),
-                    ),
+                    buildDeviceFeatures(state),
                   ],
                 ),
               ),
@@ -140,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return ListView(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         buildDestination(
           0,
@@ -255,7 +254,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         Clickable(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () {
-                            // TODO: edit name
+                            showDialog<String?>(
+                              context: context,
+                              builder: (context) {
+                                return _EditNameDialog(
+                                  previousName: state.myDevice?.name,
+                                );
+                              },
+                            ).then((value) {
+                              if (value != null) {
+                                getCubit<HomeCubit>().renameMyDevice(value);
+                              }
+                            });
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(2),
@@ -301,6 +311,59 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(R.strings.home.manage_devices).tr(),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _EditNameDialog extends StatefulWidget {
+  const _EditNameDialog({this.previousName});
+
+  final String? previousName;
+
+  @override
+  State<_EditNameDialog> createState() => _EditNameDialogState();
+}
+
+class _EditNameDialogState extends State<_EditNameDialog> {
+  final controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    controller.text = widget.previousName ?? '';
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(R.strings.home.rename_this_device.tr()),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 150,
+        ),
+        child: TextField(
+          controller: controller,
+          onChanged: (_) => setState(() {}),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            context.pop();
+          },
+          child: Text(R.strings.home.cancel.tr()),
+        ),
+        TextButton(
+          onPressed: controller.text.isEmpty || controller.text.trim() == widget.previousName ? null : () => context.pop(controller.text.trim()),
+          child: Text(R.strings.home.save.tr()),
         ),
       ],
     );
