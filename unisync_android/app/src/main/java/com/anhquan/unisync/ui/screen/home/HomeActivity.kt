@@ -1,8 +1,10 @@
 package com.anhquan.unisync.ui.screen.home
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -17,8 +19,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -39,6 +44,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,12 +75,20 @@ import com.anhquan.unisync.ui.composables.UDialog
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.pair.PairActivity
 import com.anhquan.unisync.ui.theme.setView
+import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.gson
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeActivity : ComponentActivity() {
     private val viewModel: HomeViewModel by viewModels()
     private val volumeController = SliderTileController()
+    private val permissionRequestController = PermissionRequestController()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +97,11 @@ class HomeActivity : ComponentActivity() {
         setView {
             HomeScreen()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        permissionRequestController.update()
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -201,9 +221,7 @@ class HomeActivity : ComponentActivity() {
             }
         }) {
             Scaffold(
-//                containerColor = Color.White,
                 contentWindowInsets = WindowInsets(left = 16.dp, right = 16.dp),
-//                modifier = Modifier.systemBarsPadding(),
                 topBar = {
                     TopAppBar(title = {
                         Row(
@@ -317,10 +335,15 @@ class HomeActivity : ComponentActivity() {
                             }
                         }
                         PermissionRequest(
+                            context = this@HomeActivity,
                             device = viewModel.device,
-                            modifier = Modifier.padding(
-                                horizontal = 16.dp
-                            )
+                            controller = permissionRequestController,
+                            modifier = Modifier
+                                .padding(
+                                    horizontal = 16.dp,
+                                    vertical = 16.dp
+                                )
+                                .weight(1f)
                         )
                     }
                 } else {
@@ -410,29 +433,5 @@ class HomeActivity : ComponentActivity() {
                 color = Color.Gray
             )
         })
-    }
-
-    @Composable
-    fun PermissionRequest(modifier: Modifier = Modifier, device: Device) {
-        val notGrantedPlugins = device.plugins.filterNot { it.hasPermission }
-        if (notGrantedPlugins.isNotEmpty()) {
-            Column(
-                modifier = modifier
-            ) {
-                Text(text = stringResource(R.string.permission_need_granted))
-                notGrantedPlugins.forEach {
-                    ListItem(
-                        headlineContent = { Text(text = it.type.name) },
-                        modifier = Modifier.clickable {
-                            it.requestPermission(this@HomeActivity) { granted ->
-                                if (granted) {
-
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-        }
     }
 }

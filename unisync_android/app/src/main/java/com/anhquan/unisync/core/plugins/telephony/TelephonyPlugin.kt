@@ -28,7 +28,6 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
     init {
         SmsReceiver.addListener(this)
         SmsReceiver.startService(context)
-        getMessages()
     }
 
     override fun onReceive(data: Map<String, Any?>) {
@@ -62,7 +61,6 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
         // todo: add cached messages and sort
         val result = mutableListOf<Conversation>()
         cursor.apply {
-            debugLog(this.columnNames.joinToString(" - "))
             val timestampSentIndex = getColumnIndex(Telephony.Sms.Inbox.DATE_SENT)
             val timestampReceivedIndex = getColumnIndex(Telephony.Sms.Inbox.DATE)
             val numberIndex = getColumnIndex(Telephony.Sms.Inbox.ADDRESS)
@@ -89,9 +87,6 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
             }
         }
         cursor.close()
-        debugLog(result.joinToString("\n") {
-            it.toString()
-        })
         return result
     }
 
@@ -122,25 +117,17 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
         return contactInfo
     }
 
-    override val hasPermission: Boolean
+    override val requiredPermission: List<String>
         get() {
-            val permissions = listOf(
-                Manifest.permission.RECEIVE_SMS,
+            return listOf(
                 Manifest.permission.READ_SMS,
+                Manifest.permission.READ_CONTACTS,
                 Manifest.permission.SEND_SMS,
-                Manifest.permission.READ_CONTACTS
-            )
-            return permissions.all {
+                Manifest.permission.RECEIVE_SMS,
+            ).filterNot {
                 ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
             }
         }
-
-    override fun requestPermission(callback: (Boolean) -> Unit) {
-        context.startActivity(Intent(context, PermissionRequestActivity::class.java).apply {
-            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra("permission", Manifest.permission.READ_CONTACTS)
-        })
-    }
 
     override fun onDispose() {
         SmsReceiver.removeListener(this)

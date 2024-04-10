@@ -16,9 +16,9 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
 
     val context: Context get() = device.context!!.applicationContext
 
-    open val hasPermission: Boolean = true
+    val hasPermission: Boolean get() = requiredPermission.isEmpty()
 
-    open fun requestPermission(callback: (Boolean) -> Unit) {}
+    open val requiredPermission: List<String> = listOf()
 
     abstract fun onReceive(data: Map<String, Any?>)
 

@@ -26,4 +26,11 @@
     <string name="paired_devices">Paired devices</string>
     <string name="rename_this_device">Rename this device</string>
     <string name="permission_need_granted">These permission need to be granted in order to work properly!</string>
+    <string name="read_contacts">Read contacts</string>
+    <string name="handle_sms">Handle SMS</string>
+    <string name="read_notifications">Read notifications</string>
+    <string name="post_notifications">Post notifications</string>
+    <string name="send_sms">Send SMS</string>
+    <string name="read_sms">Read SMS</string>
+    <string name="receive_sms">Receive SMS</string>
 </resources>

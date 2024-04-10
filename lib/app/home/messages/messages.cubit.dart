@@ -24,6 +24,7 @@ class MessagesCubit extends Cubit<MessagesState> with BaseCubit {
     if (_device != null) {
       safeEmit(state.copyWith(device: _device));
       _listen();
+      _device!.getPlugin<TelephonyPlugin>().getAllMessages();
     }
   }
 

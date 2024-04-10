@@ -38,19 +38,16 @@ class NotificationPlugin(
 
     private val disposables = CompositeDisposable()
 
-    override val hasPermission: Boolean
+    override val requiredPermission: List<String>
         get() {
-            val notificationListenerList =
-                Settings.Secure.getString(context.contentResolver, "enabled_notification_listeners")
-            return notificationListenerList.contains(context.packageName)
+            val notificationListenerList = Settings.Secure.getString(
+                context.contentResolver,
+                "enabled_notification_listeners"
+            )
+            return listOf("enabled_notification_listeners").filterNot {
+                notificationListenerList.contains(context.packageName)
+            }
         }
-
-    override fun requestPermission(activity: ComponentActivity, callback: (Boolean) -> Unit) {
-        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
-            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-    }
 
     override fun onReceive(data: Map<String, Any?>) {}
 
