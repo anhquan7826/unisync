@@ -259,58 +259,69 @@ class HomeActivity : ComponentActivity() {
                     })
                 }) { padding ->
                 if (state.isOnline) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2), modifier = Modifier.padding(padding)
-                    ) {
-                        item {
-                            FeatureTile(
-                                icon = painterResource(id = R.drawable.data_transfer),
-                                title = "Send files",
-                            ) {}
-                        }
-                        item {
-                            FeatureTile(
-                                icon = painterResource(id = R.drawable.clipboards),
-                                title = "Send clipboard",
-                            ) {
-                                viewModel.sendClipboard()
+                    Column {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            userScrollEnabled = false,
+                            modifier = Modifier
+                                .padding(padding)
+                        ) {
+                            item {
+                                FeatureTile(
+                                    icon = painterResource(id = R.drawable.data_transfer),
+                                    title = "Send files",
+                                ) {}
                             }
-                        }
-                        item {
-                            SliderTile(
-                                controller = volumeController
-                            ) {
-                                viewModel.setVolume(it)
+                            item {
+                                FeatureTile(
+                                    icon = painterResource(id = R.drawable.clipboards),
+                                    title = "Send clipboard",
+                                ) {
+                                    viewModel.sendClipboard()
+                                }
                             }
-                        }
-                        item {
-                            FeatureTile(
-                                icon = painterResource(id = R.drawable.command_line),
-                                title = "Run command",
-                            ) {
-                                startActivity(Intent(
-                                    this@HomeActivity, RunCommandActivity::class.java
-                                ).apply {
-                                    putExtra("device", gson.toJson(viewModel.device.info))
-                                })
+                            item {
+                                SliderTile(
+                                    controller = volumeController
+                                ) {
+                                    viewModel.setVolume(it)
+                                }
                             }
-                        }
-                        item {
-                            FeatureTile(
-                                icon = painterResource(id = R.drawable.ssh),
-                                title = "SSH",
-                            ) {
+                            item {
+                                FeatureTile(
+                                    icon = painterResource(id = R.drawable.command_line),
+                                    title = "Run command",
+                                ) {
+                                    startActivity(Intent(
+                                        this@HomeActivity, RunCommandActivity::class.java
+                                    ).apply {
+                                        putExtra("device", gson.toJson(viewModel.device.info))
+                                    })
+                                }
+                            }
+                            item {
+                                FeatureTile(
+                                    icon = painterResource(id = R.drawable.ssh),
+                                    title = "SSH",
+                                ) {
 
+                                }
                             }
-                        }
-                        item {
-                            FeatureTile(
-                                icon = painterResource(id = R.drawable.remote_control),
-                                title = "Remote desktop",
-                            ) {
+                            item {
+                                FeatureTile(
+                                    icon = painterResource(id = R.drawable.remote_control),
+                                    title = "Remote desktop",
+                                ) {
 
+                                }
                             }
                         }
+                        PermissionRequest(
+                            device = viewModel.device,
+                            modifier = Modifier.padding(
+                                horizontal = 16.dp
+                            )
+                        )
                     }
                 } else {
                     Column(
@@ -399,5 +410,29 @@ class HomeActivity : ComponentActivity() {
                 color = Color.Gray
             )
         })
+    }
+
+    @Composable
+    fun PermissionRequest(modifier: Modifier = Modifier, device: Device) {
+        val notGrantedPlugins = device.plugins.filterNot { it.hasPermission }
+        if (notGrantedPlugins.isNotEmpty()) {
+            Column(
+                modifier = modifier
+            ) {
+                Text(text = stringResource(R.string.permission_need_granted))
+                notGrantedPlugins.forEach {
+                    ListItem(
+                        headlineContent = { Text(text = it.type.name) },
+                        modifier = Modifier.clickable {
+                            it.requestPermission(this@HomeActivity) { granted ->
+                                if (granted) {
+
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 }

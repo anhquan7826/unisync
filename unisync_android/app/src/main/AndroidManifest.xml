@@ -82,6 +82,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".core.plugins.PermissionRequestActivity"
+            android:theme="@style/Theme.Unisync.Transparent"
+            android:exported="false" />
+
         <service
             android:name=".core.plugins.notification.NotificationReceiver"
             android:exported="false"

@@ -46,7 +46,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
               value?.apply((it) {
                 context.goNamed(
                   routes.home,
-                  pathParameters: {'id': it.id},
+                  extra: Device(it),
                 );
               });
             });

@@ -5,6 +5,7 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.utils.ConfigUtil
+import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.listen
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
@@ -24,16 +25,17 @@ class HomeViewModel : ViewModel() {
             volumeDisposable?.dispose()
             disposable?.dispose()
             _device = value
-            disposable = device.notifier.listen(
+            disposable = value.notifier.listen(
                 observeOn = AndroidSchedulers.mainThread()
             ) {
+                debugLog("Event from device ${value.info.name}:\n${it.connected}\n${it.pairState}")
                 _state.update { state ->
                     state.copy(
                         isOnline = it.connected,
                     )
                 }
                 if (it.connected) {
-                    volumeDisposable = device.getPlugin(VolumePlugin::class.java).notifier.listen(
+                    volumeDisposable = volumeDisposable ?: value.getPlugin(VolumePlugin::class.java).notifier.listen(
                         observeOn = AndroidSchedulers.mainThread()
                     ) {
                         _state.update { state ->

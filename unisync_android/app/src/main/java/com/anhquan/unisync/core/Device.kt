@@ -91,7 +91,9 @@ class Device private constructor(
     val pairState: PairingHandler.PairState get() = pairingHandler.state
     val pairOperation: PairingHandler.PairOperation get() = pairingHandler.operation
 
-    private var plugins: List<UnisyncPlugin> = listOf()
+    var plugins: List<UnisyncPlugin> = listOf()
+        private set
+
     private val pairingHandler = PairingHandler(this) {
         notify()
     }
@@ -146,7 +148,6 @@ class Device private constructor(
 
     @JvmName("deviceNotify")
     private fun notify() {
-        debugLog("${info.name}\nisOnline: $isOnline\nisPaired: $pairState");
         if (isOnline && pairState == PairingHandler.PairState.PAIRED) {
             initiatePlugins()
         } else {

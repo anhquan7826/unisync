@@ -5,7 +5,7 @@
     "description": "A tool to connect your phone and your PC together."
   },
   "device_connection": {
-    "manage_devices": "manage_devices",
+    "manage_devices": "Manage devices",
     "add_manually": "Add device manually",
     "id": "ID",
     "ip_address": "IP Address",

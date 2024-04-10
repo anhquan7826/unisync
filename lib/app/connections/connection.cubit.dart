@@ -7,6 +7,7 @@ import 'package:unisync/models/device_info/device_info.model.dart';
 import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
 import 'package:unisync/utils/extensions/list.ext.dart';
+import 'package:unisync/utils/logger.dart';
 
 import 'connection.state.dart';
 
@@ -36,27 +37,6 @@ class ConnectionCubit extends Cubit<DeviceConnectionState> with BaseCubit {
       });
     });
     await Device.getAllDevices();
-    // _subscription = DeviceProvider.notifier.listen((value) {
-    //   final available = <Device>[];
-    //   final requested = <Device>[];
-    //   for (final info in value) {
-    //     final device = Device(info);
-    //     switch (device.pairState) {
-    //       case PairState.unpaired:
-    //         available.add(device);
-    //         break;
-    //       case PairState.pairRequested:
-    //         requested.add(device);
-    //         break;
-    //       default:
-    //         break;
-    //     }
-    //   }
-    //   safeEmit(DeviceConnectionState(
-    //     availableDevices: available,
-    //     requestedDevices: requested,
-    //   ));
-    // });
   }
 
   void _listenDeviceChange(Device device) {

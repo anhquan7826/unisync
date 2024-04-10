@@ -23,7 +23,9 @@ class Device with ConnectionListener {
       return _instances[info]!;
     }
     _instances[info] = Device._(info);
+    debugLog('Created an instance of Device.');
     _instanceNotifier.add(_instances.values.toList());
+    debugLog('Device instances notified.');
     return _instances[info]!;
   }
 
@@ -154,7 +156,6 @@ class Device with ConnectionListener {
       connected: isOnline,
       pairState: pairState,
     ));
-    debugLog('${info.name}\nisOnline: $isOnline\nisPaired: $pairState');
     if (isOnline && pairState == PairState.paired) {
       _initiatePlugins();
     } else {

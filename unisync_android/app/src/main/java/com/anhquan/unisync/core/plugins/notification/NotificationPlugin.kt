@@ -9,6 +9,7 @@ import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
+import androidx.activity.ComponentActivity
 import androidx.core.content.res.ResourcesCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
@@ -44,8 +45,10 @@ class NotificationPlugin(
             return notificationListenerList.contains(context.packageName)
         }
 
-    override fun requestPermission(callback: (Boolean) -> Unit) {
-        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+    override fun requestPermission(activity: ComponentActivity, callback: (Boolean) -> Unit) {
+        val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
+            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
         context.startActivity(intent)
     }
 

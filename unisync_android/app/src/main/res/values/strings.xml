@@ -25,4 +25,5 @@
     <string name="connected_at">Connected at %1$s</string>
     <string name="paired_devices">Paired devices</string>
     <string name="rename_this_device">Rename this device</string>
+    <string name="permission_need_granted">These permission need to be granted in order to work properly!</string>
 </resources>

@@ -2,8 +2,11 @@ package com.anhquan.unisync.core.plugins.telephony
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Parcel
+import android.os.Parcelable
 import android.provider.ContactsContract
 import android.provider.Telephony
 import android.telephony.SmsManager
@@ -12,6 +15,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
+import com.anhquan.unisync.core.plugins.PermissionRequestActivity
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.debugLog
@@ -28,6 +32,7 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
     }
 
     override fun onReceive(data: Map<String, Any?>) {
+        if (!hasPermission) return
         if (data.containsKey("get_messages")) {
             send(
                 mapOf(
@@ -130,12 +135,11 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
             }
         }
 
-    override fun requestPermission(
-        activity: ComponentActivity, callback: (Boolean) -> Unit
-    ): ActivityResultLauncher<String> {
-        return activity.registerForActivityResult(
-            ActivityResultContracts.RequestPermission(), callback
-        )
+    override fun requestPermission(callback: (Boolean) -> Unit) {
+        context.startActivity(Intent(context, PermissionRequestActivity::class.java).apply {
+            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            putExtra("permission", Manifest.permission.READ_CONTACTS)
+        })
     }
 
     override fun onDispose() {
