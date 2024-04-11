@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:unisync/database/database.dart';
 import 'package:unisync/utils/constants/device_types.dart';
 import 'package:unisync/utils/id_gen.dart';
 import 'package:unisync/utils/push_notification.dart';

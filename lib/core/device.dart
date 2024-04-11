@@ -7,6 +7,7 @@ import 'package:unisync/core/plugins/clipboard/clipboard.plugin.dart';
 import 'package:unisync/core/plugins/notification/notification_plugin.dart';
 import 'package:unisync/core/plugins/ring_phone/ring_phone.plugin.dart';
 import 'package:unisync/core/plugins/run_command/run_command.plugin.dart';
+import 'package:unisync/core/plugins/sharing/sharing.plugin.dart';
 import 'package:unisync/core/plugins/status/status.plugin.dart';
 import 'package:unisync/core/plugins/telephony/telephony.plugin.dart';
 import 'package:unisync/core/plugins/volume/volume.plugin.dart';
@@ -141,6 +142,7 @@ class Device with ConnectionListener {
       RunCommandPlugin(this),
       RingPhonePlugin(this),
       TelephonyPlugin(this),
+      SharingPlugin(this),
     ]);
   }
 

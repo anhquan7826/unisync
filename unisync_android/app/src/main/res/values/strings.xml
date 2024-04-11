@@ -33,4 +33,10 @@
     <string name="send_sms">Send SMS</string>
     <string name="read_sms">Read SMS</string>
     <string name="receive_sms">Receive SMS</string>
+    <string name="browse_files">Browse files</string>
+    <string name="send_clipboard">Send clipboard</string>
+    <string name="run_command">Run command</string>
+    <string name="ssh">SSH</string>
+    <string name="volume">Volume</string>
+    <string name="choose_destination_device">Choose destination device...</string>
 </resources>

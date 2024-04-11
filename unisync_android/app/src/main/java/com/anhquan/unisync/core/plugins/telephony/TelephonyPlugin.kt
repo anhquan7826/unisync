@@ -2,23 +2,15 @@ package com.anhquan.unisync.core.plugins.telephony
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Parcel
-import android.os.Parcelable
 import android.provider.ContactsContract
 import android.provider.Telephony
 import android.telephony.SmsManager
-import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
-import com.anhquan.unisync.core.plugins.PermissionRequestActivity
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
-import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.toMap
 
 class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.TELEPHONY),
@@ -119,14 +111,34 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
 
     override val requiredPermission: List<String>
         get() {
-            return listOf(
+            val p = mutableListOf<String>()
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_CONTACTS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                p.add(Manifest.permission.READ_CONTACTS)
+            }
+            val sms = listOf(
                 Manifest.permission.READ_SMS,
-                Manifest.permission.READ_CONTACTS,
                 Manifest.permission.SEND_SMS,
                 Manifest.permission.RECEIVE_SMS,
-            ).filterNot {
-                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+            ).any {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    it
+                ) == PackageManager.PERMISSION_GRANTED
             }
+            if (!sms) {
+                p.addAll(
+                    listOf(
+                        Manifest.permission.READ_SMS,
+                        Manifest.permission.SEND_SMS,
+                        Manifest.permission.RECEIVE_SMS
+                    )
+                )
+            }
+            return p
         }
 
     override fun onDispose() {

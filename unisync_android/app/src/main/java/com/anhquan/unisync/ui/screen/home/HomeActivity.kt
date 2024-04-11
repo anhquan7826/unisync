@@ -1,10 +1,8 @@
 package com.anhquan.unisync.ui.screen.home
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -19,13 +17,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -38,6 +32,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -45,9 +40,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,24 +64,18 @@ import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
-import com.anhquan.unisync.ui.composables.SliderTile
-import com.anhquan.unisync.ui.composables.SliderTileController
 import com.anhquan.unisync.ui.composables.UDialog
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.pair.PairActivity
 import com.anhquan.unisync.ui.theme.setView
-import com.anhquan.unisync.utils.debugLog
+import com.anhquan.unisync.ui.theme.shapes
+import com.anhquan.unisync.ui.theme.typography
 import com.anhquan.unisync.utils.gson
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 class HomeActivity : ComponentActivity() {
     private val viewModel: HomeViewModel by viewModels()
-    private val volumeController = SliderTileController()
     private val permissionRequestController = PermissionRequestController()
 
 
@@ -110,7 +99,7 @@ class HomeActivity : ComponentActivity() {
     private fun HomeScreen() {
         val scope = rememberCoroutineScope()
         val state by viewModel.state.collectAsState()
-        volumeController.value = state.volume
+
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         var unlinkDialog by remember { mutableStateOf(false) }
         var renameDialog by remember { mutableStateOf(false) }
@@ -277,38 +266,64 @@ class HomeActivity : ComponentActivity() {
                     })
                 }) { padding ->
                 if (state.isOnline) {
-                    Column {
+                    Column(
+                        modifier = Modifier
+                            .padding(padding)
+                    ) {
+                        var sliderValue by remember {
+                            mutableFloatStateOf(state.volume)
+                        }
+                        LaunchedEffect(state.volume) {
+                            sliderValue = state.volume
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.volume)
+                            )
+                            Slider(
+                                value = sliderValue,
+                                onValueChange = {
+                                    sliderValue = it
+                                    viewModel.setVolume(it)
+                                },
+                                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                            )
+                            Text(
+                                text = "${(sliderValue * 100).roundToInt()}%",
+                                style = typography().labelMedium
+                            )
+                        }
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             userScrollEnabled = false,
-                            modifier = Modifier
-                                .padding(padding)
                         ) {
                             item {
                                 FeatureTile(
                                     icon = painterResource(id = R.drawable.data_transfer),
-                                    title = "Send files",
+                                    title = stringResource(R.string.browse_files),
                                 ) {}
                             }
                             item {
                                 FeatureTile(
                                     icon = painterResource(id = R.drawable.clipboards),
-                                    title = "Send clipboard",
+                                    title = stringResource(R.string.send_clipboard),
                                 ) {
                                     viewModel.sendClipboard()
                                 }
                             }
-                            item {
-                                SliderTile(
-                                    controller = volumeController
-                                ) {
-                                    viewModel.setVolume(it)
-                                }
-                            }
+//                            item {
+//                                SliderTile(
+//                                    controller = volumeController
+//                                ) {
+//                                    viewModel.setVolume(it)
+//                                }
+//                            }
                             item {
                                 FeatureTile(
                                     icon = painterResource(id = R.drawable.command_line),
-                                    title = "Run command",
+                                    title = stringResource(R.string.run_command),
                                 ) {
                                     startActivity(Intent(
                                         this@HomeActivity, RunCommandActivity::class.java
@@ -320,15 +335,7 @@ class HomeActivity : ComponentActivity() {
                             item {
                                 FeatureTile(
                                     icon = painterResource(id = R.drawable.ssh),
-                                    title = "SSH",
-                                ) {
-
-                                }
-                            }
-                            item {
-                                FeatureTile(
-                                    icon = painterResource(id = R.drawable.remote_control),
-                                    title = "Remote desktop",
+                                    title = stringResource(R.string.ssh),
                                 ) {
 
                                 }
@@ -381,12 +388,12 @@ class HomeActivity : ComponentActivity() {
         modifier: Modifier = Modifier, icon: Painter, title: String, onTap: () -> Unit
     ) {
         Card(
-            shape = RoundedCornerShape(28.dp),
+            shape = shapes().medium,
             modifier = modifier
                 .padding(8.dp)
                 .fillMaxWidth()
                 .height(128.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(shapes().medium)
                 .clickable(
                     onClick = onTap
                 )

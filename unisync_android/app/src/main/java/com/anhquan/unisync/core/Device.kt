@@ -6,13 +6,13 @@ import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
 import com.anhquan.unisync.core.plugins.notification.NotificationPlugin
 import com.anhquan.unisync.core.plugins.ring_phone.RingPhonePlugin
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
+import com.anhquan.unisync.core.plugins.sharing.SharingPlugin
 import com.anhquan.unisync.core.plugins.status.StatusPlugin
 import com.anhquan.unisync.core.plugins.telephony.TelephonyPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ConfigUtil
-import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.infoLog
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -59,6 +59,12 @@ class Device private constructor(
             ConfigUtil.Device.getAllPairedDevices {
                 it.forEach { info -> of(info) }
                 callback(instances.values.toList())
+            }
+        }
+
+        fun getConnectedDevices(): List<Device> {
+            return instances.values.filter {
+                it.isOnline
             }
         }
     }
@@ -130,7 +136,8 @@ class Device private constructor(
             VolumePlugin(this),
             RunCommandPlugin(this),
             RingPhonePlugin(this),
-            TelephonyPlugin(this)
+            TelephonyPlugin(this),
+            SharingPlugin(this)
         )
     }
 

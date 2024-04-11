@@ -27,6 +27,7 @@ class DeviceMessage with _$DeviceMessage {
     RUN_COMMAND: 'run_command',
     RING_PHONE: 'ring_phone',
     TELEPHONY: 'telephony',
+    SHARING: 'sharing',
   );
 }
 

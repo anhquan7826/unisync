@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
-val Typography = Typography(
+fun ComponentActivity.typography() = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -29,19 +29,34 @@ val Typography = Typography(
     )
 )
 
+fun ComponentActivity.shapes() = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    extraLarge = RoundedCornerShape(8.dp),
+    large = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(8.dp),
+)
+
+fun ComponentActivity.colorSchemes() = lightColorScheme(
+//    primary = Color.Blue,
+//    onPrimary = Color.White,
+//    primaryContainer = Color.Blue.copy(alpha = 0.15f),
+//    onPrimaryContainer = Color.Blue,
+//    secondary = Color.DarkGray,
+//    onSecondary = Color.White,
+//    secondaryContainer = Color.Gray.copy(alpha = 0.25f),
+//    onSecondaryContainer = Color.DarkGray,
+//    surface = Color.Blue.copy(alpha = 0.1f),
+//    surfaceTint = Color.Transparent,
+)
+
 fun ComponentActivity.setView(content: @Composable () -> Unit) {
     WindowCompat.setDecorFitsSystemWindows(window, false)
     setContent {
         MaterialTheme(
-            colorScheme = lightColorScheme(),
-            shapes = Shapes(
-                extraSmall = RoundedCornerShape(12.dp),
-                extraLarge = RoundedCornerShape(12.dp),
-                large = RoundedCornerShape(12.dp),
-                medium = RoundedCornerShape(12.dp),
-                small = RoundedCornerShape(12.dp),
-            ),
-            typography = Typography,
+            colorScheme = colorSchemes(),
+            shapes = shapes(),
+            typography = typography(),
         ) {
             Surface(
                 modifier = Modifier.fillMaxSize(),

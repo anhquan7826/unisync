@@ -25,6 +25,8 @@ data class DeviceMessage(
         RING_PHONE,
         @SerializedName("telephony")
         TELEPHONY,
+        @SerializedName("sharing")
+        SHARING,
     }
 
     override fun toString(): String {

@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
+import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
-
-import '../../device.dart';
 
 class VolumePlugin extends UnisyncPlugin {
   VolumePlugin(Device device) : super(device, type: DeviceMessage.Type.VOLUME) {
@@ -18,13 +17,18 @@ class VolumePlugin extends UnisyncPlugin {
   late final StreamSubscription<double> _subscription;
 
   bool _isChangingByPeer = false;
-  late final debounce = _Debouncer(callback: () {
-    _isChangingByPeer = false;
-  });
+  late final debounce = _Debouncer(
+    // duration: const Duration(seconds: 2),
+    callback: () {
+      _isChangingByPeer = false;
+    },
+  );
 
   @override
   Future<void> onReceive(
-      Map<String, dynamic> data, DeviceMessagePayload? payload) async {
+    Map<String, dynamic> data,
+    DeviceMessagePayload? payload,
+  ) async {
     if (data.containsKey('set_volume')) {
       _setVolume(data['set_volume']);
     }
