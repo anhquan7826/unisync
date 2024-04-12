@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
+import 'package:unisync/utils/push_notification.dart';
 
 import '../../device.dart';
 
 class RunCommandPlugin extends UnisyncPlugin {
-  RunCommandPlugin(Device device) : super(device, type: DeviceMessage.Type.RUN_COMMAND);
+  RunCommandPlugin(Device device)
+      : super(device, type: DeviceMessage.Type.RUN_COMMAND);
 
   @override
   void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
@@ -17,6 +19,11 @@ class RunCommandPlugin extends UnisyncPlugin {
       executable,
       arguments,
       runInShell: true,
-    );
+    ).then((value) {
+      PushNotification.showNotification(
+        title: 'Run command',
+        text: 'Executing command "$command"...',
+      );
+    });
   }
 }

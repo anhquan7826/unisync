@@ -7,7 +7,7 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 
-class SharingPlugin(private val device: Device) :
+class SharingPlugin(device: Device) :
     UnisyncPlugin(device, DeviceMessage.Type.SHARING) {
     override fun onReceive(data: Map<String, Any?>) {}
 

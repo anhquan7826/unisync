@@ -9,8 +9,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +32,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -64,12 +63,12 @@ import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
+import com.anhquan.unisync.ui.composables.SliderTile
 import com.anhquan.unisync.ui.composables.UDialog
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.pair.PairActivity
 import com.anhquan.unisync.ui.theme.setView
 import com.anhquan.unisync.ui.theme.shapes
-import com.anhquan.unisync.ui.theme.typography
 import com.anhquan.unisync.utils.gson
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -210,7 +209,6 @@ class HomeActivity : ComponentActivity() {
             }
         }) {
             Scaffold(
-                contentWindowInsets = WindowInsets(left = 16.dp, right = 16.dp),
                 topBar = {
                     TopAppBar(title = {
                         Row(
@@ -251,15 +249,6 @@ class HomeActivity : ComponentActivity() {
                             Icon(painterResource(id = R.drawable.menu), contentDescription = null)
                         }
                     }, actions = {
-//                        IconButton(onClick = {
-//                            startActivity(Intent(this@HomeActivity, SettingsActivity::class.java))
-//                        }) {
-//                            Icon(
-//                                painterResource(id = R.drawable.settings),
-//                                contentDescription = null,
-//                                modifier = Modifier.size(24.dp)
-//                            )
-//                        }
                         IconButton(onClick = { unlinkDialog = true }) {
                             Icon(painterResource(R.drawable.unlink), contentDescription = null)
                         }
@@ -267,8 +256,7 @@ class HomeActivity : ComponentActivity() {
                 }) { padding ->
                 if (state.isOnline) {
                     Column(
-                        modifier = Modifier
-                            .padding(padding)
+                        modifier = Modifier.padding(padding)
                     ) {
                         var sliderValue by remember {
                             mutableFloatStateOf(state.volume)
@@ -276,28 +264,56 @@ class HomeActivity : ComponentActivity() {
                         LaunchedEffect(state.volume) {
                             sliderValue = state.volume
                         }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
+                        SliderTile(
+                            value = sliderValue,
+                            onChanged = {
+                                sliderValue = it
+                                viewModel.setVolume(it)
+                            },
+                            modifier = Modifier
+                                .height(72.dp)
+                                .padding(
+                                    top = 16.dp,
+                                    start = 16.dp,
+                                    end = 16.dp
+                                )
+                                .clip(shapes().medium)
                         ) {
-                            Text(
-                                text = stringResource(R.string.volume)
-                            )
-                            Slider(
-                                value = sliderValue,
-                                onValueChange = {
-                                    sliderValue = it
-                                    viewModel.setVolume(it)
-                                },
-                                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
-                            )
-                            Text(
-                                text = "${(sliderValue * 100).roundToInt()}%",
-                                style = typography().labelMedium
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                                    .padding(8.dp)
+                            ) {
+                                Image(
+                                    painterResource(
+                                        if (sliderValue == 0F)
+                                            R.drawable.no_sound
+                                        else if (sliderValue < 0.33F)
+                                            R.drawable.volume_mute
+                                        else if (sliderValue < 0.66F)
+                                            R.drawable.volume_down
+                                        else
+                                            R.drawable.volume_up
+                                    ),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                )
+                                Text(
+                                    "Volume",
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    "${(sliderValue * 100).roundToInt()}%"
+                                )
+                            }
                         }
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
                             userScrollEnabled = false,
+                            contentPadding = PaddingValues(8.dp)
                         ) {
                             item {
                                 FeatureTile(
@@ -313,13 +329,6 @@ class HomeActivity : ComponentActivity() {
                                     viewModel.sendClipboard()
                                 }
                             }
-//                            item {
-//                                SliderTile(
-//                                    controller = volumeController
-//                                ) {
-//                                    viewModel.setVolume(it)
-//                                }
-//                            }
                             item {
                                 FeatureTile(
                                     icon = painterResource(id = R.drawable.command_line),
@@ -359,7 +368,7 @@ class HomeActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(padding)
+                            .padding(16.dp)
                     ) {
                         Icon(
                             painterResource(id = R.drawable.error),
