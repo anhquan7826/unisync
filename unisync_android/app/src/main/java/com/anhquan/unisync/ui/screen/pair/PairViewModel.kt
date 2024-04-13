@@ -36,7 +36,7 @@ class PairViewModel : ViewModel() {
     }
 
     private fun listenDeviceChange(device: Device) {
-        device.notifier.listen {
+        device.eventNotifier.listen {
             _state.update { s ->
                 PairViewState(
                     s.availableDevices.minus(device),

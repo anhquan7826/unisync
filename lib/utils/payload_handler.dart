@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:unisync/utils/extensions/stream.ext.dart';
 import 'package:unisync/utils/logger.dart';
 
 Future<Uint8List> handlePayload({
@@ -32,4 +33,49 @@ Future<Uint8List> handlePayload({
     }
     return completer.future;
   });
+}
+
+Future<Stream<Uint8List>> getPayloadStream({
+  required String address,
+  required int port,
+}) async {
+  infoLog('Connecting to payload server $address:$port...');
+  final socket = await Socket.connect(address, port);
+  infoLog('Connected to payload server $address:$port.');
+  return socket;
+}
+
+Future<Uint8List> getPayloadData(
+  Stream<Uint8List> stream, {
+  required int size,
+  void Function(int)? onProgress,
+}) async {
+  final completer = Completer<Uint8List>();
+  final Uint8List data = Uint8List(size);
+  infoLog('Receiving payload of size $size...');
+  int progress = 0;
+  infoLog('Progress: ${(progress / size).toStringAsFixed(2)}%');
+  stream.listenCancellable(
+    (event) {
+      data.setRange(progress, progress + event.length, event);
+      progress += event.length;
+      infoLog('Progress: ${((progress / size) * 100).toStringAsFixed(2)}%');
+      onProgress?.call(progress);
+      if (progress == size) {
+        completer.complete(data);
+        infoLog('Payload of size $size received!');
+        return true;
+      } else {
+        return false;
+      }
+    },
+    onError: (error, stacktrace) {
+      errorLog('getPayloadData stopped with error!');
+      completer.completeError(
+        error,
+        stacktrace,
+      );
+    },
+  );
+  return completer.future;
 }

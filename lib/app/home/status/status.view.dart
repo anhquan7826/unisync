@@ -11,29 +11,14 @@ import 'package:unisync/utils/extensions/state.ext.dart';
 import 'status.state.dart';
 
 class StatusScreen extends StatefulWidget {
-  const StatusScreen({super.key, required this.device});
-
-  final Device device;
+  const StatusScreen({super.key});
 
   @override
   State<StatusScreen> createState() => _StatusScreenState();
 }
 
-class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClientMixin<StatusScreen> {
-  @override
-  void initState() {
-    super.initState();
-    getCubit<StatusCubit>().device = widget.device;
-  }
-
-  @override
-  void didUpdateWidget(covariant StatusScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.device != widget.device) {
-      getCubit<StatusCubit>().device = widget.device;
-    }
-  }
-
+class _StatusScreenState extends State<StatusScreen>
+    with AutomaticKeepAliveClientMixin<StatusScreen> {
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -54,7 +39,7 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       buildStatus(state),
-                      if (state.isOnline) buildButtons() else Expanded(child: buildDisconnected()),
+                      buildButtons(),
                     ],
                   ),
                 ),
@@ -74,7 +59,7 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
         image: DecorationImage(
           image: Image.memory(state.wallpaper!).image,
           fit: BoxFit.fitWidth,
-          colorFilter: state.isOnline
+          colorFilter: true
               ? null
               : const ColorFilter.mode(
                   Colors.grey,
@@ -133,6 +118,7 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
   }
 
   Widget buildStatus(StatusState state) {
+    final device = getCubit<StatusCubit>().device;
     return Padding(
       padding: const EdgeInsets.only(
         right: 24,
@@ -141,7 +127,7 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            state.device?.info.name ?? 'null',
+            device.info.name ?? 'null',
             style: const TextStyle(
               fontSize: 64,
               fontWeight: FontWeight.bold,
@@ -149,21 +135,25 @@ class _StatusScreenState extends State<StatusScreen> with AutomaticKeepAliveClie
           ),
           const SizedBox(height: 8),
           textWithLeading(
-            state.isOnline ? R.strings.status.connected_at.tr(args: [state.ipAddress.toString()]) : R.strings.status.disconnected.tr(),
+            device.isOnline
+                ? R.strings.status.connected_at
+                    .tr(args: [state.ipAddress.toString()])
+                : R.strings.status.disconnected.tr(),
             leading: Icon(
               Icons.circle,
               size: 12,
-              color: state.isOnline ? Colors.green : Colors.grey,
+              color: device.isOnline ? Colors.green : Colors.grey,
             ),
           ),
           const SizedBox(height: 12),
-          if (state.isOnline) ...[
+          if (device.isOnline) ...[
             Row(
               children: [
                 textWithLeading(
                   '${state.batteryLevel}%',
                   leading: ColorFiltered(
-                    colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+                    colorFilter:
+                        const ColorFilter.mode(Colors.green, BlendMode.srcIn),
                     child: UImage.asset(() {
                       if (state.isCharging) {
                         return R.vectors.battery_bolt;

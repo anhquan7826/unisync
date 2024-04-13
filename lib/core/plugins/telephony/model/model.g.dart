@@ -20,7 +20,7 @@ Map<String, dynamic> _$$ConversationImplToJson(_$ConversationImpl instance) =>
     <String, dynamic>{
       'personNumber': instance.personNumber,
       'personName': instance.personName,
-      'messages': instance.messages,
+      'messages': instance.messages.map((e) => e.toJson()).toList(),
     };
 
 _$MessageImpl _$$MessageImplFromJson(Map<String, dynamic> json) =>

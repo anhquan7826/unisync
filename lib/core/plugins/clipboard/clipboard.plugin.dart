@@ -1,5 +1,6 @@
 import 'package:clipboard_watcher/clipboard_watcher.dart';
 import 'package:flutter/services.dart';
+import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
@@ -25,7 +26,8 @@ class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
   var _latestClipboard = '';
 
   @override
-  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
+  void onReceive(Map<String, dynamic> data, Payload? payload) {
+    super.onReceive(data, payload);
     data['clipboard']?.toString().let((it) async {
       if (_latestClipboard == it) {
         return;

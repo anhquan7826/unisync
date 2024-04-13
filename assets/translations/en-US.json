@@ -41,7 +41,8 @@
     "connected": "Connected",
     "disconnected": "Disconnected",
     "connected_at": "Connected at {}",
-    "device_offline": "This device is not reachable. Make sure to connect to the same network as this device!"
+    "device_offline": "This device is not reachable. Make sure to connect to the same network as this device!",
+    "device_unpaired": "This device is unpaired! To pair this device, go to Manage devices in your phone and select this device."
   },
   "messages": {
     "conversations": "Conversations",

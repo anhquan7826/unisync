@@ -3,6 +3,7 @@ package com.anhquan.unisync.core
 import android.content.Context
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
+import com.anhquan.unisync.core.plugins.gallery.GalleryPlugin
 import com.anhquan.unisync.core.plugins.notification.NotificationPlugin
 import com.anhquan.unisync.core.plugins.ring_phone.RingPhonePlugin
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
@@ -14,6 +15,7 @@ import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.infoLog
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 
@@ -90,7 +92,7 @@ class Device private constructor(
                     pairOperation.unpair()
                 }
             }
-            notify()
+            notifyNewEvent()
         }
 
     val isOnline: Boolean get() = pairingHandler.isReady && connection != null
@@ -101,7 +103,7 @@ class Device private constructor(
         private set
 
     private val pairingHandler = PairingHandler(this) {
-        notify()
+        notifyNewEvent()
     }
 
     override fun onMessage(message: DeviceMessage) {
@@ -137,7 +139,8 @@ class Device private constructor(
             RunCommandPlugin(this),
             RingPhonePlugin(this),
             TelephonyPlugin(this),
-            SharingPlugin(this)
+            SharingPlugin(this),
+            GalleryPlugin(this)
         )
     }
 
@@ -151,23 +154,23 @@ class Device private constructor(
         return plugins.filterIsInstance(type).first()
     }
 
-    val notifier = BehaviorSubject.create<Notification>()
+    private val notifier = BehaviorSubject.create<DeviceEvent>()
+    val eventNotifier get() = notifier as Observable<DeviceEvent>
 
-    @JvmName("deviceNotify")
-    private fun notify() {
+    private fun notifyNewEvent() {
         if (isOnline && pairState == PairingHandler.PairState.PAIRED) {
             initiatePlugins()
         } else {
             disposePlugins()
         }
         notifier.onNext(
-            Notification(
+            DeviceEvent(
                 connected = isOnline, pairState = pairState
             )
         )
     }
 
-    data class Notification(
+    data class DeviceEvent(
         val connected: Boolean = true,
         val pairState: PairingHandler.PairState = PairingHandler.PairState.UNKNOWN
     )

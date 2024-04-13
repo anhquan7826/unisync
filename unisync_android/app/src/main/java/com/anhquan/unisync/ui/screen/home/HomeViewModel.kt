@@ -25,7 +25,7 @@ class HomeViewModel : ViewModel() {
             volumeDisposable?.dispose()
             disposable?.dispose()
             _device = value
-            disposable = value.notifier.listen(
+            disposable = value.eventNotifier.listen(
                 observeOn = AndroidSchedulers.mainThread()
             ) {
                 debugLog("Event from device ${value.info.name}:\n${it.connected}\n${it.pairState}")

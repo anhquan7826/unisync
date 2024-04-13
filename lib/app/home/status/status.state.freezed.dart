@@ -16,8 +16,6 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$StatusState {
-  Device? get device => throw _privateConstructorUsedError;
-  bool get isOnline => throw _privateConstructorUsedError;
   String? get ipAddress => throw _privateConstructorUsedError;
   int get batteryLevel => throw _privateConstructorUsedError;
   bool get isCharging => throw _privateConstructorUsedError;
@@ -35,9 +33,7 @@ abstract class $StatusStateCopyWith<$Res> {
       _$StatusStateCopyWithImpl<$Res, StatusState>;
   @useResult
   $Res call(
-      {Device? device,
-      bool isOnline,
-      String? ipAddress,
+      {String? ipAddress,
       int batteryLevel,
       bool isCharging,
       Uint8List? wallpaper});
@@ -56,22 +52,12 @@ class _$StatusStateCopyWithImpl<$Res, $Val extends StatusState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? device = freezed,
-    Object? isOnline = null,
     Object? ipAddress = freezed,
     Object? batteryLevel = null,
     Object? isCharging = null,
     Object? wallpaper = freezed,
   }) {
     return _then(_value.copyWith(
-      device: freezed == device
-          ? _value.device
-          : device // ignore: cast_nullable_to_non_nullable
-              as Device?,
-      isOnline: null == isOnline
-          ? _value.isOnline
-          : isOnline // ignore: cast_nullable_to_non_nullable
-              as bool,
       ipAddress: freezed == ipAddress
           ? _value.ipAddress
           : ipAddress // ignore: cast_nullable_to_non_nullable
@@ -101,9 +87,7 @@ abstract class _$$StatusStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {Device? device,
-      bool isOnline,
-      String? ipAddress,
+      {String? ipAddress,
       int batteryLevel,
       bool isCharging,
       Uint8List? wallpaper});
@@ -120,22 +104,12 @@ class __$$StatusStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? device = freezed,
-    Object? isOnline = null,
     Object? ipAddress = freezed,
     Object? batteryLevel = null,
     Object? isCharging = null,
     Object? wallpaper = freezed,
   }) {
     return _then(_$StatusStateImpl(
-      device: freezed == device
-          ? _value.device
-          : device // ignore: cast_nullable_to_non_nullable
-              as Device?,
-      isOnline: null == isOnline
-          ? _value.isOnline
-          : isOnline // ignore: cast_nullable_to_non_nullable
-              as bool,
       ipAddress: freezed == ipAddress
           ? _value.ipAddress
           : ipAddress // ignore: cast_nullable_to_non_nullable
@@ -160,19 +134,11 @@ class __$$StatusStateImplCopyWithImpl<$Res>
 
 class _$StatusStateImpl implements _StatusState {
   const _$StatusStateImpl(
-      {this.device = null,
-      this.isOnline = false,
-      this.ipAddress = null,
+      {this.ipAddress = null,
       this.batteryLevel = -1,
       this.isCharging = false,
       this.wallpaper = null});
 
-  @override
-  @JsonKey()
-  final Device? device;
-  @override
-  @JsonKey()
-  final bool isOnline;
   @override
   @JsonKey()
   final String? ipAddress;
@@ -188,7 +154,7 @@ class _$StatusStateImpl implements _StatusState {
 
   @override
   String toString() {
-    return 'StatusState(device: $device, isOnline: $isOnline, ipAddress: $ipAddress, batteryLevel: $batteryLevel, isCharging: $isCharging, wallpaper: $wallpaper)';
+    return 'StatusState(ipAddress: $ipAddress, batteryLevel: $batteryLevel, isCharging: $isCharging, wallpaper: $wallpaper)';
   }
 
   @override
@@ -196,9 +162,6 @@ class _$StatusStateImpl implements _StatusState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$StatusStateImpl &&
-            (identical(other.device, device) || other.device == device) &&
-            (identical(other.isOnline, isOnline) ||
-                other.isOnline == isOnline) &&
             (identical(other.ipAddress, ipAddress) ||
                 other.ipAddress == ipAddress) &&
             (identical(other.batteryLevel, batteryLevel) ||
@@ -209,8 +172,8 @@ class _$StatusStateImpl implements _StatusState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, device, isOnline, ipAddress,
-      batteryLevel, isCharging, const DeepCollectionEquality().hash(wallpaper));
+  int get hashCode => Object.hash(runtimeType, ipAddress, batteryLevel,
+      isCharging, const DeepCollectionEquality().hash(wallpaper));
 
   @JsonKey(ignore: true)
   @override
@@ -221,17 +184,11 @@ class _$StatusStateImpl implements _StatusState {
 
 abstract class _StatusState implements StatusState {
   const factory _StatusState(
-      {final Device? device,
-      final bool isOnline,
-      final String? ipAddress,
+      {final String? ipAddress,
       final int batteryLevel,
       final bool isCharging,
       final Uint8List? wallpaper}) = _$StatusStateImpl;
 
-  @override
-  Device? get device;
-  @override
-  bool get isOnline;
   @override
   String? get ipAddress;
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:unisync/core/device.dart';
+import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 import 'package:unisync/utils/logger.dart';
@@ -10,7 +11,8 @@ class SharingPlugin extends UnisyncPlugin {
       : super(device, type: DeviceMessage.Type.SHARING);
 
   @override
-  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
+  void onReceive(Map<String, dynamic> data, Payload? payload) {
+    super.onReceive(data, payload);
     if (data.containsKey('url')) {
       _handleUrl(data['url']);
     }

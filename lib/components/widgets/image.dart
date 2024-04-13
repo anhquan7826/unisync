@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -31,7 +33,9 @@ class UImage extends StatelessWidget {
     BoxFit fit = BoxFit.contain,
     Alignment alignment = Alignment.center,
     Widget Function(BuildContext context)? placeholder,
-    Widget Function(BuildContext context, Widget widget, ImageChunkEvent? event)? loadingBuilder,
+    Widget Function(
+            BuildContext context, Widget widget, ImageChunkEvent? event)?
+        loadingBuilder,
     Color? color,
   }) {
     return UImage._(
@@ -47,10 +51,37 @@ class UImage extends StatelessWidget {
     );
   }
 
+  factory UImage.bytes(
+    Uint8List bytes, {
+    Key? key,
+    double? width,
+    double? height,
+    BoxFit fit = BoxFit.contain,
+    Alignment alignment = Alignment.center,
+    Widget Function(BuildContext context)? placeholder,
+    Widget Function(
+            BuildContext context, Widget widget, ImageChunkEvent? event)?
+        loadingBuilder,
+    Color? color,
+  }) {
+    return UImage._(
+      key: key,
+      byteArray: bytes,
+      width: width,
+      height: height,
+      fit: fit,
+      alignment: alignment,
+      placeholder: placeholder,
+      loadingBuilder: loadingBuilder,
+      color: color,
+    );
+  }
+
   const UImage._({
     super.key,
     this.imageResource,
     this.imageUrl,
+    this.byteArray,
     this.width,
     this.height,
     this.fit = BoxFit.contain,
@@ -62,12 +93,15 @@ class UImage extends StatelessWidget {
 
   final String? imageResource;
   final String? imageUrl;
+  final Uint8List? byteArray;
   final double? width;
   final double? height;
   final BoxFit fit;
   final Alignment alignment;
   final Widget Function(BuildContext context)? placeholder;
-  final Widget Function(BuildContext context, Widget widget, ImageChunkEvent? event)? loadingBuilder;
+  final Widget Function(
+          BuildContext context, Widget widget, ImageChunkEvent? event)?
+      loadingBuilder;
   final Color? color;
 
   @override
@@ -81,7 +115,8 @@ class UImage extends StatelessWidget {
           fit: fit,
           alignment: alignment,
           placeholderBuilder: placeholder,
-          colorFilter: color == null ? null : ColorFilter.mode(color!, BlendMode.srcIn),
+          colorFilter:
+              color == null ? null : ColorFilter.mode(color!, BlendMode.srcIn),
         );
       } else {
         return Image.asset(
@@ -94,7 +129,7 @@ class UImage extends StatelessWidget {
           colorBlendMode: color == null ? null : BlendMode.srcIn,
         );
       }
-    } else {
+    } else if (imageUrl != null) {
       if (imageUrl!.contains(RegExp(r'.*\.svg'))) {
         return SvgPicture.network(
           imageUrl!,
@@ -103,7 +138,8 @@ class UImage extends StatelessWidget {
           fit: fit,
           alignment: alignment,
           placeholderBuilder: placeholder,
-          colorFilter: color == null ? null : ColorFilter.mode(color!, BlendMode.srcIn),
+          colorFilter:
+              color == null ? null : ColorFilter.mode(color!, BlendMode.srcIn),
         );
       } else {
         return CachedNetworkImage(
@@ -121,6 +157,16 @@ class UImage extends StatelessWidget {
           imageUrl: imageUrl!,
         );
       }
+    } else {
+      return Image.memory(
+        byteArray!,
+        width: width,
+        height: height,
+        fit: fit,
+        alignment: alignment,
+        color: color,
+        colorBlendMode: color == null ? null : BlendMode.srcIn,
+      );
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/core/plugins/telephony/model/model.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
@@ -8,7 +9,8 @@ class TelephonyPlugin extends UnisyncPlugin {
   List<Conversation> conversations = [];
 
   @override
-  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
+  void onReceive(Map<String, dynamic> data, Payload? payload) {
+    super.onReceive(data, payload);
     if (data.containsKey('messages')) {
       conversations = (data['messages'] as List).map((e) => Conversation.fromJson(e)).toList();
       notifier.add({

@@ -28,6 +28,7 @@ class DeviceMessage with _$DeviceMessage {
     RING_PHONE: 'ring_phone',
     TELEPHONY: 'telephony',
     SHARING: 'sharing',
+    GALLERY: 'gallery'
   );
 }
 

@@ -1,20 +1,22 @@
+import 'package:unisync/core/device.dart';
+import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 import 'package:unisync/utils/logger.dart';
 import 'package:unisync/utils/payload_handler.dart';
 import 'package:unisync/utils/push_notification.dart';
 
-import '../../device.dart';
-
 class NotificationPlugin extends UnisyncPlugin {
-  NotificationPlugin(Device device) : super(device, type: DeviceMessage.Type.NOTIFICATION);
+  NotificationPlugin(Device device)
+      : super(device, type: DeviceMessage.Type.NOTIFICATION);
 
   final List<NotificationData> _notifications = [];
 
   List<NotificationData> get notifications => _notifications.toList();
 
   @override
-  void onReceive(Map<String, dynamic> data, DeviceMessagePayload? payload) {
+  void onReceive(Map<String, dynamic> data, Payload? payload) {
+    super.onReceive(data, payload);
     _addNotification(NotificationData(
       timestamp: data['timestamp'],
       appName: data['app_name'].toString(),
@@ -26,9 +28,8 @@ class NotificationPlugin extends UnisyncPlugin {
       text: data['text'].toString(),
     );
     if (payload != null) {
-      handlePayload(
-        address: device.ipAddress!,
-        port: payload.port,
+      getPayloadData(
+        payload.stream,
         size: payload.size,
       ).then(
         (value) {

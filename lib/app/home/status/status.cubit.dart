@@ -6,54 +6,38 @@ import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/ring_phone/ring_phone.plugin.dart';
 import 'package:unisync/core/plugins/status/status.plugin.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
+import 'package:unisync/utils/extensions/scope.ext.dart';
 
 class StatusCubit extends Cubit<StatusState> with BaseCubit {
-  StatusCubit() : super(const StatusState());
-
-  Device? _device;
-
-  Device? get device => _device;
-
-  set device(Device? value) {
-    if (_device != value) {
-      _deviceSubscription?.cancel();
-      _statusSubscription?.cancel();
-    }
-    _device = value;
-    if (_device != null) {
-      safeEmit(state.copyWith(device: _device));
-      _listen();
-    }
-  }
-
-  StreamSubscription? _deviceSubscription;
-  StreamSubscription? _statusSubscription;
-
-  void _listen() {
-    _deviceSubscription = device!.notifier.listen((value) {
-      safeEmit(state.copyWith(
-        isOnline: value.connected,
-        ipAddress: device!.ipAddress,
-      ));
-      if (value.connected) {
-        _statusSubscription = device!.getPlugin<StatusPlugin>().notifier.listen((status) {
-          safeEmit(state.copyWith(
-            batteryLevel: status['level'],
-            isCharging: status['isCharging'],
-          ));
-        });
-      }
+  StatusCubit(this.device) : super(const StatusState()) {
+    device.getPlugin<StatusPlugin>().apply((it) {
+      subscription = it.notifier.listen((value) {
+        onStatus(
+          isCharging: value['isCharging'],
+          level: value['level'],
+        );
+      });
+      it.sendStatusRequest();
     });
   }
 
+  final Device device;
+  late final StreamSubscription subscription;
+
+  void onStatus({required bool isCharging, required int level}) {
+    safeEmit(state.copyWith(
+      batteryLevel: level,
+      isCharging: isCharging,
+    ));
+  }
+
   void ringMyPhone() {
-    device?.getPlugin<RingPhonePlugin>().ringMyPhone();
+    device.getPlugin<RingPhonePlugin>().ringMyPhone();
   }
 
   @override
-  Future<void> close() async {
-    await _deviceSubscription?.cancel();
-    await _statusSubscription?.cancel();
+  Future<void> close() {
+    subscription.cancel();
     return super.close();
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:unisync/core/device.dart';
+import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 
@@ -27,7 +28,7 @@ class VolumePlugin extends UnisyncPlugin {
   @override
   Future<void> onReceive(
     Map<String, dynamic> data,
-    DeviceMessagePayload? payload,
+    Payload? payload,
   ) async {
     if (data.containsKey('set_volume')) {
       _setVolume(data['set_volume']);

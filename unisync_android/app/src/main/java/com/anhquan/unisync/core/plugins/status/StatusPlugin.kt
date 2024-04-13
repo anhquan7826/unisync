@@ -7,15 +7,23 @@ import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
+import com.anhquan.unisync.utils.toMap
 
 
 class StatusPlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.STATUS), StatusReceiver.StatusDataListener {
+    data class Status(
+        val level: Int,
+        val isCharging: Boolean
+    )
+
     init {
         StatusReceiver.registerBroadcast(context)
         StatusReceiver.addListener(this)
     }
+
+    private var latestStatus: Status? = null
 
     override fun onDispose() {
         StatusReceiver.removeListener(this)
@@ -36,14 +44,21 @@ class StatusPlugin(
             }
         }
 
-    override fun onReceive(data: Map<String, Any?>) {}
+    override fun onReceive(data: Map<String, Any?>) {
+        latestStatus?.let {
+            send(
+                toMap(it)
+            )
+        }
+    }
 
     override fun onStatusChanged(batteryLevel: Int, isCharging: Boolean) {
+        latestStatus = Status(
+            level = batteryLevel,
+            isCharging = isCharging
+        )
         send(
-            mapOf(
-                "level" to batteryLevel,
-                "isCharging" to isCharging,
-            )
+            toMap(latestStatus!!)
         )
     }
 }

@@ -4,6 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:unisync/core/pairing_handler.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/core/plugins/clipboard/clipboard.plugin.dart';
+import 'package:unisync/core/plugins/gallery/gallery.plugin.dart';
 import 'package:unisync/core/plugins/notification/notification_plugin.dart';
 import 'package:unisync/core/plugins/ring_phone/ring_phone.plugin.dart';
 import 'package:unisync/core/plugins/run_command/run_command.plugin.dart';
@@ -13,6 +14,7 @@ import 'package:unisync/core/plugins/telephony/telephony.plugin.dart';
 import 'package:unisync/core/plugins/volume/volume.plugin.dart';
 import 'package:unisync/utils/configs.dart';
 import 'package:unisync/utils/logger.dart';
+import 'package:unisync/utils/push_notification.dart';
 
 import '../models/device_info/device_info.model.dart';
 import '../models/device_message/device_message.model.dart';
@@ -41,7 +43,8 @@ class Device with ConnectionListener {
   static final Map<DeviceInfo, Device> _instances = {};
   static final _instanceNotifier = BehaviorSubject<List<Device>>();
 
-  static Stream<List<Device>> get instanceNotifier => _instanceNotifier.asBroadcastStream();
+  static Stream<List<Device>> get instanceNotifier =>
+      _instanceNotifier.asBroadcastStream();
 
   static void _removeInstance(DeviceInfo info) {
     final instance = _instances.remove(info);
@@ -107,7 +110,7 @@ class Device with ConnectionListener {
   }
 
   @override
-  void onMessage(DeviceMessage message) {
+  void onMessage(DeviceMessage message, Payload? payload) {
     infoLog('Device@${info.name}: Message received:');
     infoLog(message.toJson());
     if (message.type == DeviceMessage.Type.PAIR) {
@@ -115,14 +118,15 @@ class Device with ConnectionListener {
     } else if (_pairingHandler.state == PairState.paired) {
       for (final plugin in plugins) {
         if (plugin.type == message.type) {
-          plugin.onReceive(message.body, message.payload);
+          plugin.onReceive(message.body, payload);
         }
       }
     }
   }
 
   void sendMessage(DeviceMessage message, [Uint8List? data]) {
-    if (_pairingHandler.state == PairState.paired || message.type == DeviceMessage.Type.PAIR) {
+    if (_pairingHandler.state == PairState.paired ||
+        message.type == DeviceMessage.Type.PAIR) {
       connection?.send(message, data);
       infoLog('Device@${info.name}: Message sent:');
       infoLog(message.toJson());
@@ -143,6 +147,7 @@ class Device with ConnectionListener {
       RingPhonePlugin(this),
       TelephonyPlugin(this),
       SharingPlugin(this),
+      GalleryPlugin(this),
     ]);
   }
 
@@ -151,6 +156,27 @@ class Device with ConnectionListener {
       plugin.dispose();
     }
     plugins.clear();
+  }
+
+  void showNotification() {
+    if (pairState == PairState.paired) {
+      if (isOnline) {
+        PushNotification.showNotification(
+          title: 'Connection',
+          text: 'Device ${info.name} connected!',
+        );
+      } else {
+        PushNotification.showNotification(
+          title: 'Connection',
+          text: 'Device ${info.name} disconnected!',
+        );
+      }
+    } else if (pairState == PairState.pairRequested) {
+      PushNotification.showNotification(
+        title: 'Pairing',
+        text: 'Device ${info.name} requests to pair!',
+      );
+    }
   }
 
   void _notify() {

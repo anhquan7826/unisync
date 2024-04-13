@@ -6,11 +6,12 @@ import 'package:unisync/utils/extensions/map.ext.dart';
 import 'package:unisync/utils/extensions/string.ext.dart';
 import 'package:unisync/utils/extensions/uint8list.ext.dart';
 import 'package:unisync/utils/logger.dart';
+import 'package:unisync/utils/payload_handler.dart';
 
 import '../models/device_message/device_message.model.dart';
 
 mixin ConnectionListener {
-  void onMessage(DeviceMessage message);
+  void onMessage(DeviceMessage message, Payload? payload);
 
   void onDisconnected();
 }
@@ -34,10 +35,23 @@ class DeviceConnection {
 
   void _listenInputStream() {
     _streamSubscription = _inputStream.listen(
-      (event) {
-        connectionListener?.onMessage(DeviceMessage.fromJson(
+      (event) async {
+        final message = DeviceMessage.fromJson(
           event.string.toMap(),
-        ));
+        );
+        debugLog(message);
+        if (message.payload != null) {
+          final stream = await getPayloadStream(
+            address: ipAddress,
+            port: message.payload!.port,
+          );
+          connectionListener?.onMessage(
+            message,
+            Payload(message.payload!.size, stream),
+          );
+        } else {
+          connectionListener?.onMessage(message, null);
+        }
       },
       cancelOnError: true,
       onDone: disconnect,
@@ -80,4 +94,11 @@ class DeviceConnection {
     _onDisconnect?.call();
     connectionListener?.onDisconnected();
   }
+}
+
+class Payload {
+  Payload(this.size, this.stream);
+
+  final int size;
+  final Stream<Uint8List> stream;
 }

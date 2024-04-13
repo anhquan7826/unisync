@@ -27,6 +27,8 @@ data class DeviceMessage(
         TELEPHONY,
         @SerializedName("sharing")
         SHARING,
+        @SerializedName("gallery")
+        GALLERY
     }
 
     override fun toString(): String {

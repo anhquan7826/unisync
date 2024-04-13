@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unisync/app/home/gallery/gallery.cubit.dart';
 import 'package:unisync/app/home/home.cubit.dart';
 import 'package:unisync/app/home/home.state.dart';
 import 'package:unisync/app/home/messages/messages.cubit.dart';
@@ -12,6 +13,7 @@ import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/components/widgets/expandable_list.dart';
 import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/core/device.dart';
+import 'package:unisync/core/pairing_handler.dart';
 import 'package:unisync/routes/routes.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
@@ -34,13 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<HomeCubit, HomeState>(
-      listener: (context, state) {
-        if (!state.currentDevice.isOnline) {
-          currentDest = 0;
-          pageController.jumpToPage(currentDest);
-        }
-      },
+    return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
         return Scaffold(
           body: Row(
@@ -56,36 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Expanded(
-                child: PageView(
-                  scrollDirection: Axis.vertical,
-                  controller: pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    BlocProvider(
-                      create: (context) => StatusCubit(),
-                      child: StatusScreen(
-                        key: ValueKey(state.currentDevice.info.hashCode),
-                        device: state.currentDevice,
-                      ),
-                    ),
-                    const FileTransferScreen(),
-                    const GalleryScreen(),
-                    BlocProvider(
-                      create: (context) => MessagesCubit(),
-                      child: MessagesScreen(
-                        key: ValueKey(state.currentDevice.info.hashCode + 3),
-                        device: state.currentDevice,
-                      ),
-                    ),
-                    BlocProvider(
-                      create: (context) => NotificationCubit(),
-                      child: NotificationScreen(
-                        key: ValueKey(state.currentDevice.info.hashCode + 4),
-                        device: state.currentDevice,
-                      ),
-                    ),
-                  ],
-                ),
+                child: buildBody(state),
               ),
             ],
           ),
@@ -95,6 +62,78 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   int currentDest = 0;
+
+  Widget buildBody(HomeState state) {
+    if (!state.currentDevice.isOnline) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          UImage.asset(
+            R.vectors.warning,
+            width: 64,
+            height: 64,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            R.strings.status.device_offline,
+            textAlign: TextAlign.center,
+          ).tr(),
+        ],
+      );
+    }
+    if (state.currentDevice.pairState != PairState.paired) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          UImage.asset(
+            R.vectors.warning,
+            width: 64,
+            height: 64,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            R.strings.status.device_offline,
+            textAlign: TextAlign.center,
+          ).tr(),
+        ],
+      );
+    }
+    return PageView(
+      scrollDirection: Axis.vertical,
+      controller: pageController,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        BlocProvider(
+          create: (context) => StatusCubit(state.currentDevice),
+          child: StatusScreen(
+            key: ValueKey(state.currentDevice.info.hashCode),
+          ),
+        ),
+        const FileTransferScreen(),
+        BlocProvider(
+          key: ValueKey(state.currentDevice.info.hashCode + 2),
+          create: (context) => GalleryCubit(state.currentDevice),
+          child: const GalleryScreen(),
+        ),
+        BlocProvider(
+          key: ValueKey(state.currentDevice.info.hashCode + 3),
+          create: (context) => MessagesCubit(),
+          child: MessagesScreen(
+            device: state.currentDevice,
+          ),
+        ),
+        BlocProvider(
+          key: ValueKey(state.currentDevice.info.hashCode + 4),
+          create: (context) => NotificationCubit(),
+          child: NotificationScreen(
+            device: state.currentDevice,
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget buildDeviceFeatures(HomeState state) {
     Widget buildDestination(
@@ -121,7 +160,9 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
-                color: index == currentDest ? Color(R.colors.main_color).withOpacity(0.2) : null,
+                color: index == currentDest
+                    ? Color(R.colors.main_color).withOpacity(0.2)
+                    : null,
               ),
               child: Row(
                 children: [
@@ -175,7 +216,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildPairedDevices(HomeState state) {
-    Widget buildDevice(Device device, {bool isSelected = false, void Function()? onTap}) {
+    Widget buildDevice(Device device,
+        {bool isSelected = false, void Function()? onTap}) {
       return Clickable(
         key: GlobalKey(),
         borderRadius: BorderRadius.circular(24),
@@ -184,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            color: isSelected ? Color(R.colors.main_color).withOpacity(0.2) : null,
+            color:
+                isSelected ? Color(R.colors.main_color).withOpacity(0.2) : null,
           ),
           child: Row(
             children: [
@@ -204,7 +247,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    device.isOnline ? R.strings.status.connected.tr() : R.strings.status.disconnected.tr(),
+                    device.isOnline
+                        ? R.strings.status.connected.tr()
+                        : R.strings.status.disconnected.tr(),
                     style: context.labelM.copyWith(
                       color: device.isOnline ? Colors.green : Colors.grey,
                     ),
@@ -362,7 +407,10 @@ class _EditNameDialogState extends State<_EditNameDialog> {
           child: Text(R.strings.home.cancel.tr()),
         ),
         TextButton(
-          onPressed: controller.text.isEmpty || controller.text.trim() == widget.previousName ? null : () => context.pop(controller.text.trim()),
+          onPressed: controller.text.isEmpty ||
+                  controller.text.trim() == widget.previousName
+              ? null
+              : () => context.pop(controller.text.trim()),
           child: Text(R.strings.home.save.tr()),
         ),
       ],

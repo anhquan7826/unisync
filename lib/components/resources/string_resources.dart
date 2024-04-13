@@ -45,6 +45,7 @@ const _stringResources = (
     disconnected: 'status.disconnected',
     connected_at: 'status.connected_at',
     device_offline: 'status.device_offline',
+    device_unpaired: 'status.device_unpaired',
   ),
   messages: (
     conversations: 'messages.conversations',

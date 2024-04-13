@@ -18,6 +18,8 @@ class HomeCubit extends Cubit<HomeState> with BaseCubit {
     _load();
   }
 
+  StreamSubscription? _currentDeviceSubscription;
+
   Future<void> _load() async {
     final myDevice = await ConfigUtil.device.getDeviceInfo();
     safeEmit(state.copyWith(
@@ -71,6 +73,12 @@ class HomeCubit extends Cubit<HomeState> with BaseCubit {
       currentDevice: value,
     ));
     ConfigUtil.device.setLastUsedDevice(value.info);
+    _currentDeviceSubscription?.cancel();
+    _currentDeviceSubscription = value.notifier.listen((event) {
+      safeEmit(state.copyWith(
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ));
+    });
   }
 
   Future<void> renameMyDevice(String newName) async {
