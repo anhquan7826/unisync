@@ -1,7 +1,6 @@
 package com.anhquan.unisync.core.plugins.notification
 
 import android.app.Notification
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -9,12 +8,13 @@ import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
-import androidx.activity.ComponentActivity
 import androidx.core.content.res.ResourcesCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
+import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.extensions.addTo
+import com.anhquan.unisync.utils.extensions.toPrettyString
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -61,11 +61,14 @@ class NotificationPlugin(
         try {
             val notification = sbn.notification
             notification.extras.apply {
+                debugLog(toPrettyString())
                 val appName = packageManager.getApplicationInfo(sbn.packageName, 0).let {
                     packageManager.getApplicationLabel(it).toString()
                 }
-                val title = getString(Notification.EXTRA_TITLE)
-                val text = getString(Notification.EXTRA_TEXT)
+                val title = getCharSequence(Notification.EXTRA_TITLE).toString()
+                val text = getCharSequence(Notification.EXTRA_TEXT).toString()
+                val subText = getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
+                val bigText = getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()
                 runTask(task = {
                     val icon = extractIcon(sbn)
                     val picture = extractPicture(sbn)
@@ -81,8 +84,10 @@ class NotificationPlugin(
                             "app_name" to appName,
                             "title" to title,
                             "text" to text,
+                            "sub_text" to subText,
+                            "big_text" to bigText
                         ),
-                        payloadData = it["icon"]
+                        payloadData = it["picture"]
                     )
                 }).addTo(disposables)
             }

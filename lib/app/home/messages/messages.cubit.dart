@@ -9,43 +9,23 @@ import 'package:unisync/core/plugins/telephony/telephony.plugin.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
 
 class MessagesCubit extends Cubit<MessagesState> with BaseCubit {
-  MessagesCubit() : super(MessagesState(timestamp: DateTime.now().millisecondsSinceEpoch));
-
-  Device? _device;
-
-  Device? get device => _device;
-
-  set device(Device? value) {
-    if (_device != value) {
-      _deviceSubscription?.cancel();
-      _telephonySubscription?.cancel();
-    }
-    _device = value;
-    if (_device != null) {
-      safeEmit(state.copyWith(device: _device));
-      _listen();
-      _device!.getPlugin<TelephonyPlugin>().getAllMessages();
-    }
+  MessagesCubit(this.device) : super(MessagesState(timestamp: DateTime.now().millisecondsSinceEpoch)) {
+    _listen();
+    device!.getPlugin<TelephonyPlugin>().getAllMessages();
   }
 
-  StreamSubscription? _deviceSubscription;
+  final Device? device;
+  
   StreamSubscription? _telephonySubscription;
 
   void _listen() {
-    _deviceSubscription = device!.notifier.listen((value) {
-      if (value.connected) {
-        _telephonySubscription = device!.getPlugin<TelephonyPlugin>().notifier.listen((value) {
-          safeEmit(state.copyWith(
-            timestamp: DateTime.now().millisecondsSinceEpoch,
-            status: Status.loaded,
-            conversations: value['conversations'] as List<Conversation>,
-            newMessage: value['new_message'] as Message?,
-          ));
-        });
-        device!.getPlugin<TelephonyPlugin>().getAllMessages();
-      } else {
-        _telephonySubscription?.cancel();
-      }
+    _telephonySubscription = device!.getPlugin<TelephonyPlugin>().notifier.listen((value) {
+      safeEmit(state.copyWith(
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+        status: Status.loaded,
+        conversations: value['conversations'] as List<Conversation>,
+        newMessage: value['new_message'] as Message?,
+      ));
     });
   }
 
@@ -68,7 +48,6 @@ class MessagesCubit extends Cubit<MessagesState> with BaseCubit {
   @override
   Future<void> close() {
     _telephonySubscription?.cancel();
-    _deviceSubscription?.cancel();
     return super.close();
   }
 }

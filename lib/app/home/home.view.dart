@@ -119,10 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         BlocProvider(
           key: ValueKey(state.currentDevice.info.hashCode + 3),
-          create: (context) => MessagesCubit(),
-          child: MessagesScreen(
-            device: state.currentDevice,
-          ),
+          create: (context) => MessagesCubit(state.currentDevice),
+          child: const MessagesScreen(),
         ),
         BlocProvider(
           key: ValueKey(state.currentDevice.info.hashCode + 4),

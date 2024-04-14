@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:unisync/core/device.dart';
-import 'package:unisync/core/plugins/notification/notification_plugin.dart';
+import 'package:unisync/models/notification_data/notification_data.model.dart';
 
 part 'notification.state.freezed.dart';
 

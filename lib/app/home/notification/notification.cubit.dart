@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/app/home/notification/notification.state.dart';
 import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/notification/notification_plugin.dart';
+import 'package:unisync/models/notification_data/notification_data.model.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
 
 class NotificationCubit extends Cubit<NotificationState> with BaseCubit {

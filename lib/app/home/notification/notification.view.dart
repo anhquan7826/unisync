@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/app/home/notification/notification.cubit.dart';
 import 'package:unisync/app/home/notification/notification.state.dart';
+import 'package:unisync/components/resources/resources.dart';
+import 'package:unisync/components/widgets/image.dart';
 import 'package:unisync/core/device.dart';
-import 'package:unisync/core/plugins/notification/notification_plugin.dart';
+import 'package:unisync/models/notification_data/notification_data.model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
@@ -16,7 +18,8 @@ class NotificationScreen extends StatefulWidget {
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> with AutomaticKeepAliveClientMixin<NotificationScreen> {
+class _NotificationScreenState extends State<NotificationScreen>
+    with AutomaticKeepAliveClientMixin<NotificationScreen> {
   @override
   void initState() {
     super.initState();
@@ -84,6 +87,19 @@ class _NotificationScreenState extends State<NotificationScreen> with AutomaticK
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (notification.icon != null)
+            UImage.bytes(
+              notification.icon!,
+              width: 42,
+              height: 42,
+            )
+          else
+            UImage.asset(
+              R.vectors.app_icon,
+              width: 42,
+              height: 42,
+            ),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,

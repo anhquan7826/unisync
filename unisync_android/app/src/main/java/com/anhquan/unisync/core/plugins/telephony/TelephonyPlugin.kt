@@ -111,34 +111,17 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
 
     override val requiredPermission: List<String>
         get() {
-            val p = mutableListOf<String>()
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_CONTACTS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                p.add(Manifest.permission.READ_CONTACTS)
-            }
-            val sms = listOf(
+            return listOf(
                 Manifest.permission.READ_SMS,
                 Manifest.permission.SEND_SMS,
                 Manifest.permission.RECEIVE_SMS,
-            ).any {
+                Manifest.permission.READ_CONTACTS
+            ).filterNot {
                 ContextCompat.checkSelfPermission(
                     context,
                     it
                 ) == PackageManager.PERMISSION_GRANTED
             }
-            if (!sms) {
-                p.addAll(
-                    listOf(
-                        Manifest.permission.READ_SMS,
-                        Manifest.permission.SEND_SMS,
-                        Manifest.permission.RECEIVE_SMS
-                    )
-                )
-            }
-            return p
         }
 
     override fun onDispose() {

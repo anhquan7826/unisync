@@ -5,36 +5,19 @@ import 'package:unisync/app/home/messages/messages.cubit.dart';
 import 'package:unisync/app/home/messages/messages.state.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
-import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/telephony/model/model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
 class MessagesScreen extends StatefulWidget {
-  const MessagesScreen({super.key, required this.device});
-
-  final Device device;
+  const MessagesScreen({super.key});
 
   @override
   State<MessagesScreen> createState() => _MessagesScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAliveClientMixin<MessagesScreen> {
-  @override
-  void initState() {
-    super.initState();
-    getCubit<MessagesCubit>().device = widget.device;
-  }
-
-  @override
-  void didUpdateWidget(covariant MessagesScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.device != widget.device) {
-      getCubit<MessagesCubit>().device = widget.device;
-    }
-  }
-
+class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);

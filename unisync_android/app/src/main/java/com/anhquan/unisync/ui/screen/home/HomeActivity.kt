@@ -223,18 +223,22 @@ class HomeActivity : ComponentActivity() {
                                     }),
                                 modifier = Modifier
                                     .size(42.dp)
-                                    .padding(end = 8.dp)
+                                    .padding(end = 16.dp)
                             )
-                            Column {
+                            Column(
+                                verticalArrangement = Arrangement.Center
+                            ) {
                                 Text(
                                     viewModel.device.info.name,
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    lineHeight = 14.sp
                                 )
                                 Text(
                                     if (state.isOnline) stringResource(R.string.connected) else stringResource(
                                         R.string.disconnected
-                                    ), fontSize = 10.sp
+                                    ), fontSize = 10.sp,
+                                    lineHeight = 10.sp
                                 )
                             }
                         }

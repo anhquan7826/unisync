@@ -20,7 +20,7 @@ class RunCommandPlugin extends UnisyncPlugin {
       executable,
       arguments,
       runInShell: true,
-    ).then((value) {
+    ).then((value) async {
       PushNotification.showNotification(
         title: 'Run command',
         text: 'Executing command "$command"...',

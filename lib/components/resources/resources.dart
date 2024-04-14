@@ -2,6 +2,7 @@ part 'vector_resources.dart';
 part 'string_resources.dart';
 part 'script_resources.dart';
 part 'font_resources.dart';
+part 'image_resources.dart';
 part 'color_resources.dart';
 
 class R {
@@ -11,5 +12,6 @@ class R {
   static const strings = _stringResources;
   static const scripts = _scriptResources;
   static const fonts = _fontResources;
+  static const images = _imageResources;
   static const colors = _colorResources;
 }

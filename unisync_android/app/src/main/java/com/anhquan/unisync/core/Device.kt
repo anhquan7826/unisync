@@ -163,11 +163,13 @@ class Device private constructor(
         } else {
             disposePlugins()
         }
-        notifier.onNext(
-            DeviceEvent(
-                connected = isOnline, pairState = pairState
+        try {
+            notifier.onNext(
+                DeviceEvent(
+                    connected = isOnline, pairState = pairState
+                )
             )
-        )
+        } catch (_: Exception) {}
     }
 
     data class DeviceEvent(
