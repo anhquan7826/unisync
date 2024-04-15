@@ -1,5 +1,4 @@
 import 'package:unisync/core/device.dart';
-import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 

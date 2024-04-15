@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class DeviceMessage(
     val time: Long = System.currentTimeMillis(),
     val type: Type,
-    val payload: Payload? = null,
+    val payload: DeviceMessagePayload? = null,
     val body: Map<String, Any?> = mapOf()
 ) {
     enum class Type {
@@ -28,7 +28,9 @@ data class DeviceMessage(
         @SerializedName("sharing")
         SHARING,
         @SerializedName("gallery")
-        GALLERY
+        GALLERY,
+        @SerializedName("storage")
+        STORAGE
     }
 
     override fun toString(): String {
@@ -39,7 +41,7 @@ data class DeviceMessage(
         """.trimIndent()
     }
 
-    data class Payload(
+    data class DeviceMessagePayload(
         val port: Int = -1,
         val size: Int,
     )

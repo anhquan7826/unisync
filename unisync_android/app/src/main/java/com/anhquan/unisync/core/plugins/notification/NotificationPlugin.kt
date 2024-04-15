@@ -36,8 +36,6 @@ class NotificationPlugin(
 
     private val packageManager = context.packageManager
 
-    private val disposables = CompositeDisposable()
-
     override val requiredPermission: List<String>
         get() {
             val notificationListenerList = Settings.Secure.getString(
@@ -53,7 +51,6 @@ class NotificationPlugin(
 
     override fun onDispose() {
         NotificationReceiver.removeListener(this)
-        disposables.dispose()
         super.onDispose()
     }
 
@@ -77,6 +74,7 @@ class NotificationPlugin(
                             "icon" to icon, "picture" to picture
                         )
                     )
+                    it.onComplete()
                 }, subscribeOn = Schedulers.computation(), onResult = {
                     send(
                         mapOf(
@@ -89,7 +87,7 @@ class NotificationPlugin(
                         ),
                         payloadData = it["picture"]
                     )
-                }).addTo(disposables)
+                })
             }
         } catch (e: Exception) {
             warningLog("Something went wrong at ${this::class.simpleName}:\n${e.message}")

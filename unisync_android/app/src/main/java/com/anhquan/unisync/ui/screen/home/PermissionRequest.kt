@@ -3,6 +3,8 @@ package com.anhquan.unisync.ui.screen.home
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -46,32 +48,44 @@ fun PermissionRequest(
             for (i in permissions.indices) {
                 val permission = permissions[i]
                 val state = permissionStates[i]
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = when (permission) {
-                                Manifest.permission.READ_CONTACTS -> stringResource(R.string.read_contacts)
-                                Manifest.permission.SEND_SMS -> stringResource(R.string.send_sms)
-                                Manifest.permission.READ_SMS -> stringResource(R.string.read_sms)
-                                Manifest.permission.RECEIVE_SMS -> stringResource(R.string.receive_sms)
-                                Manifest.permission.POST_NOTIFICATIONS -> stringResource(R.string.post_notifications)
-                                "enabled_notification_listeners" -> stringResource(R.string.read_notifications)
-                                else -> permission
-                            }
-                        )
-                    },
-                    modifier = Modifier.clickable {
-                        if (permission == "enabled_notification_listeners") {
-                            context.startActivity(
-                                Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
-                                    setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                ListItem(headlineContent = {
+                    Text(
+                        text = when (permission) {
+                            Manifest.permission.READ_CONTACTS -> stringResource(R.string.read_contacts)
+                            Manifest.permission.SEND_SMS -> stringResource(R.string.send_sms)
+                            Manifest.permission.READ_SMS -> stringResource(R.string.read_sms)
+                            Manifest.permission.RECEIVE_SMS -> stringResource(R.string.receive_sms)
+                            Manifest.permission.POST_NOTIFICATIONS -> stringResource(R.string.post_notifications)
+                            "enabled_notification_listeners" -> stringResource(R.string.read_notifications)
+                            else -> permission
+                        }
+                    )
+                }, modifier = Modifier.clickable {
+                    if (permission == "enabled_notification_listeners") {
+                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
+                            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        })
+                    } else {
+                        when (permission) {
+                            Manifest.permission.MANAGE_EXTERNAL_STORAGE -> {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                                    context.startActivity(
+                                        Intent(
+                                            Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                                            Uri.parse("package:${context.packageName}")
+                                        )
+                                    )
+                                } else {
+                                    state.launchPermissionRequest()
                                 }
-                            )
-                        } else {
-                            state.launchPermissionRequest()
+                            }
+
+                            else -> {
+                                state.launchPermissionRequest()
+                            }
                         }
                     }
-                )
+                })
             }
         }
     }

@@ -1,11 +1,16 @@
 package com.anhquan.unisync.utils
 
+import java.lang.Exception
 import java.util.concurrent.Executors
 
 object ThreadHelper {
-    fun run(callback: () -> Unit) {
+    fun run(onError: ((Exception) -> Unit)? = null, callback: () -> Unit) {
         Executors.newCachedThreadPool().execute {
-            callback.invoke();
+            try {
+                callback.invoke()
+            } catch (e: Exception) {
+                onError?.invoke(e)
+            }
         }
     }
 }

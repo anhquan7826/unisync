@@ -30,6 +30,7 @@ class VolumePlugin extends UnisyncPlugin {
     Map<String, dynamic> data,
     Payload? payload,
   ) async {
+    super.onReceive(data, payload);
     if (data.containsKey('set_volume')) {
       _setVolume(data['set_volume']);
     }

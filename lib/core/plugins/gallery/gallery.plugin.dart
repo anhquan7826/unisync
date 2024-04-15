@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:unisync/core/device.dart';
-import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
 import 'package:unisync/models/media/media.model.dart';
 import 'package:unisync/utils/extensions/stream.ext.dart';
-import 'package:unisync/utils/logger.dart';
 import 'package:unisync/utils/payload_handler.dart';
 
 class GalleryPlugin extends UnisyncPlugin {

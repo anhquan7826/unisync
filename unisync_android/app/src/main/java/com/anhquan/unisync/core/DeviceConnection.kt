@@ -4,13 +4,16 @@ import android.content.Context
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ThreadHelper
 import com.anhquan.unisync.utils.fromJson
+import com.anhquan.unisync.utils.getPayloadStream
 import com.anhquan.unisync.utils.gson
 import com.anhquan.unisync.utils.infoLog
 import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
+import com.anhquan.unisync.utils.warningLog
 import io.reactivex.rxjava3.disposables.Disposable
 import java.io.BufferedReader
 import java.io.ByteArrayInputStream
+import java.io.InputStream
 import java.io.OutputStream
 import java.net.ServerSocket
 import javax.net.ssl.SSLSocket
@@ -21,17 +24,21 @@ class DeviceConnection(
     private val onDisconnected: (() -> Unit)? = null
 ) {
     interface ConnectionListener {
-        fun onMessage(message: DeviceMessage)
+        fun onMessage(message: DeviceMessage, payload: Payload? = null)
 
         fun onDisconnected()
     }
+
+    data class Payload(
+        val stream: InputStream,
+        val size: Int
+    )
 
     private val reader: BufferedReader = socket.inputStream.bufferedReader()
     private var writer: OutputStream = socket.outputStream
 
     var connectionListener: ConnectionListener? = null
 
-    private lateinit var inputStreamDisposable: Disposable
     private var isConnected = true
 
     val ipAddress: String get() = socket.inetAddress?.hostAddress ?: ""
@@ -41,7 +48,7 @@ class DeviceConnection(
     }
 
     private fun listenInputStream() {
-        inputStreamDisposable = runTask(task = {
+        runTask(task = {
             try {
                 while (true) {
                     val message = reader.readLine()
@@ -49,20 +56,37 @@ class DeviceConnection(
                         it.onNext(message)
                     } else {
                         disconnect()
+                        it.onComplete()
                         break
                     }
                 }
             } catch (e: Exception) {
-//                it.onError(e)
+                it.onError(e)
             }
         }, onResult = {
             fromJson(
                 it, DeviceMessage::class.java
             )?.let { message ->
-                connectionListener?.onMessage(
-                    message
-                )
+                if (message.payload != null) {
+                    getPayloadStream(
+                        ipAddress,
+                        message.payload.port
+                    ) { stream ->
+                        connectionListener?.onMessage(
+                            message, Payload(
+                                stream,
+                                message.payload.size
+                            )
+                        )
+                    }
+                } else {
+                    connectionListener?.onMessage(
+                        message
+                    )
+                }
             }
+        }, onError = {
+            warningLog(it)
         })
     }
 
@@ -75,12 +99,11 @@ class DeviceConnection(
                             try {
                                 infoLog("Opening server socket for payload...")
                                 val payloadServer = ServerSocket(0)
-//                                    payloadServer.bind(null)
                                 val payloadSize = data.size
                                 write(
                                     gson.toJson(
                                         message.copy(
-                                            payload = DeviceMessage.Payload(
+                                            payload = DeviceMessage.DeviceMessagePayload(
                                                 port = payloadServer.localPort,
                                                 size = payloadSize
                                             )
@@ -130,7 +153,6 @@ class DeviceConnection(
     private fun disconnect() {
         isConnected = false
         try {
-            inputStreamDisposable.dispose()
             socket.close()
             onDisconnected?.invoke()
             connectionListener?.onDisconnected()

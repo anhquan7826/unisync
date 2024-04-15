@@ -9,6 +9,7 @@ import com.anhquan.unisync.core.plugins.ring_phone.RingPhonePlugin
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
 import com.anhquan.unisync.core.plugins.sharing.SharingPlugin
 import com.anhquan.unisync.core.plugins.status.StatusPlugin
+import com.anhquan.unisync.core.plugins.storage.StoragePlugin
 import com.anhquan.unisync.core.plugins.telephony.TelephonyPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.models.DeviceInfo
@@ -106,7 +107,7 @@ class Device private constructor(
         notifyNewEvent()
     }
 
-    override fun onMessage(message: DeviceMessage) {
+    override fun onMessage(message: DeviceMessage, payload: DeviceConnection.Payload?) {
         infoLog("${this::class.simpleName}@${info.name}: Message received${if (message.payload != null) " with payload" else ""}:\n$message")
         if (message.type == DeviceMessage.Type.PAIR) {
             pairingHandler.handle(message.body)
@@ -140,7 +141,8 @@ class Device private constructor(
             RingPhonePlugin(this),
             TelephonyPlugin(this),
             SharingPlugin(this),
-            GalleryPlugin(this)
+            GalleryPlugin(this),
+            StoragePlugin(this)
         )
     }
 

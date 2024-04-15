@@ -1,8 +1,6 @@
 package com.anhquan.unisync.core.plugins
 
 import android.content.Context
-import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.CallSuper
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceMessage
@@ -28,7 +26,7 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
                 type = type,
                 body = data,
                 payload = payloadData?.let {
-                    DeviceMessage.Payload(size = it.size,)
+                    DeviceMessage.DeviceMessagePayload(size = it.size,)
                 }
             ),
             payloadData = payloadData

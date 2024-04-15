@@ -5,7 +5,6 @@ import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/components/widgets/image.dart';
-import 'package:unisync/core/device.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
 import 'status.state.dart';

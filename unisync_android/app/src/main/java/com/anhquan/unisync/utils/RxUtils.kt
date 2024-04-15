@@ -11,17 +11,24 @@ import java.util.concurrent.TimeUnit
 
 fun runSingle(
     subscribeOn: Scheduler = Schedulers.io(),
-    onError: (e: Throwable) -> Unit = { it.printStackTrace() },
+    onError: ((Throwable) -> Unit)? = null,
     callback: () -> Unit,
-): Disposable {
-    return Single.create {
+) {
+    lateinit var disposable: Disposable
+    disposable = Completable.create {
         try {
             callback.invoke()
-            it.onSuccess(Unit)
+            it.onComplete()
         } catch (e: Exception) {
             it.onError(e)
         }
-    }.subscribeOn(subscribeOn).subscribe({}, onError)
+    }.subscribeOn(subscribeOn).subscribe({
+        disposable.dispose()
+    }, {
+        onError?.invoke(it)
+        it.printStackTrace()
+        disposable.dispose()
+    })
 }
 
 fun runPeriodic(
@@ -38,25 +45,21 @@ fun <T : Any> runTask(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
     task: (ObservableEmitter<T>) -> Unit,
-    onResult: (T) -> Unit = {},
-    onError: (Throwable) -> Unit = { it.printStackTrace() },
-    onComplete: () -> Unit = {}
-): Disposable {
-    return Observable
-        .create {
-            try {
-                task.invoke(it)
-            } catch (e: Exception) {
-//                it.onError(e)
+    onResult: (T) -> Unit,
+    onError: ((Throwable) -> Unit)? = null,
+    cancelOnError: Boolean = false,
+) {
+    lateinit var disposable: Disposable
+    disposable =
+        Observable.create(task).subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onResult, {
+            onError?.invoke(it)
+            it.printStackTrace()
+            if (cancelOnError) {
+                disposable.dispose()
             }
-        }
-        .subscribeOn(subscribeOn)
-        .observeOn(observeOn)
-        .subscribe(
-            onResult,
-            onError,
-            onComplete
-        )
+        }, {
+            disposable.dispose()
+        })
 }
 
 fun <T : Any> Observable<T>.listen(
@@ -68,6 +71,25 @@ fun <T : Any> Observable<T>.listen(
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onNext, onError)
 }
 
+fun <T : Any> Observable<T>.listenCancellable(
+    subscribeOn: Scheduler = Schedulers.io(),
+    observeOn: Scheduler = Schedulers.io(),
+    onError: ((Throwable) -> Unit)? = null,
+    onNext: (T) -> Boolean
+) {
+    lateinit var disposable: Disposable
+    disposable = this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe({
+        if (onNext(it)) {
+            disposable.dispose()
+        }
+    }, {
+        onError?.invoke(it)
+        errorLog(it.message)
+        it.printStackTrace()
+        disposable.dispose()
+    })
+}
+
 fun <T : Any> Single<T>.listen(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
@@ -77,6 +99,24 @@ fun <T : Any> Single<T>.listen(
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onResult, onError)
 }
 
+fun <T : Any> Single<T>.listenCancellable(
+    subscribeOn: Scheduler = Schedulers.io(),
+    observeOn: Scheduler = Schedulers.io(),
+    onError: ((Throwable) -> Unit)? = null,
+    onNext: (T) -> Unit
+) {
+    lateinit var disposable: Disposable
+    disposable = this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe({
+        onNext(it)
+        disposable.dispose()
+    }, {
+        onError?.invoke(it)
+        errorLog(it.message)
+        it.printStackTrace()
+        disposable.dispose()
+    })
+}
+
 fun Completable.listen(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
@@ -84,9 +124,26 @@ fun Completable.listen(
     onResult: () -> Unit
 ): Disposable {
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(
-        onResult,
-        onError
+        onResult, onError
     )
+}
+
+fun Completable.listenCancellable(
+    subscribeOn: Scheduler = Schedulers.io(),
+    observeOn: Scheduler = Schedulers.io(),
+    onError: ((Throwable) -> Unit)? = null,
+    onNext: () -> Unit
+) {
+    lateinit var disposable: Disposable
+    disposable = this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe({
+        onNext()
+        disposable.dispose()
+    }, {
+        onError?.invoke(it)
+        errorLog(it.message)
+        it.printStackTrace()
+        disposable.dispose()
+    })
 }
 
 fun delay(timeMillis: Long = 500, callback: () -> Unit): Disposable {
