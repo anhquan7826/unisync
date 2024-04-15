@@ -13,13 +13,23 @@ class GalleryScreen extends StatefulWidget {
   State<GalleryScreen> createState() => _GalleryScreenState();
 }
 
-class _GalleryScreenState extends State<GalleryScreen> with AutomaticKeepAliveClientMixin {
+class _GalleryScreenState extends State<GalleryScreen>
+    with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gallery'),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              getCubit<GalleryCubit>().getGallery();
+            },
+            label: const Text('Reload'),
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
       ),
       body: BlocBuilder<GalleryCubit, GalleryState>(
         builder: (context, state) {

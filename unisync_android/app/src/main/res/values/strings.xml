@@ -39,4 +39,7 @@
     <string name="ssh">SSH</string>
     <string name="volume">Volume</string>
     <string name="choose_destination_device">Choose destination device...</string>
+    <string name="read_all_images">Read all images</string>
+    <string name="other_permission">Other permission (%1$s)</string>
+    <string name="read_all_files">Read all files</string>
 </resources>

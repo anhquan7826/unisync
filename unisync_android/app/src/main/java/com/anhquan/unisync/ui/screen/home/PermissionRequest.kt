@@ -48,24 +48,23 @@ fun PermissionRequest(
             for (i in permissions.indices) {
                 val permission = permissions[i]
                 val state = permissionStates[i]
-                ListItem(headlineContent = {
-                    Text(
-                        text = when (permission) {
-                            Manifest.permission.READ_CONTACTS -> stringResource(R.string.read_contacts)
-                            Manifest.permission.SEND_SMS -> stringResource(R.string.send_sms)
-                            Manifest.permission.READ_SMS -> stringResource(R.string.read_sms)
-                            Manifest.permission.RECEIVE_SMS -> stringResource(R.string.receive_sms)
-                            Manifest.permission.POST_NOTIFICATIONS -> stringResource(R.string.post_notifications)
-                            "enabled_notification_listeners" -> stringResource(R.string.read_notifications)
-                            else -> permission
-                        }
-                    )
-                }, modifier = Modifier.clickable {
-                    if (permission == "enabled_notification_listeners") {
-                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
-                            setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        })
-                    } else {
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = when (permission) {
+                                Manifest.permission.READ_CONTACTS -> stringResource(R.string.read_contacts)
+                                Manifest.permission.SEND_SMS -> stringResource(R.string.send_sms)
+                                Manifest.permission.READ_SMS -> stringResource(R.string.read_sms)
+                                Manifest.permission.RECEIVE_SMS -> stringResource(R.string.receive_sms)
+                                Manifest.permission.POST_NOTIFICATIONS -> stringResource(R.string.post_notifications)
+                                "enabled_notification_listeners" -> stringResource(R.string.read_notifications)
+                                Manifest.permission.READ_MEDIA_IMAGES -> stringResource(R.string.read_all_images)
+                                Manifest.permission.READ_EXTERNAL_STORAGE -> stringResource(R.string.read_all_files)
+                                else -> stringResource(R.string.other_permission, permission)
+                            }
+                        )
+                    },
+                    modifier = Modifier.clickable {
                         when (permission) {
                             Manifest.permission.MANAGE_EXTERNAL_STORAGE -> {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -79,13 +78,19 @@ fun PermissionRequest(
                                     state.launchPermissionRequest()
                                 }
                             }
-
+                            "enabled_notification_listeners" -> {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
+                                        setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                )
+                            }
                             else -> {
                                 state.launchPermissionRequest()
                             }
                         }
                     }
-                })
+                )
             }
         }
     }

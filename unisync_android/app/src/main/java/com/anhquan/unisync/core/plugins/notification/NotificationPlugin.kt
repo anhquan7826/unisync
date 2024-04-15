@@ -83,7 +83,7 @@ class NotificationPlugin(
                             "title" to title,
                             "text" to text,
                             "sub_text" to subText,
-                            "big_text" to bigText
+                            "big_text" to if (text == bigText) null else bigText
                         ),
                         payloadData = it["picture"]
                     )

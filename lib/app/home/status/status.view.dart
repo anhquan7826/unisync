@@ -126,7 +126,7 @@ class _StatusScreenState extends State<StatusScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            device.info.name ?? 'null',
+            device.info.name,
             style: const TextStyle(
               fontSize: 64,
               fontWeight: FontWeight.bold,
