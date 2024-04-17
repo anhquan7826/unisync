@@ -21,6 +21,7 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 class Device private constructor(
+    val context: Context,
     val info: DeviceInfo
 ) : DeviceConnection.ConnectionListener {
     companion object {
@@ -31,9 +32,9 @@ class Device private constructor(
         private val instances = mutableMapOf<DeviceInfo, Device>()
         val instanceNotifier = PublishSubject.create<InstantNotifyValue>()
 
-        fun of(info: DeviceInfo): Device {
+        fun of(context: Context, info: DeviceInfo): Device {
             if (instances.containsKey(info)) return instances[info]!!
-            val device = Device(info)
+            val device = Device(context, info)
             instances[info] = device
             instanceNotifier.onNext(
                 InstantNotifyValue(
@@ -58,9 +59,9 @@ class Device private constructor(
             }
         }
 
-        fun getAllDevices(callback: (List<Device>) -> Unit) {
+        fun getAllDevices(context: Context, callback: (List<Device>) -> Unit) {
             ConfigUtil.Device.getAllPairedDevices {
-                it.forEach { info -> of(info) }
+                it.forEach { info -> of(context, info) }
                 callback(instances.values.toList())
             }
         }
@@ -74,8 +75,6 @@ class Device private constructor(
 
     val ipAddress: String? get() = _connection?.ipAddress
     private var _connection: DeviceConnection? = null
-
-    val context: Context? get() = _connection?.context
 
     var connection: DeviceConnection?
         get() = _connection

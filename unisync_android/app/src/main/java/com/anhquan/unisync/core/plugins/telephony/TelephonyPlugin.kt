@@ -1,7 +1,6 @@
 package com.anhquan.unisync.core.plugins.telephony
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.ContactsContract
@@ -10,6 +9,7 @@ import android.telephony.SmsManager
 import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
+import com.anhquan.unisync.models.Conversation
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.toMap
 
@@ -24,29 +24,48 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
 
     override fun onReceive(data: Map<String, Any?>) {
         if (!hasPermission) return
-        if (data.containsKey("get_messages")) {
-            send(
-                mapOf(
-                    "messages" to getMessages()?.map {
-                        toMap(it)
-                    }?.toList()
+        when (data["func"]) {
+            "get_messages" -> {
+                send(
+                    mapOf(
+                        "func_response" to "get_messages",
+                        "conversations" to (getConversations() ?: listOf()).map {
+                            toMap(it)
+                        }.toList()
+                    )
                 )
-            )
-        } else if (data.containsKey("send_message")) {
-            val recipient = data["person"].toString()
-            val content = data["content"].toString()
-            // todo: cache message
-            smsManager.sendTextMessage(recipient, null, content, null, null)
+            }
+            "send_message" -> {
+                val recipient = data["to"].toString()
+                val content = data["content"].toString()
+                // todo: cache message
+                smsManager.sendTextMessage(recipient, null, content, null, null)
+            }
+            "get_contact" -> {
+                phoneNumberLookup(data["number"].toString()).let {
+                    it["name"]
+                }.apply {
+                    send(mapOf(
+                        "func_response" to "get_contact",
+                        "name" to this
+                    ))
+                }
+            }
         }
     }
 
     override fun onSmsReceived(message: Conversation.Message) {
         send(
-            mapOf("new_message" to toMap(message))
+            mapOf(
+                "func" to "on_new_message",
+                "message" to toMap(message.copy(
+                    fromName = phoneNumberLookup(message.from!!)["name"]
+                ))
+            )
         )
     }
 
-    private fun getMessages(): List<Conversation>? {
+    private fun getConversations(): List<Conversation>? {
         val cursor =
             context.contentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, null, null, null, null)
                 ?: return null
@@ -60,20 +79,22 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
             while (moveToNext()) {
                 val timestamp = getString(timestampSentIndex) ?: getString(timestampReceivedIndex)
                 val number = getString(numberIndex)
-                val name = number?.let { phoneNumberLookup(context, it)["name"] }
+                val name = number?.let { phoneNumberLookup(it)["name"] }
                 val content = getString(bodyIndex)
 
                 val conversation = result.find {
-                    it.personNumber == number
+                    it.number == number
                 } ?: Conversation(
-                    personNumber = number,
-                    personName = name,
+                    number = number,
+                    name = name,
                 ).apply {
                     result.add(this)
                 }
                 conversation.messages.add(
                     Conversation.Message(
-                        timestamp = timestamp.toLong(), sender = number, content = content
+                        timestamp = timestamp.toLong(),
+                        from = number,
+                        content = content
                     )
                 )
             }
@@ -82,7 +103,7 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
         return result
     }
 
-    private fun phoneNumberLookup(context: Context, number: String): Map<String, String> {
+    private fun phoneNumberLookup(number: String): Map<String, String> {
         val contactInfo = mutableMapOf<String, String>()
         val uri = Uri.withAppendedPath(
             ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number)

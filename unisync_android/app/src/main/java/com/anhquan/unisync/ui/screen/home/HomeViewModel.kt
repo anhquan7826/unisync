@@ -1,5 +1,6 @@
 package com.anhquan.unisync.ui.screen.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
@@ -60,13 +61,14 @@ class HomeViewModel : ViewModel() {
         val volume: Float = 0F,
     )
 
-    init {
+    fun initialize(context: Context) {
         ConfigUtil.Device.getAllPairedDevices {
             pairedDevices = it.map { info ->
-                Device.of(info)
+                Device.of(context, info)
             }
         }
     }
+
     private var _state = MutableStateFlow(HomeState())
 
     val state = _state.asStateFlow()

@@ -1,11 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:unisync/app/home/messages/messages.cubit.dart';
 import 'package:unisync/app/home/messages/messages.state.dart';
+import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
-import 'package:unisync/core/plugins/telephony/model/model.dart';
+import 'package:unisync/models/telephony/telephony.model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
@@ -17,12 +20,18 @@ class MessagesScreen extends StatefulWidget {
   State<MessagesScreen> createState() => _MessagesScreenState();
 }
 
-class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAliveClientMixin {
+class _MessagesScreenState extends State<MessagesScreen>
+    with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return BlocBuilder<MessagesCubit, MessagesState>(
       builder: (context, state) {
+        if (state.status == Status.loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
         return Row(
           children: [
             Expanded(
@@ -45,19 +54,37 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
     return Scaffold(
       appBar: AppBar(
         title: Text(R.strings.messages.conversations).tr(),
-        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: getCubit<MessagesCubit>().load,
+            icon: const Icon(
+              Icons.refresh_rounded,
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 8,
         ),
-        children: state.conversations.map((c) {
+        children: state.conversations.reversed.map((c) {
           return buildConversation(
             c,
             isSelected: c == state.currentConversation,
           );
         }).toList(),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          showNewConversationDialog().then((value) {
+            if (value != null) {
+              getCubit<MessagesCubit>().newConversation(value);
+            }
+          });
+        },
+        label: const Text('New conversation'),
+        icon: const Icon(Icons.message_rounded),
       ),
     );
   }
@@ -81,19 +108,19 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
           title: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (state.currentConversation!.personName != null)
+              if (state.currentConversation!.name != null)
                 Text(
-                  state.currentConversation!.personName!,
-                  style: context.bodyM.copyWith(fontWeight: FontWeight.w500),
+                  state.currentConversation!.name!,
+                  style: context.bodyM.copyWith(fontWeight: FontWeight.w600),
                 ),
               Text(
-                state.currentConversation!.personNumber,
-                style: (state.currentConversation!.personName != null)
+                state.currentConversation!.number,
+                style: (state.currentConversation!.name != null)
                     ? context.bodyS.copyWith(
                         color: Colors.grey,
                       )
                     : context.bodyM.copyWith(
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
               )
             ],
@@ -155,7 +182,8 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
       borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? Color(R.colors.main_color).withOpacity(0.2) : null,
+          color:
+              isSelected ? Color(R.colors.main_color).withOpacity(0.2) : null,
           borderRadius: BorderRadius.circular(16),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -163,7 +191,7 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              c.personName ?? c.personNumber,
+              c.name ?? c.number,
               style: context.bodyM.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -173,7 +201,9 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
                 return Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    (it.sender == null) ? R.strings.messages.me.tr(args: [it.content]) : it.content,
+                    (it.from == null)
+                        ? R.strings.messages.me.tr(args: [it.content])
+                        : it.content,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.bodyS.copyWith(
@@ -202,23 +232,34 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
     }
 
     return Align(
-      alignment: m.sender == null ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: m.from == null ? Alignment.centerRight : Alignment.centerLeft,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (m.sender == null) buildTimestamp(m.timestamp),
+          if (m.from == null) buildTimestamp(m.timestamp),
           Container(
             margin: const EdgeInsets.symmetric(vertical: 8),
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: m.sender == null ? Colors.grey.withOpacity(0.5) : Color(R.colors.main_color).withOpacity(0.25),
+              color: m.from == null
+                  ? Colors.grey.withOpacity(0.5)
+                  : Color(R.colors.main_color).withOpacity(0.25),
             ),
             child: Text(m.content),
           ),
-          if (m.sender != null) buildTimestamp(m.timestamp),
+          if (m.from != null) buildTimestamp(m.timestamp),
         ],
       ),
+    );
+  }
+
+  Future<String?> showNewConversationDialog() async {
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return const _NewConversationDialog();
+      },
     );
   }
 
@@ -228,8 +269,63 @@ class _MessagesScreenState extends State<MessagesScreen> with AutomaticKeepAlive
   String formatTimestamp(int timestamp) {
     final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     final now = DateTime.now();
-    final isSameDate = dateTime.year == now.year && dateTime.month == now.month && dateTime.day == now.day;
-    final formattedTime = DateFormat(isSameDate ? 'HH:mm' : 'dd/MM/yyyy HH:mm').format(dateTime);
+    final isSameDate = dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day;
+    final formattedTime =
+        DateFormat(isSameDate ? 'HH:mm' : 'dd/MM/yyyy HH:mm').format(dateTime);
     return formattedTime;
+  }
+}
+
+class _NewConversationDialog extends StatefulWidget {
+  const _NewConversationDialog({super.key});
+
+  @override
+  State<_NewConversationDialog> createState() => _NewConversationDialogState();
+}
+
+class _NewConversationDialogState extends State<_NewConversationDialog> {
+  final controller = TextEditingController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('New conversation'),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 200,
+        ),
+        child: TextField(
+          controller: controller,
+          inputFormatters: [
+            FilteringTextInputFormatter(RegExp(r'\d'), allow: true),
+          ],
+          decoration: const InputDecoration(
+            prefixText: 'To: ',
+            labelText: 'Phone number',
+          ),
+          keyboardType: TextInputType.number,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (value) {
+            context.pop(value.isEmpty ? null : value);
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            context.pop(controller.text.isEmpty ? null : controller.text);
+          },
+          child: const Text('Create'),
+        ),
+      ],
+    );
   }
 }

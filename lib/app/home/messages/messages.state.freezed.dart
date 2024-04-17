@@ -17,11 +17,9 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$MessagesState {
   int get timestamp => throw _privateConstructorUsedError;
-  Device? get device => throw _privateConstructorUsedError;
   Status get status => throw _privateConstructorUsedError;
   Conversation? get currentConversation => throw _privateConstructorUsedError;
   List<Conversation> get conversations => throw _privateConstructorUsedError;
-  Message? get newMessage => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $MessagesStateCopyWith<MessagesState> get copyWith =>
@@ -36,14 +34,11 @@ abstract class $MessagesStateCopyWith<$Res> {
   @useResult
   $Res call(
       {int timestamp,
-      Device? device,
       Status status,
       Conversation? currentConversation,
-      List<Conversation> conversations,
-      Message? newMessage});
+      List<Conversation> conversations});
 
   $ConversationCopyWith<$Res>? get currentConversation;
-  $MessageCopyWith<$Res>? get newMessage;
 }
 
 /// @nodoc
@@ -60,21 +55,15 @@ class _$MessagesStateCopyWithImpl<$Res, $Val extends MessagesState>
   @override
   $Res call({
     Object? timestamp = null,
-    Object? device = freezed,
     Object? status = null,
     Object? currentConversation = freezed,
     Object? conversations = null,
-    Object? newMessage = freezed,
   }) {
     return _then(_value.copyWith(
       timestamp: null == timestamp
           ? _value.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
               as int,
-      device: freezed == device
-          ? _value.device
-          : device // ignore: cast_nullable_to_non_nullable
-              as Device?,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -87,10 +76,6 @@ class _$MessagesStateCopyWithImpl<$Res, $Val extends MessagesState>
           ? _value.conversations
           : conversations // ignore: cast_nullable_to_non_nullable
               as List<Conversation>,
-      newMessage: freezed == newMessage
-          ? _value.newMessage
-          : newMessage // ignore: cast_nullable_to_non_nullable
-              as Message?,
     ) as $Val);
   }
 
@@ -105,18 +90,6 @@ class _$MessagesStateCopyWithImpl<$Res, $Val extends MessagesState>
       return _then(_value.copyWith(currentConversation: value) as $Val);
     });
   }
-
-  @override
-  @pragma('vm:prefer-inline')
-  $MessageCopyWith<$Res>? get newMessage {
-    if (_value.newMessage == null) {
-      return null;
-    }
-
-    return $MessageCopyWith<$Res>(_value.newMessage!, (value) {
-      return _then(_value.copyWith(newMessage: value) as $Val);
-    });
-  }
 }
 
 /// @nodoc
@@ -129,16 +102,12 @@ abstract class _$$MessagesStateImplCopyWith<$Res>
   @useResult
   $Res call(
       {int timestamp,
-      Device? device,
       Status status,
       Conversation? currentConversation,
-      List<Conversation> conversations,
-      Message? newMessage});
+      List<Conversation> conversations});
 
   @override
   $ConversationCopyWith<$Res>? get currentConversation;
-  @override
-  $MessageCopyWith<$Res>? get newMessage;
 }
 
 /// @nodoc
@@ -153,21 +122,15 @@ class __$$MessagesStateImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? timestamp = null,
-    Object? device = freezed,
     Object? status = null,
     Object? currentConversation = freezed,
     Object? conversations = null,
-    Object? newMessage = freezed,
   }) {
     return _then(_$MessagesStateImpl(
       timestamp: null == timestamp
           ? _value.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
               as int,
-      device: freezed == device
-          ? _value.device
-          : device // ignore: cast_nullable_to_non_nullable
-              as Device?,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -180,10 +143,6 @@ class __$$MessagesStateImplCopyWithImpl<$Res>
           ? _value._conversations
           : conversations // ignore: cast_nullable_to_non_nullable
               as List<Conversation>,
-      newMessage: freezed == newMessage
-          ? _value.newMessage
-          : newMessage // ignore: cast_nullable_to_non_nullable
-              as Message?,
     ));
   }
 }
@@ -193,18 +152,13 @@ class __$$MessagesStateImplCopyWithImpl<$Res>
 class _$MessagesStateImpl implements _MessagesState {
   const _$MessagesStateImpl(
       {required this.timestamp,
-      this.device = null,
       this.status = Status.loading,
       this.currentConversation = null,
-      final List<Conversation> conversations = const [],
-      this.newMessage = null})
+      final List<Conversation> conversations = const []})
       : _conversations = conversations;
 
   @override
   final int timestamp;
-  @override
-  @JsonKey()
-  final Device? device;
   @override
   @JsonKey()
   final Status status;
@@ -221,12 +175,8 @@ class _$MessagesStateImpl implements _MessagesState {
   }
 
   @override
-  @JsonKey()
-  final Message? newMessage;
-
-  @override
   String toString() {
-    return 'MessagesState(timestamp: $timestamp, device: $device, status: $status, currentConversation: $currentConversation, conversations: $conversations, newMessage: $newMessage)';
+    return 'MessagesState(timestamp: $timestamp, status: $status, currentConversation: $currentConversation, conversations: $conversations)';
   }
 
   @override
@@ -236,25 +186,16 @@ class _$MessagesStateImpl implements _MessagesState {
             other is _$MessagesStateImpl &&
             (identical(other.timestamp, timestamp) ||
                 other.timestamp == timestamp) &&
-            (identical(other.device, device) || other.device == device) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.currentConversation, currentConversation) ||
                 other.currentConversation == currentConversation) &&
             const DeepCollectionEquality()
-                .equals(other._conversations, _conversations) &&
-            (identical(other.newMessage, newMessage) ||
-                other.newMessage == newMessage));
+                .equals(other._conversations, _conversations));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      timestamp,
-      device,
-      status,
-      currentConversation,
-      const DeepCollectionEquality().hash(_conversations),
-      newMessage);
+  int get hashCode => Object.hash(runtimeType, timestamp, status,
+      currentConversation, const DeepCollectionEquality().hash(_conversations));
 
   @JsonKey(ignore: true)
   @override
@@ -266,24 +207,18 @@ class _$MessagesStateImpl implements _MessagesState {
 abstract class _MessagesState implements MessagesState {
   const factory _MessagesState(
       {required final int timestamp,
-      final Device? device,
       final Status status,
       final Conversation? currentConversation,
-      final List<Conversation> conversations,
-      final Message? newMessage}) = _$MessagesStateImpl;
+      final List<Conversation> conversations}) = _$MessagesStateImpl;
 
   @override
   int get timestamp;
-  @override
-  Device? get device;
   @override
   Status get status;
   @override
   Conversation? get currentConversation;
   @override
   List<Conversation> get conversations;
-  @override
-  Message? get newMessage;
   @override
   @JsonKey(ignore: true)
   _$$MessagesStateImplCopyWith<_$MessagesStateImpl> get copyWith =>

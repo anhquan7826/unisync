@@ -23,7 +23,7 @@ class UnisyncActivity : ComponentActivity() {
 //                }
 //            })
 //        else
-        ConfigUtil.Device.getLastUsedDevice {
+        ConfigUtil.Device.getLastUsedDevice(this) {
             if (it == null) {
                 startActivity(Intent(this, PairActivity::class.java).apply {
                     putExtra("isInitial", true)

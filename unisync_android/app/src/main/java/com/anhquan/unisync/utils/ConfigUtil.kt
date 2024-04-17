@@ -75,6 +75,7 @@ object ConfigUtil {
         }
 
         fun getLastUsedDevice(
+            context: Context,
             callback: (com.anhquan.unisync.core.Device?) -> Unit
         ) {
             database.pairedDeviceDao().getLastUsed().listen(onError = {
@@ -82,6 +83,7 @@ object ConfigUtil {
             }) {
                 callback(
                     com.anhquan.unisync.core.Device.of(
+                        context,
                         DeviceInfo(
                             id = it.id, name = it.name, deviceType = it.type
                         )

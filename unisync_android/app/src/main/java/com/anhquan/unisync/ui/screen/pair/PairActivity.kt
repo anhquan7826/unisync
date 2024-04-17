@@ -47,6 +47,7 @@ class PairActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.initialize(this)
         setView {
             PairScreen()
         }

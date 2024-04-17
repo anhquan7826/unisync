@@ -13,11 +13,9 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.debugLog
-import com.anhquan.unisync.utils.extensions.addTo
 import com.anhquan.unisync.utils.extensions.toPrettyString
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
-import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -95,11 +93,12 @@ class NotificationPlugin(
     }
 
     private fun extractPicture(statusBarNotification: StatusBarNotification): ByteArray? {
-        val drawable = statusBarNotification.notification.getLargeIcon().loadDrawable(context)
-        if (drawable != null) {
-            return convertBitmapToByteArray(drawableToBitmap(drawable))
+        return try {
+            val drawable = statusBarNotification.notification.getLargeIcon().loadDrawable(context)
+            convertBitmapToByteArray(drawableToBitmap(drawable))
+        } catch (_: Exception) {
+            null
         }
-        return null
     }
 
     private fun extractIcon(statusBarNotification: StatusBarNotification): ByteArray? {

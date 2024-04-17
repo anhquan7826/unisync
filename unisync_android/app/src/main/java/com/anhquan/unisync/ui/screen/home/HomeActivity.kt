@@ -80,8 +80,9 @@ class HomeActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.initialize(this)
         val deviceInfo = gson.fromJson(intent.extras!!.getString("device"), DeviceInfo::class.java)
-        viewModel.device = Device.of(deviceInfo)
+        viewModel.device = Device.of(this, deviceInfo)
         setView {
             HomeScreen()
         }
@@ -235,9 +236,13 @@ class HomeActivity : ComponentActivity() {
                                     lineHeight = 14.sp
                                 )
                                 Text(
-                                    if (state.isOnline) stringResource(R.string.connected) else stringResource(
+                                    if (state.isOnline) stringResource(
+                                        R.string.connected_at,
+                                        viewModel.device.ipAddress!!
+                                    ) else stringResource(
                                         R.string.disconnected
-                                    ), fontSize = 10.sp,
+                                    ),
+                                    fontSize = 10.sp,
                                     lineHeight = 10.sp
                                 )
                             }

@@ -1,6 +1,5 @@
 package com.anhquan.unisync.core
 
-import android.content.Context
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ThreadHelper
 import com.anhquan.unisync.utils.fromJson
@@ -10,7 +9,6 @@ import com.anhquan.unisync.utils.infoLog
 import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
-import io.reactivex.rxjava3.disposables.Disposable
 import java.io.BufferedReader
 import java.io.ByteArrayInputStream
 import java.io.InputStream
@@ -19,7 +17,6 @@ import java.net.ServerSocket
 import javax.net.ssl.SSLSocket
 
 class DeviceConnection(
-    val context: Context,
     private val socket: SSLSocket,
     private val onDisconnected: (() -> Unit)? = null
 ) {

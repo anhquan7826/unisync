@@ -16,7 +16,6 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$StatusState {
-  String? get ipAddress => throw _privateConstructorUsedError;
   int get batteryLevel => throw _privateConstructorUsedError;
   bool get isCharging => throw _privateConstructorUsedError;
   Uint8List? get wallpaper => throw _privateConstructorUsedError;
@@ -32,11 +31,7 @@ abstract class $StatusStateCopyWith<$Res> {
           StatusState value, $Res Function(StatusState) then) =
       _$StatusStateCopyWithImpl<$Res, StatusState>;
   @useResult
-  $Res call(
-      {String? ipAddress,
-      int batteryLevel,
-      bool isCharging,
-      Uint8List? wallpaper});
+  $Res call({int batteryLevel, bool isCharging, Uint8List? wallpaper});
 }
 
 /// @nodoc
@@ -52,16 +47,11 @@ class _$StatusStateCopyWithImpl<$Res, $Val extends StatusState>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? ipAddress = freezed,
     Object? batteryLevel = null,
     Object? isCharging = null,
     Object? wallpaper = freezed,
   }) {
     return _then(_value.copyWith(
-      ipAddress: freezed == ipAddress
-          ? _value.ipAddress
-          : ipAddress // ignore: cast_nullable_to_non_nullable
-              as String?,
       batteryLevel: null == batteryLevel
           ? _value.batteryLevel
           : batteryLevel // ignore: cast_nullable_to_non_nullable
@@ -86,11 +76,7 @@ abstract class _$$StatusStateImplCopyWith<$Res>
       __$$StatusStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {String? ipAddress,
-      int batteryLevel,
-      bool isCharging,
-      Uint8List? wallpaper});
+  $Res call({int batteryLevel, bool isCharging, Uint8List? wallpaper});
 }
 
 /// @nodoc
@@ -104,16 +90,11 @@ class __$$StatusStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? ipAddress = freezed,
     Object? batteryLevel = null,
     Object? isCharging = null,
     Object? wallpaper = freezed,
   }) {
     return _then(_$StatusStateImpl(
-      ipAddress: freezed == ipAddress
-          ? _value.ipAddress
-          : ipAddress // ignore: cast_nullable_to_non_nullable
-              as String?,
       batteryLevel: null == batteryLevel
           ? _value.batteryLevel
           : batteryLevel // ignore: cast_nullable_to_non_nullable
@@ -134,14 +115,8 @@ class __$$StatusStateImplCopyWithImpl<$Res>
 
 class _$StatusStateImpl implements _StatusState {
   const _$StatusStateImpl(
-      {this.ipAddress = null,
-      this.batteryLevel = -1,
-      this.isCharging = false,
-      this.wallpaper = null});
+      {this.batteryLevel = -1, this.isCharging = false, this.wallpaper = null});
 
-  @override
-  @JsonKey()
-  final String? ipAddress;
   @override
   @JsonKey()
   final int batteryLevel;
@@ -154,7 +129,7 @@ class _$StatusStateImpl implements _StatusState {
 
   @override
   String toString() {
-    return 'StatusState(ipAddress: $ipAddress, batteryLevel: $batteryLevel, isCharging: $isCharging, wallpaper: $wallpaper)';
+    return 'StatusState(batteryLevel: $batteryLevel, isCharging: $isCharging, wallpaper: $wallpaper)';
   }
 
   @override
@@ -162,8 +137,6 @@ class _$StatusStateImpl implements _StatusState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$StatusStateImpl &&
-            (identical(other.ipAddress, ipAddress) ||
-                other.ipAddress == ipAddress) &&
             (identical(other.batteryLevel, batteryLevel) ||
                 other.batteryLevel == batteryLevel) &&
             (identical(other.isCharging, isCharging) ||
@@ -172,8 +145,8 @@ class _$StatusStateImpl implements _StatusState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, ipAddress, batteryLevel,
-      isCharging, const DeepCollectionEquality().hash(wallpaper));
+  int get hashCode => Object.hash(runtimeType, batteryLevel, isCharging,
+      const DeepCollectionEquality().hash(wallpaper));
 
   @JsonKey(ignore: true)
   @override
@@ -184,13 +157,10 @@ class _$StatusStateImpl implements _StatusState {
 
 abstract class _StatusState implements StatusState {
   const factory _StatusState(
-      {final String? ipAddress,
-      final int batteryLevel,
+      {final int batteryLevel,
       final bool isCharging,
       final Uint8List? wallpaper}) = _$StatusStateImpl;
 
-  @override
-  String? get ipAddress;
   @override
   int get batteryLevel;
   @override

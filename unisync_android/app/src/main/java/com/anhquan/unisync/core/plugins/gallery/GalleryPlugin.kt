@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
-import com.anhquan.unisync.utils.debugLog
 import java.io.IOException
 
 class GalleryPlugin(device: Device) :
@@ -81,7 +80,6 @@ class GalleryPlugin(device: Device) :
                 images.add(image)
             }
         }
-        debugLog(images.joinToString("\n") { it.toString() })
         return images
     }
 

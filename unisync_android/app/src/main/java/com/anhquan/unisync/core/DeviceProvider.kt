@@ -19,12 +19,11 @@ object DeviceProvider {
         } else {
             _devices.add(info)
             val connection = DeviceConnection(
-                context,
                 socket,
             ) {
                 _devices.remove(info)
             }
-            Device.of(info).apply {
+            Device.of(context, info).apply {
                 this.connection = connection
             }
         }

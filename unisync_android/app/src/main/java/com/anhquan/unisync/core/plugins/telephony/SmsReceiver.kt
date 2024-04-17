@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.provider.Telephony
+import com.anhquan.unisync.models.Conversation
 
 class SmsReceiver : BroadcastReceiver() {
     interface SmsListener {
@@ -41,9 +42,10 @@ class SmsReceiver : BroadcastReceiver() {
                 val content = smsMessage.messageBody
                 val senderNumber = smsMessage.displayOriginatingAddress
                 listeners.forEach {
-                    it.onSmsReceived(Conversation.Message(
+                    it.onSmsReceived(
+                        Conversation.Message(
                         timestamp = timestamp,
-                        sender = senderNumber,
+                        from = senderNumber,
                         content = content
                     ))
                 }

@@ -7,4 +7,12 @@ extension IterableExt<T> on Iterable<T> {
     }
     return true;
   }
+
+  T? firstWhereOrNull(bool Function(T) predicate) {
+    try {
+      return firstWhere(predicate);
+    } catch (_) {
+      return null;
+    }
+  }
 }

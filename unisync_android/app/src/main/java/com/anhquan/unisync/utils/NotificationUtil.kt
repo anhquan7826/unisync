@@ -22,6 +22,7 @@ object NotificationUtil {
 
     val CHANNEL_ID_PERSISTENCE = "unisync.channel_persistence"
     val CHANNEL_ID_PAIR = "unisync.channel_pair"
+    val CHANNEL_ID_SFTP = "unisync.channel_sftp"
     val CHANNEL_ID_RING_PHONE = "unisync.channel_ring_phone"
 
     private lateinit var notiManager: NotificationManager
@@ -34,29 +35,41 @@ object NotificationUtil {
     private fun registerChannels() {
         notiManager.apply {
             createNotificationChannels(
-                listOf(NotificationChannel(
-                    CHANNEL_ID_PERSISTENCE,
-                    "Persistent Notification",
-                    NotificationManager.IMPORTANCE_LOW
-                ).apply {
-                    description = "This channel is used for Unisync background service."
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                }, NotificationChannel(
-                    CHANNEL_ID_PAIR,
-                    "Location Update Notification",
-                    NotificationManager.IMPORTANCE_HIGH
-                ).apply {
-                    description = "This channel is used for pairing notification."
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                }, NotificationChannel(
-                    CHANNEL_ID_RING_PHONE,
-                    "Find my phone Notifition",
-                    NotificationManager.IMPORTANCE_HIGH
-                ).apply {
-                    description = "This channel is used for Find my phone notification."
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    importance = NotificationManager.IMPORTANCE_HIGH
-                })
+                listOf(
+                    NotificationChannel(
+                        CHANNEL_ID_PERSISTENCE,
+                        "Persistent Notification",
+                        NotificationManager.IMPORTANCE_LOW
+                    ).apply {
+                        description = "This channel is used for Unisync background service."
+                        lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    },
+                    NotificationChannel(
+                        CHANNEL_ID_PAIR,
+                        "Location Update Notification",
+                        NotificationManager.IMPORTANCE_HIGH
+                    ).apply {
+                        description = "This channel is used for pairing notification."
+                        lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    },
+                    NotificationChannel(
+                        CHANNEL_ID_RING_PHONE,
+                        "Find my phone Notifition",
+                        NotificationManager.IMPORTANCE_HIGH
+                    ).apply {
+                        description = "This channel is used for Find my phone notification."
+                        lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                        importance = NotificationManager.IMPORTANCE_HIGH
+                    },
+                    NotificationChannel(
+                        CHANNEL_ID_SFTP,
+                        "SFTP Server Notification",
+                        NotificationManager.IMPORTANCE_DEFAULT
+                    ).apply {
+                        description = "This channel is used for SFTP server notification."
+                        lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    }
+                )
             )
         }
     }
@@ -100,5 +113,21 @@ object NotificationUtil {
                 ), true
             )
             .build()
+    }
+
+    fun buildSftpNotification(context: Context): Notification {
+        return Notification.Builder(context, CHANNEL_ID_SFTP)
+            .setOngoing(true)
+            .setSmallIcon(R.drawable.app_icon_monochrome)
+            .setContentTitle("Unisync SFTP Server")
+            .setContentText("Server is running.")
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    Intent(context, UnisyncActivity::class.java),
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+            ).build()
     }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:unisync/utils/extensions/stream.ext.dart';
 import 'package:unisync/utils/logger.dart';
 
@@ -39,10 +40,16 @@ Future<Stream<Uint8List>> getPayloadStream({
   required String address,
   required int port,
 }) async {
-  infoLog('Connecting to payload server $address:$port...');
-  final socket = await Socket.connect(address, port);
-  infoLog('Connected to payload server $address:$port.');
-  return socket;
+  try {
+    infoLog('Connecting to payload server $address:$port...');
+    final socket = await Socket.connect(address, port);
+    infoLog('Connected to payload server $address:$port.');
+    return socket;
+  } catch (e) {
+    infoLog('Cannot connect to payload server $address:$port.');
+    errorLog(e);
+    rethrow;
+  }
 }
 
 Future<Uint8List> getPayloadData(

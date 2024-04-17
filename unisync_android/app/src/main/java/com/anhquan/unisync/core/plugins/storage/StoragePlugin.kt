@@ -1,6 +1,7 @@
 package com.anhquan.unisync.core.plugins.storage
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
@@ -10,10 +11,21 @@ import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 
 class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.STORAGE) {
+
+
+    init {
+        context.startService(Intent(context, SftpService::class.java))
+    }
+
     override fun onReceive(data: Map<String, Any?>) {
         if (hasPermission) {
 
         }
+    }
+
+    override fun onDispose() {
+        context.stopService(Intent(context, SftpService::class.java))
+        super.onDispose()
     }
 
     override val requiredPermission: List<String>

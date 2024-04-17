@@ -1,69 +1,68 @@
 import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
-import 'package:unisync/core/plugins/telephony/model/model.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
+import 'package:unisync/models/telephony/telephony.model.dart';
+import 'package:unisync/utils/extensions/stream.ext.dart';
 
 class TelephonyPlugin extends UnisyncPlugin {
   TelephonyPlugin(super.device) : super(type: DeviceMessage.Type.TELEPHONY);
 
-  List<Conversation> conversations = [];
-
   @override
   void onReceive(Map<String, dynamic> data, Payload? payload) {
     super.onReceive(data, payload);
-    if (data.containsKey('messages')) {
-      conversations = (data['messages'] as List).map((e) => Conversation.fromJson(e)).toList();
-      notifier.add({
-        'conversations': conversations,
-      });
-    } else if (data.containsKey('new_message')) {
-      final message = Message.fromJson(data['new_message']);
-      if (!conversations.any((element) => element.personNumber == message.sender)) {
-        conversations.insert(
-          0,
-          Conversation(
-            personNumber: message.sender!,
-            messages: [message],
-          ),
-        );
-      } else {
-        conversations
-            .firstWhere((element) {
-              return element.personNumber == message.sender;
-            })
-            .messages
-            .add(message);
-      }
-      notifier.add({
-        'conversations': conversations,
-        'new_message': message,
-      });
+    switch (data['func']) {
+      case 'on_new_message':
+        final message = Message.fromJson(data['message']);
+        _onNewMessage(message);
+        break;
     }
   }
 
-  void getAllMessages() {
-    send({'get_messages': ''});
+  Future<List<Conversation>> getAllConversations() async {
+    final c = completer<List<Conversation>>();
+    send({'func': 'get_messages'});
+    messages.listenCancellable((event) {
+      if (event.data['func_response'] == 'get_messages') {
+        final conversations = (event.data['conversations'] as List)
+            .map(
+              (e) => Conversation.fromJson(e),
+            )
+            .toList();
+        complete(c, value: conversations);
+        return true;
+      }
+      return false;
+    });
+    return future(c);
   }
 
-  void sendMessage({required String personNumber, required String content}) {
+  Future<String?> getContactName(String number) {
+    final c = completer<String?>();
     send({
-      'send_message': '',
-      'person': personNumber,
-      'content': content,
+      'func': 'get_contact',
+      'number': number,
     });
-    final message = Message(
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-      content: content,
-    );
-    conversations
-        .firstWhere((element) {
-          return element.personNumber == personNumber;
-        })
-        .messages
-        .add(message);
+    messages.listenCancellable((value) {
+      if (value.data['func_response'] == 'get_contact') {
+        complete(c, value: value.data['name']);
+        return true;
+      }
+      return false;
+    });
+    return future(c);
+  }
+
+  void _onNewMessage(Message message) {
     notifier.add({
-      'conversations': conversations,
       'new_message': message,
+    });
+  }
+
+  void sendMessage({required String to, required String content}) {
+    send({
+      'func': 'send_message',
+      'to': to,
+      'content': content,
     });
   }
 }

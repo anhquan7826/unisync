@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.anhquan.unisync.R
 import com.anhquan.unisync.core.Device
-import com.anhquan.unisync.utils.debugLog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 
@@ -33,7 +32,6 @@ fun PermissionRequest(
 ) {
     LaunchedEffect(controller.state.value) {}
     val notGrantedPlugins = device.plugins.filter { !it.hasPermission }
-    debugLog(notGrantedPlugins.map { it.type }.joinToString("\n"))
     if (notGrantedPlugins.isNotEmpty()) {
         Column(
             modifier = modifier.verticalScroll(rememberScrollState())
@@ -59,6 +57,7 @@ fun PermissionRequest(
                                 Manifest.permission.POST_NOTIFICATIONS -> stringResource(R.string.post_notifications)
                                 "enabled_notification_listeners" -> stringResource(R.string.read_notifications)
                                 Manifest.permission.READ_MEDIA_IMAGES -> stringResource(R.string.read_all_images)
+                                Manifest.permission.MANAGE_EXTERNAL_STORAGE -> stringResource(R.string.access_all_files)
                                 Manifest.permission.READ_EXTERNAL_STORAGE -> stringResource(R.string.read_all_files)
                                 else -> stringResource(R.string.other_permission, permission)
                             }

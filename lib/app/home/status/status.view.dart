@@ -135,8 +135,9 @@ class _StatusScreenState extends State<StatusScreen>
           const SizedBox(height: 8),
           textWithLeading(
             device.isOnline
-                ? R.strings.status.connected_at
-                    .tr(args: [state.ipAddress.toString()])
+                ? R.strings.status.connected_at.tr(args: [
+                    getCubit<StatusCubit>().device.ipAddress.toString(),
+                  ])
                 : R.strings.status.disconnected.tr(),
             leading: Icon(
               Icons.circle,

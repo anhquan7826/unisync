@@ -41,5 +41,6 @@
     <string name="choose_destination_device">Choose destination device...</string>
     <string name="read_all_images">Read all images</string>
     <string name="other_permission">Other permission (%1$s)</string>
+    <string name="access_all_files">Access all files</string>
     <string name="read_all_files">Read all files</string>
 </resources>

@@ -33,6 +33,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final pageController = PageController();
+  int currentDest = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-
-  int currentDest = 0;
 
   Widget buildBody(HomeState state) {
     if (!state.currentDevice.isOnline) {

@@ -1,5 +1,6 @@
 package com.anhquan.unisync.ui.screen.pair
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.PairingHandler.PairState.NOT_PAIRED
@@ -24,8 +25,8 @@ class PairViewModel : ViewModel() {
 
     private val disposables = CompositeDisposable()
 
-    init {
-        Device.getAllDevices {
+    fun initialize(context: Context) {
+        Device.getAllDevices(context) {
             it.forEach { device -> listenDeviceChange(device) }
             Device.instanceNotifier.listen { n ->
                 if (n.added) {
