@@ -113,7 +113,7 @@ class Device private constructor(
         } else if (pairingHandler.state == PairingHandler.PairState.PAIRED) {
             plugins.forEach { plugin ->
                 if (plugin.type == message.type) {
-                    plugin.onReceive(message.body)
+                    plugin.onReceive(message, payload)
                 }
             }
         }
@@ -126,7 +126,7 @@ class Device private constructor(
     fun sendMessage(message: DeviceMessage, payloadData: ByteArray? = null) {
         if (pairingHandler.state == PairingHandler.PairState.PAIRED || message.type == DeviceMessage.Type.PAIR) {
             connection?.send(message, payloadData)
-            infoLog("${this::class.simpleName}@${info.name}: Message sent:\n$message${if (message.payload != null) "\nwith payload ${message.payload}" else ""}")
+            infoLog("${this::class.simpleName}@${info.name}: Message sent:\n$message")
         }
     }
 

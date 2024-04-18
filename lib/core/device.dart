@@ -10,6 +10,7 @@ import 'package:unisync/core/plugins/ring_phone/ring_phone.plugin.dart';
 import 'package:unisync/core/plugins/run_command/run_command.plugin.dart';
 import 'package:unisync/core/plugins/sharing/sharing.plugin.dart';
 import 'package:unisync/core/plugins/status/status.plugin.dart';
+import 'package:unisync/core/plugins/storage/storage.plugin.dart';
 import 'package:unisync/core/plugins/telephony/telephony.plugin.dart';
 import 'package:unisync/core/plugins/volume/volume.plugin.dart';
 import 'package:unisync/utils/configs.dart';
@@ -118,7 +119,7 @@ class Device with ConnectionListener {
     } else if (_pairingHandler.state == PairState.paired) {
       for (final plugin in plugins) {
         if (plugin.type == message.type) {
-          plugin.onReceive(message.body, payload);
+          plugin.onReceive(message.header, message.body, payload);
         }
       }
     }
@@ -148,6 +149,7 @@ class Device with ConnectionListener {
       TelephonyPlugin(this),
       SharingPlugin(this),
       GalleryPlugin(this),
+      StoragePlugin(this),
     ]);
   }
 

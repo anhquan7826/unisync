@@ -8,6 +8,7 @@ import android.provider.Telephony
 import android.telephony.SmsManager
 import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
+import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.Conversation
 import com.anhquan.unisync.models.DeviceMessage
@@ -15,6 +16,13 @@ import com.anhquan.unisync.utils.toMap
 
 class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.TELEPHONY),
     SmsReceiver.SmsListener {
+    private object Method {
+        const val GET_MESSAGES = "get_messages"
+        const val SEND_MESSAGE = "send_message"
+        const val GET_CONTACT = "get_contact"
+        const val NEW_MESSAGE = "new_message"
+    }
+
     private val smsManager = context.getSystemService(SmsManager::class.java)
 
     init {
@@ -22,45 +30,52 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
         SmsReceiver.startService(context)
     }
 
-    override fun onReceive(data: Map<String, Any?>) {
-        if (!hasPermission) return
-        when (data["func"]) {
-            "get_messages" -> {
-                send(
+    override fun listen(
+        header: DeviceMessage.DeviceMessageHeader,
+        data: Map<String, Any?>,
+        payload: DeviceConnection.Payload?
+    ) {
+        when (header.method) {
+            Method.GET_MESSAGES -> {
+                sendResponse(
+                    Method.GET_MESSAGES,
                     mapOf(
-                        "func_response" to "get_messages",
                         "conversations" to (getConversations() ?: listOf()).map {
                             toMap(it)
                         }.toList()
                     )
                 )
             }
-            "send_message" -> {
+            Method.SEND_MESSAGE -> {
                 val recipient = data["to"].toString()
                 val content = data["content"].toString()
                 // todo: cache message
                 smsManager.sendTextMessage(recipient, null, content, null, null)
             }
-            "get_contact" -> {
+            Method.GET_CONTACT -> {
                 phoneNumberLookup(data["number"].toString()).let {
                     it["name"]
                 }.apply {
-                    send(mapOf(
-                        "func_response" to "get_contact",
-                        "name" to this
-                    ))
+                    sendResponse(
+                        Method.GET_CONTACT,
+                        mapOf(
+                            "name" to this
+                        )
+                    )
                 }
             }
         }
     }
 
     override fun onSmsReceived(message: Conversation.Message) {
-        send(
+        sendNotification(
+            Method.NEW_MESSAGE,
             mapOf(
-                "func" to "on_new_message",
-                "message" to toMap(message.copy(
-                    fromName = phoneNumberLookup(message.from!!)["name"]
-                ))
+                "message" to toMap(
+                    message.copy(
+                        fromName = phoneNumberLookup(message.from!!)["name"]
+                    )
+                )
             )
         )
     }

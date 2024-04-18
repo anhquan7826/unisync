@@ -78,6 +78,7 @@ class DeviceConnection {
         infoLog('Opening server socket for payload...');
         final payloadSocket = await payloadServer.first;
         infoLog('Payload socket server found a connection!');
+        payloadServer.close();
         infoLog('Sending payload of size ${data.length}...');
         payloadSocket
           ..writeAll(data)

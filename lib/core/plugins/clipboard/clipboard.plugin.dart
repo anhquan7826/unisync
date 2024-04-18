@@ -8,26 +8,33 @@ import 'package:unisync/utils/extensions/scope.ext.dart';
 import '../../device.dart';
 
 class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
-  ClipboardPlugin(Device device) : super(device, type: DeviceMessage.Type.CLIPBOARD) {
+  ClipboardPlugin(Device device)
+      : super(device, type: DeviceMessage.Type.CLIPBOARD) {
     clipboardWatcher
       ..addListener(this)
       ..start();
   }
+
+  static const _Method = (CLIPBOARD_CHANGED: 'clipboard_changed',);
 
   @override
   Future<void> onClipboardChanged() async {
     final content = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
     if (content != null && _latestClipboard != content) {
       _latestClipboard = content;
-      send({'clipboard': content});
+      sendNotification(
+        _Method.CLIPBOARD_CHANGED,
+        data: {'clipboard': content},
+      );
     }
   }
 
   var _latestClipboard = '';
 
   @override
-  void onReceive(Map<String, dynamic> data, Payload? payload) {
-    super.onReceive(data, payload);
+  void onReceive(
+      DeviceMessageHeader header, Map<String, dynamic> data, Payload? payload) {
+    super.onReceive(header, data, payload);
     data['clipboard']?.toString().let((it) async {
       if (_latestClipboard == it) {
         return;

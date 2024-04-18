@@ -6,10 +6,17 @@ import 'package:unisync/utils/extensions/stream.ext.dart';
 
 class TelephonyPlugin extends UnisyncPlugin {
   TelephonyPlugin(super.device) : super(type: DeviceMessage.Type.TELEPHONY);
+  static const _Method = (
+    GET_MESSAGES: 'get_messages',
+    SEND_MESSAGE: 'send_message',
+    GET_CONTACT: 'get_contact',
+    NEW_MESSAGE: 'new_message',
+  );
 
   @override
-  void onReceive(Map<String, dynamic> data, Payload? payload) {
-    super.onReceive(data, payload);
+  void onReceive(
+      DeviceMessageHeader header, Map<String, dynamic> data, Payload? payload) {
+    super.onReceive(header, data, payload);
     switch (data['func']) {
       case 'on_new_message':
         final message = Message.fromJson(data['message']);
@@ -20,9 +27,10 @@ class TelephonyPlugin extends UnisyncPlugin {
 
   Future<List<Conversation>> getAllConversations() async {
     final c = completer<List<Conversation>>();
-    send({'func': 'get_messages'});
+    sendRequest(_Method.GET_MESSAGES);
     messages.listenCancellable((event) {
-      if (event.data['func_response'] == 'get_messages') {
+      if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
+          event.header.method == _Method.GET_MESSAGES) {
         final conversations = (event.data['conversations'] as List)
             .map(
               (e) => Conversation.fromJson(e),
@@ -38,12 +46,13 @@ class TelephonyPlugin extends UnisyncPlugin {
 
   Future<String?> getContactName(String number) {
     final c = completer<String?>();
-    send({
-      'func': 'get_contact',
-      'number': number,
-    });
+    sendRequest(
+      _Method.GET_CONTACT,
+      data: {'number': number},
+    );
     messages.listenCancellable((value) {
-      if (value.data['func_response'] == 'get_contact') {
+      if (value.header.type == DeviceMessageHeader.Type.RESPONSE &&
+          value.header.method == _Method.GET_CONTACT) {
         complete(c, value: value.data['name']);
         return true;
       }
@@ -59,10 +68,12 @@ class TelephonyPlugin extends UnisyncPlugin {
   }
 
   void sendMessage({required String to, required String content}) {
-    send({
-      'func': 'send_message',
-      'to': to,
-      'content': content,
-    });
+    sendRequest(
+      _Method.SEND_MESSAGE,
+      data: {
+        'to': to,
+        'content': content,
+      },
+    );
   }
 }

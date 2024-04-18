@@ -25,6 +25,10 @@ class NotificationPlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.NOTIFICATION),
     NotificationReceiver.NotificationListener {
+    private object Method {
+        const val NEW_NOTIFICATION = "new_notification"
+    }
+
     init {
         NotificationReceiver.apply {
             addListener(this@NotificationPlugin)
@@ -44,8 +48,6 @@ class NotificationPlugin(
                 notificationListenerList.contains(context.packageName)
             }
         }
-
-    override fun onReceive(data: Map<String, Any?>) {}
 
     override fun onDispose() {
         NotificationReceiver.removeListener(this)
@@ -74,7 +76,8 @@ class NotificationPlugin(
                     )
                     it.onComplete()
                 }, subscribeOn = Schedulers.computation(), onResult = {
-                    send(
+                    sendNotification(
+                        Method.NEW_NOTIFICATION,
                         mapOf(
                             "timestamp" to sbn.postTime,
                             "app_name" to appName,

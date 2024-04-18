@@ -18,8 +18,12 @@ abstract class UnisyncPlugin {
   bool isClosed = false;
   final notifier = BehaviorSubject<Map<String, dynamic>>();
 
-  final _messages =
-      PublishSubject<({Map<String, dynamic> data, Payload? payload})>();
+  final _messages = PublishSubject<
+      ({
+        DeviceMessageHeader header,
+        Map<String, dynamic> data,
+        Payload? payload
+      })>();
 
   late final messages = _messages.stream.asBroadcastStream();
 
@@ -44,20 +48,87 @@ abstract class UnisyncPlugin {
     return (_completers[id]! as Completer<T>).future;
   }
 
-  void send(Map<String, dynamic> data, [Uint8List? payload]) {
+  void sendRequest(
+    String method, {
+    Map<String, dynamic> data = const {},
+    Uint8List? payload,
+  }) {
     device.sendMessage(
       DeviceMessage(
         time: DateTime.now().millisecondsSinceEpoch,
         type: type,
+        header: DeviceMessageHeader(
+          type: DeviceMessageHeader.Type.REQUEST,
+          method: method,
+        ),
         body: data,
       ),
       payload,
     );
   }
 
+  void sendResponse(
+    String method, {
+    required Map<String, dynamic> data,
+    Uint8List? payload,
+  }) {
+    device.sendMessage(
+      DeviceMessage(
+        time: DateTime.now().millisecondsSinceEpoch,
+        type: type,
+        header: DeviceMessageHeader(
+          type: DeviceMessageHeader.Type.RESPONSE,
+          method: method,
+          status: DeviceMessageHeader.Status.SUCCESS,
+        ),
+        body: data,
+      ),
+      payload,
+    );
+  }
+
+  void sendNotification(
+    String method, {
+    required Map<String, dynamic> data,
+    Uint8List? payload,
+  }) {
+    device.sendMessage(
+      DeviceMessage(
+        time: DateTime.now().millisecondsSinceEpoch,
+        type: type,
+        header: DeviceMessageHeader(
+          type: DeviceMessageHeader.Type.NOTIFICATION,
+          method: method,
+        ),
+        body: data,
+      ),
+      payload,
+    );
+  }
+
+  void sendError(String method, {Map<String, dynamic>? data}) {
+    device.sendMessage(
+      DeviceMessage(
+        time: DateTime.now().millisecondsSinceEpoch,
+        type: type,
+        header: DeviceMessageHeader(
+          type: DeviceMessageHeader.Type.RESPONSE,
+          method: method,
+          status: DeviceMessageHeader.Status.ERROR,
+        ),
+        body: data ?? {},
+      ),
+    );
+  }
+
   @mustCallSuper
-  void onReceive(Map<String, dynamic> data, Payload? payload) {
+  void onReceive(
+    DeviceMessageHeader header,
+    Map<String, dynamic> data,
+    Payload? payload,
+  ) {
     _messages.add((
+      header: header,
       data: data,
       payload: payload,
     ));

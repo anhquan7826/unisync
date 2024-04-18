@@ -14,14 +14,17 @@ class GalleryPlugin extends UnisyncPlugin {
           device,
           type: DeviceMessage.Type.GALLERY,
         );
+  static const _Method = (
+    GET_GALLERY: 'get_gallery',
+    GET_IMAGE: 'get_image',
+  );
 
   Future<List<Media>> getGallery() async {
     final cId = completer<List<Media>>();
-    send({
-      'func': 'get_gallery',
-    });
+    sendRequest(_Method.GET_GALLERY);
     messages.listenCancellable((event) {
-      if (event.data.containsKey('gallery')) {
+      if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
+          event.header.method == _Method.GET_GALLERY) {
         complete(cId,
             value: (event.data['gallery'] as List).map((e) {
               return Media.fromJson(e);
@@ -36,13 +39,18 @@ class GalleryPlugin extends UnisyncPlugin {
 
   Future<Uint8List> getImage(int id) async {
     final cId = completer<Uint8List>();
-    send({
-      'func': 'get_image',
-      'id': id,
-    });
+    sendRequest(
+      _Method.GET_IMAGE,
+      data: {'id': id},
+    );
     messages.listenCancellable((event) {
-      if (event.data['image'] == id) {
-        getPayloadData(event.payload!.stream, size: event.payload!.size).then((value) {
+      if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
+          event.header.method == _Method.GET_IMAGE &&
+          event.data['image'] == id) {
+        getPayloadData(
+          event.payload!.stream,
+          size: event.payload!.size,
+        ).then((value) {
           complete(cId, value: value);
         });
         return true;

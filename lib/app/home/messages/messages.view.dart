@@ -179,7 +179,9 @@ class _MessagesScreenState extends State<MessagesScreen>
       onTap: () {
         getCubit<MessagesCubit>().setConversation(c);
       },
-      borderRadius: BorderRadius.circular(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Container(
         decoration: BoxDecoration(
           color:

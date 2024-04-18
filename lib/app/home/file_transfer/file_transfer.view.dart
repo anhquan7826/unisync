@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:unisync/components/resources/resources.dart';
-import 'package:unisync/components/widgets/image.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:unisync/app/home/file_transfer/file_transfer.cubit.dart';
+import 'package:unisync/app/home/file_transfer/file_transfer.state.dart';
+import 'package:unisync/components/enums/file_type.dart';
+import 'package:unisync/components/enums/status.dart';
+import 'package:unisync/components/widgets/clickable.dart';
+import 'package:unisync/utils/extensions/context.ext.dart';
+import 'package:unisync/utils/extensions/state.ext.dart';
 
 class FileTransferScreen extends StatefulWidget {
   const FileTransferScreen({super.key});
@@ -9,149 +16,139 @@ class FileTransferScreen extends StatefulWidget {
   State<FileTransferScreen> createState() => _FileTransferScreenState();
 }
 
-class _FileTransferScreenState extends State<FileTransferScreen> {
+class _FileTransferScreenState extends State<FileTransferScreen>
+    with AutomaticKeepAliveClientMixin {
+  final height = 42.0;
+
+  ({String name, FileType type})? selectedFile;
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          UImage.asset(
-            R.vectors.error,
-            width: 64,
-            height: 128,
-          ),
-          const Text('Feature is not available!'),
-        ],
-      ),
-    );
-    // return Column(
-    //   children: [
-    //     Expanded(
-    //       child: Row(
-    //         children: [
-    //           Expanded(
-    //             child: Column(
-    //               children: [
-    //                 buildDeviceName('Your PC'),
-    //                 const Divider(),
-    //                 Expanded(
-    //                   child: buildListFolders(mockFilesPc),
-    //                 ),
-    //               ],
-    //             ),
-    //           ),
-    //           const VerticalDivider(
-    //             width: 0,
-    //           ),
-    //           Expanded(
-    //             child: Column(
-    //               children: [
-    //                 buildDeviceName('aaaaa'),
-    //                 const Divider(),
-    //                 Expanded(
-    //                   child: buildListFolders(mockFilesMobile),
-    //                 ),
-    //               ],
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //     const Divider(
-    //       height: 0,
-    //     ),
-    //     SizedBox(
-    //       height: 70,
-    //       child: Row(
-    //         children: [
-    //           Expanded(
-    //             child: buildPendingFiles([]),
-    //           ),
-    //           Padding(
-    //             padding: const EdgeInsets.symmetric(horizontal: 16),
-    //             child: TextButton.icon(
-    //               onPressed: () {},
-    //               icon: const Icon(Icons.send),
-    //               label: const Text('Send'),
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //   ],
-    // );
-  }
-
-  Widget buildDeviceName(String name) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 16,
-      ),
-      child: Text(
-        name,
-        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  Widget buildListFolders(List<String> folders) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      children: folders.map((folder) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.folder,
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(folder),
-            ],
-          ),
+    super.build(context);
+    return BlocBuilder<FileTransferCubit, FileTransferState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: buildAppBar(state.path),
+          body: buildBody(state),
         );
-      }).toList(),
+      },
     );
   }
 
-  Widget buildPendingFiles(List<String> files) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(8),
-          child: Text(
-            'Files to be sent:',
-            style: TextStyle(
-              fontSize: 12,
+  PreferredSizeWidget buildAppBar(String path) {
+    return AppBar(
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Device Browser'),
+          Text(
+            path,
+            style: context.labelM.copyWith(
               color: Colors.grey,
             ),
           ),
+        ],
+      ),
+      actions: [
+        TextButton.icon(
+          onPressed: () {
+            getCubit<FileTransferCubit>().putFile();
+          },
+          icon: const Icon(Icons.upload_rounded),
+          label: const Text('Upload'),
         ),
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 8,
-                right: 8,
-                bottom: 8,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: files.map((file) {
-                  return Text(file);
-                }).toList(),
-              ),
-            ),
+        if (selectedFile != null)
+          TextButton.icon(
+            onPressed: () {
+              getCubit<FileTransferCubit>().getFiles(selectedFile!.name);
+            },
+            icon: const Icon(Icons.download_rounded),
+            label: const Text('Download'),
           ),
-        ),
       ],
     );
   }
+
+  Widget buildBody(FileTransferState state) {
+    if (state.status == Status.loading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+    return ListView(
+      children: [
+        if (state.path != '/') buildBack(),
+        ...state.currentDirectory.map((e) {
+          return buildFile(e);
+        }),
+      ],
+    );
+  }
+
+  Widget buildProgressBar() {
+    return Row(
+      children: [],
+    );
+  }
+
+  Widget buildFile(({String name, FileType type}) file) {
+    return Clickable(
+      onDoubleTap: () {
+        if (file.type == FileType.directory) {
+          getCubit<FileTransferCubit>().goToFolder(file.name);
+        }
+      },
+      onTap: () => setState(() {
+        selectedFile = selectedFile == file ? null : file;
+      }),
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: selectedFile == file ? Colors.grey.shade200 : null,
+        ),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Icon(
+                () {
+                  return switch (file.type) {
+                    FileType.directory => Icons.folder_rounded,
+                    FileType.file => Icons.description_rounded,
+                    FileType.symlink => Icons.link,
+                  };
+                }.call(),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                file.name,
+                maxLines: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildBack() {
+    return Clickable(
+      onDoubleTap: () {
+        getCubit<FileTransferCubit>().goBack();
+      },
+      child: Container(
+        height: height,
+        alignment: Alignment.centerLeft,
+        child: const Padding(
+          padding: EdgeInsets.only(left: 16),
+          child: Text('..'),
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -7,12 +7,18 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
+import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import java.io.IOException
 
 class GalleryPlugin(device: Device) :
     UnisyncPlugin(device, DeviceMessage.Type.GALLERY) {
+    private object Method {
+        const val GET_GALLERY = "get_gallery"
+        const val GET_IMAGE = "get_image"
+    }
+
     data class Media(
         val id: Long,
         val name: String,
@@ -22,23 +28,32 @@ class GalleryPlugin(device: Device) :
 
     private val collectionUri = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
 
-    override fun onReceive(data: Map<String, Any?>) {
-        when (data["func"]) {
-            "get_gallery" -> {
-                send(mapOf(
-                    "gallery" to queryGallery().map { m ->
-                        mapOf(
-                            "id" to m.id,
-                            "name" to m.name,
-                            "size" to m.size,
-                            "mimeType" to m.mimeType
-                        )
-                    }
-                ))
+    override fun listen(
+        header: DeviceMessage.DeviceMessageHeader,
+        data: Map<String, Any?>,
+        payload: DeviceConnection.Payload?
+    ) {
+        when (header.method) {
+            Method.GET_GALLERY -> {
+                sendResponse(
+                    Method.GET_GALLERY,
+                    mapOf(
+                        "gallery" to queryGallery().map { m ->
+                            mapOf(
+                                "id" to m.id,
+                                "name" to m.name,
+                                "size" to m.size,
+                                "mimeType" to m.mimeType
+                            )
+                        }
+                    )
+                )
             }
-            "get_image" -> {
+
+            Method.GET_IMAGE -> {
                 getImage((data["id"] as Double).toLong())?.let {
-                    send(
+                    sendResponse(
+                        Method.GET_IMAGE,
                         mapOf(
                             "image" to data["id"]
                         ),

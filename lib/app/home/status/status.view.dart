@@ -191,7 +191,9 @@ class _StatusScreenState extends State<StatusScreen>
     }) {
       return Clickable(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Container(
           width: 256,
           height: 128,

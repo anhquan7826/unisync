@@ -8,8 +8,13 @@ import com.anhquan.unisync.models.DeviceMessage
 class RunCommandPlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.RUN_COMMAND) {
+    private object Method {
+        const val EXECUTE = "execute"
+    }
+
     fun execute(command: String) {
-        send(
+        sendRequest(
+            Method.EXECUTE,
             mapOf(
                 "command" to command
             )
@@ -20,6 +25,4 @@ class RunCommandPlugin(
             Toast.LENGTH_SHORT
         ).show()
     }
-
-    override fun onReceive(data: Map<String, Any?>) {}
 }

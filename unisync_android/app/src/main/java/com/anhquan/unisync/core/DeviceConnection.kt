@@ -111,6 +111,7 @@ class DeviceConnection(
                                 infoLog("Payload socket waiting for connection at port ${payloadServer.localPort}...")
                                 val payloadSocket = payloadServer.accept()
                                 infoLog("Payload socket server found a connection!")
+                                payloadServer.close()
                                 val payloadOutput = payloadSocket.getOutputStream()
                                 val dataStream = ByteArrayInputStream(data)
                                 infoLog("Sending payload of size $payloadSize...")

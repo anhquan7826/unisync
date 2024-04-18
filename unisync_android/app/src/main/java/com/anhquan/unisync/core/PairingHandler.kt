@@ -10,13 +10,20 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
         fun unpair()
     }
 
+    private object Method {
+        const val REQUEST = "request"
+        const val UNPAIR = "unpair"
+    }
+
     val operation = object : PairOperation {
         override fun requestPair() {
             if (state == PairState.NOT_PAIRED) {
                 device.sendMessage(
                     DeviceMessage(
-                        type = DeviceMessage.Type.PAIR, body = mapOf(
-                            "message" to "requested"
+                        type = DeviceMessage.Type.PAIR,
+                        header = DeviceMessage.DeviceMessageHeader(
+                            type = DeviceMessage.DeviceMessageHeader.Type.REQUEST,
+                            method = Method.REQUEST
                         )
                     )
                 )
@@ -30,8 +37,10 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
                 ConfigUtil.Device.removePairedDevice(device.info)
                 device.sendMessage(
                     DeviceMessage(
-                        type = DeviceMessage.Type.PAIR, body = mapOf(
-                            "message" to "unpair"
+                        type = DeviceMessage.Type.PAIR,
+                        header = DeviceMessage.DeviceMessageHeader(
+                            type = DeviceMessage.DeviceMessageHeader.Type.NOTIFICATION,
+                            method = Method.UNPAIR
                         )
                     )
                 )

@@ -16,6 +16,8 @@ abstract interface class PairOperation {
 class PairingHandler implements PairOperation {
   PairingHandler(this.device, {required this.onStateChanged});
 
+  static const _Method = (REQUEST: 'request', UNPAIR: 'unpair',);
+
   final Device device;
   final void Function(PairState state) onStateChanged;
 
@@ -50,8 +52,13 @@ class PairingHandler implements PairOperation {
       device.sendMessage(DeviceMessage(
         time: DateTime.now().millisecondsSinceEpoch,
         type: DeviceMessage.Type.PAIR,
+        header: DeviceMessageHeader(
+          type: DeviceMessageHeader.Type.RESPONSE,
+          status: DeviceMessageHeader.Status.SUCCESS,
+          method: _Method.REQUEST,
+        ),
         body: {
-          'message': 'accepted',
+          'accepted': true,
         },
       ));
       ConfigUtil.device.addPairedDevice(device.info);
@@ -66,8 +73,13 @@ class PairingHandler implements PairOperation {
       device.sendMessage(DeviceMessage(
         time: DateTime.now().millisecondsSinceEpoch,
         type: DeviceMessage.Type.PAIR,
+        header: DeviceMessageHeader(
+          type: DeviceMessageHeader.Type.RESPONSE,
+          status: DeviceMessageHeader.Status.SUCCESS,
+          method: _Method.REQUEST,
+        ),
         body: {
-          'message': 'rejected',
+          'accepted': false,
         },
       ));
       _state = PairState.unpaired;
@@ -81,9 +93,10 @@ class PairingHandler implements PairOperation {
       device.sendMessage(DeviceMessage(
         time: DateTime.now().millisecondsSinceEpoch,
         type: DeviceMessage.Type.PAIR,
-        body: {
-          'message': 'unpair',
-        },
+        header: DeviceMessageHeader(
+          type: DeviceMessageHeader.Type.NOTIFICATION,
+          method: _Method.UNPAIR,
+        ),
       ));
       ConfigUtil.device.removePairedDevice(device.info);
       _state = PairState.unpaired;

@@ -9,7 +9,10 @@ import com.anhquan.unisync.models.DeviceMessage
 
 class SharingPlugin(device: Device) :
     UnisyncPlugin(device, DeviceMessage.Type.SHARING) {
-    override fun onReceive(data: Map<String, Any?>) {}
+    private object Method {
+        const val OPEN_URL = "open_url"
+        const val COPY_TEXT = "copy_text"
+    }
 
     fun handleExtras(bundle: Bundle) {
         val text = bundle.getString(Intent.EXTRA_TEXT)
@@ -23,13 +26,17 @@ class SharingPlugin(device: Device) :
     }
 
     private fun handleUrl(url: String) {
-        send(mapOf(
-            "url" to url
-        ))
+        sendNotification(
+            Method.OPEN_URL,
+            mapOf(
+                "url" to url
+            )
+        )
     }
 
     private fun handleText(text: String) {
-        send(
+        sendNotification(
+            Method.COPY_TEXT,
             mapOf(
                 "text" to text
             )

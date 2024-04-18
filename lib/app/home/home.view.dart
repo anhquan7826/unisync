@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:unisync/app/home/file_transfer/file_transfer.cubit.dart';
 import 'package:unisync/app/home/gallery/gallery.cubit.dart';
 import 'package:unisync/app/home/home.cubit.dart';
 import 'package:unisync/app/home/home.state.dart';
@@ -110,7 +111,10 @@ class _HomeScreenState extends State<HomeScreen> {
             key: ValueKey(state.currentDevice.info.hashCode),
           ),
         ),
-        const FileTransferScreen(),
+        BlocProvider(
+          create: (context) => FileTransferCubit(state.currentDevice),
+          child: const FileTransferScreen(),
+        ),
         BlocProvider(
           key: ValueKey(state.currentDevice.info.hashCode + 2),
           create: (context) => GalleryCubit(state.currentDevice),
@@ -142,7 +146,9 @@ class _HomeScreenState extends State<HomeScreen> {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 4),
         child: Clickable(
-          borderRadius: BorderRadius.circular(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+          ),
           onTap: !enabled
               ? null
               : () {
@@ -217,7 +223,9 @@ class _HomeScreenState extends State<HomeScreen> {
         {bool isSelected = false, void Function()? onTap}) {
       return Clickable(
         key: GlobalKey(),
-        borderRadius: BorderRadius.circular(24),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+        ),
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.all(8),
@@ -294,7 +302,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 8),
                         Clickable(
-                          borderRadius: BorderRadius.circular(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                           onTap: () {
                             showDialog<String?>(
                               context: context,

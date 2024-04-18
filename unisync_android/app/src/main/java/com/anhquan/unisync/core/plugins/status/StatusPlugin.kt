@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
+import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.toMap
@@ -13,6 +14,11 @@ import com.anhquan.unisync.utils.toMap
 class StatusPlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.STATUS), StatusReceiver.StatusDataListener {
+    private object Method {
+        const val GET_STATUS = "get_status"
+        const val STATUS_CHANGED = "status_changed"
+    }
+
     data class Status(
         val level: Int,
         val isCharging: Boolean
@@ -44,9 +50,14 @@ class StatusPlugin(
             }
         }
 
-    override fun onReceive(data: Map<String, Any?>) {
+    override fun listen(
+        header: DeviceMessage.DeviceMessageHeader,
+        data: Map<String, Any?>,
+        payload: DeviceConnection.Payload?
+    ) {
         latestStatus?.let {
-            send(
+            sendNotification(
+                Method.STATUS_CHANGED,
                 toMap(it)
             )
         }
@@ -57,7 +68,8 @@ class StatusPlugin(
             level = batteryLevel,
             isCharging = isCharging
         )
-        send(
+        sendNotification(
+            Method.STATUS_CHANGED,
             toMap(latestStatus!!)
         )
     }

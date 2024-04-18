@@ -10,14 +10,16 @@ import 'package:unisync/utils/push_notification.dart';
 class NotificationPlugin extends UnisyncPlugin {
   NotificationPlugin(Device device)
       : super(device, type: DeviceMessage.Type.NOTIFICATION);
+  static const _Method = (NEW_NOTIFICATION: 'new_notification',);
 
   final List<NotificationData> _notifications = [];
 
   List<NotificationData> get notifications => _notifications.toList();
 
   @override
-  void onReceive(Map<String, dynamic> data, Payload? payload) {
-    super.onReceive(data, payload);
+  void onReceive(
+      DeviceMessageHeader header, Map<String, dynamic> data, Payload? payload) {
+    super.onReceive(header, data, payload);
     var notification = NotificationData(
         timestamp: data['timestamp'],
         appName: data['app_name'].toString(),

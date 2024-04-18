@@ -10,10 +10,19 @@ class VolumePlugin extends UnisyncPlugin {
   VolumePlugin(Device device) : super(device, type: DeviceMessage.Type.VOLUME) {
     _subscription = FlutterVolumeController.addListener((value) {
       if (!_isChangingByPeer) {
-        send({'volume': value});
+        sendNotification(
+          _Method.VOLUME_CHANGED,
+          data: {'volume': value},
+        );
       }
     });
   }
+
+  static const _Method = (
+    GET_VOLUME: 'get_volume',
+    SET_VOLUME: 'set_volume',
+    VOLUME_CHANGED: 'volume_changed'
+  );
 
   late final StreamSubscription<double> _subscription;
 
@@ -27,15 +36,21 @@ class VolumePlugin extends UnisyncPlugin {
 
   @override
   Future<void> onReceive(
+    DeviceMessageHeader header,
     Map<String, dynamic> data,
     Payload? payload,
   ) async {
-    super.onReceive(data, payload);
-    if (data.containsKey('set_volume')) {
+    super.onReceive(header, data, payload);
+    if (header.method == _Method.SET_VOLUME) {
       _setVolume(data['set_volume']);
     }
-    if (data.containsKey('get_volume')) {
-      send({'volume': await FlutterVolumeController.getVolume()});
+    if (header.method == _Method.GET_VOLUME) {
+      sendNotification(
+        _Method.VOLUME_CHANGED,
+        data: {
+          'volume': await FlutterVolumeController.getVolume(),
+        },
+      );
     }
   }
 
