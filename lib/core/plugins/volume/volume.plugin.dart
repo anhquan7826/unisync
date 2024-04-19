@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 import 'dart:async';
 
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
@@ -11,14 +12,14 @@ class VolumePlugin extends UnisyncPlugin {
     _subscription = FlutterVolumeController.addListener((value) {
       if (!_isChangingByPeer) {
         sendNotification(
-          _Method.VOLUME_CHANGED,
+          _method.VOLUME_CHANGED,
           data: {'volume': value},
         );
       }
     });
   }
 
-  static const _Method = (
+  static const _method = (
     GET_VOLUME: 'get_volume',
     SET_VOLUME: 'set_volume',
     VOLUME_CHANGED: 'volume_changed'
@@ -41,12 +42,12 @@ class VolumePlugin extends UnisyncPlugin {
     Payload? payload,
   ) async {
     super.onReceive(header, data, payload);
-    if (header.method == _Method.SET_VOLUME) {
+    if (header.method == _method.SET_VOLUME) {
       _setVolume(data['set_volume']);
     }
-    if (header.method == _Method.GET_VOLUME) {
+    if (header.method == _method.GET_VOLUME) {
       sendNotification(
-        _Method.VOLUME_CHANGED,
+        _method.VOLUME_CHANGED,
         data: {
           'volume': await FlutterVolumeController.getVolume(),
         },

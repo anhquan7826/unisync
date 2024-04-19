@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 import 'package:unisync/core/device.dart';
 import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
@@ -10,7 +11,7 @@ import 'package:unisync/utils/push_notification.dart';
 class NotificationPlugin extends UnisyncPlugin {
   NotificationPlugin(Device device)
       : super(device, type: DeviceMessage.Type.NOTIFICATION);
-  static const _Method = (NEW_NOTIFICATION: 'new_notification',);
+  static const _method = (NEW_NOTIFICATION: 'new_notification',);
 
   final List<NotificationData> _notifications = [];
 

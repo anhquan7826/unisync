@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 import 'dart:io';
 
 import 'package:unisync/core/device.dart';
@@ -9,7 +10,7 @@ import 'package:unisync/utils/push_notification.dart';
 class RunCommandPlugin extends UnisyncPlugin {
   RunCommandPlugin(Device device)
       : super(device, type: DeviceMessage.Type.RUN_COMMAND);
-  static const _Method = (EXECUTE: 'execute',);
+  static const _method = (EXECUTE: 'execute',);
 
   @override
   void onReceive(
