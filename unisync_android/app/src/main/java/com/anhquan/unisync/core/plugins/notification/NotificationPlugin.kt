@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import androidx.core.content.res.ResourcesCompat
 import com.anhquan.unisync.core.Device
+import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.debugLog
@@ -76,6 +77,7 @@ class NotificationPlugin(
                     )
                     it.onComplete()
                 }, subscribeOn = Schedulers.computation(), onResult = {
+                    val picture = it["picture"]
                     sendNotification(
                         Method.NEW_NOTIFICATION,
                         mapOf(
@@ -86,7 +88,12 @@ class NotificationPlugin(
                             "sub_text" to subText,
                             "big_text" to if (text == bigText) null else bigText
                         ),
-                        payloadData = it["picture"]
+                        payload = picture?.let { p ->
+                            DeviceConnection.Payload(
+                                size = p.size,
+                                stream = p.inputStream()
+                            )
+                        }
                     )
                 })
             }

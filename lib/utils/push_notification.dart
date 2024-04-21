@@ -29,9 +29,8 @@ class PushNotification {
           height: 256,
         ),
       ),
-      category: LinuxNotificationCategory.im,
+      category: LinuxNotificationCategory.transferComplete,
       resident: true,
-      transient: true,
     );
     final details = NotificationDetails(
       linux: notification,

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.anhquan.unisync.R
 import com.anhquan.unisync.UnisyncActivity
+import com.anhquan.unisync.UnisyncService
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.theme.setView
@@ -83,6 +84,17 @@ class PairActivity : ComponentActivity() {
                         Icon(painterResource(id = R.drawable.arrow_back), contentDescription = null)
                     }
                 },
+                actions = {
+                    TextButton(onClick = {
+                        UnisyncService.restartDiscovery(this@PairActivity)
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.refresh),
+                            contentDescription = null
+                        )
+                        Text(text = stringResource(R.string.refresh))
+                    }
+                }
             )
         }) { padding ->
             Column(

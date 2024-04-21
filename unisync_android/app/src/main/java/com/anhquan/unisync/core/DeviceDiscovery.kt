@@ -47,12 +47,17 @@ class DeviceDiscovery(private val context: Context) {
 
     fun start() {
         nsdManager = context.getSystemService(NsdManager::class.java)
-        configureServiceDiscovery()
+        startDiscovery()
 //        connectToAddress("10.0.2.2")
     }
 
     fun stop() {
-        nsdManager.stopServiceDiscovery(discoveryListener)
+        stopDiscovery()
+    }
+
+    fun restart() {
+        stopDiscovery()
+        startDiscovery()
     }
 
     private fun configureServiceDiscovery() {
@@ -119,7 +124,15 @@ class DeviceDiscovery(private val context: Context) {
 
             override fun onServiceLost(p0: NsdServiceInfo?) {}
         }
+    }
+
+    private fun startDiscovery() {
+        configureServiceDiscovery()
         nsdManager.discoverServices(serviceType, NsdManager.PROTOCOL_DNS_SD, discoveryListener)
+    }
+
+    private fun stopDiscovery() {
+        nsdManager.stopServiceDiscovery(discoveryListener)
     }
 
     fun connectToAddress(address: String) {

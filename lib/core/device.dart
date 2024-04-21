@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:rxdart/rxdart.dart';
 import 'package:unisync/core/pairing_handler.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
@@ -125,10 +123,10 @@ class Device with ConnectionListener {
     }
   }
 
-  void sendMessage(DeviceMessage message, [Uint8List? data]) {
+  void sendMessage(DeviceMessage message, [Payload? payload, void Function(double)? onProgress]) {
     if (_pairingHandler.state == PairState.paired ||
         message.type == DeviceMessage.Type.PAIR) {
-      connection?.send(message, data);
+      connection?.send(message, payload, onProgress);
       infoLog('Device@${info.name}: Message sent:');
       infoLog(message.toJson());
     }

@@ -43,4 +43,6 @@
     <string name="other_permission">Other permission (%1$s)</string>
     <string name="access_all_files">Access all files</string>
     <string name="read_all_files">Read all files</string>
+    <string name="upload">Upload</string>
+    <string name="refresh">Refresh</string>
 </resources>

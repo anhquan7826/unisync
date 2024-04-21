@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:unisync/components/enums/file_type.dart';
 import 'package:unisync/components/enums/status.dart';
+import 'package:unisync/models/file/file.model.dart';
 
 part 'file_transfer.state.freezed.dart';
 
@@ -9,6 +9,6 @@ class FileTransferState with _$FileTransferState {
   const factory FileTransferState({
     @Default(Status.loading) Status status,
     @Default('/') String path,
-    @Default([])List<({String name, FileType type})> currentDirectory,
+    @Default([])List<UnisyncFile> currentDirectory,
   }) = _FileTransferState;
 }

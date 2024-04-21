@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -14,17 +15,18 @@ class GalleryPlugin extends UnisyncPlugin {
           device,
           type: DeviceMessage.Type.GALLERY,
         );
-  static const _Method = (
+  static const _method = (
     GET_GALLERY: 'get_gallery',
     GET_IMAGE: 'get_image',
+    GET_THUMBNAIL: 'get_thumbnail',
   );
 
   Future<List<Media>> getGallery() async {
     final cId = completer<List<Media>>();
-    sendRequest(_Method.GET_GALLERY);
+    sendRequest(_method.GET_GALLERY);
     messages.listenCancellable((event) {
       if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
-          event.header.method == _Method.GET_GALLERY) {
+          event.header.method == _method.GET_GALLERY) {
         complete(cId,
             value: (event.data['gallery'] as List).map((e) {
               return Media.fromJson(e);
@@ -37,15 +39,44 @@ class GalleryPlugin extends UnisyncPlugin {
     return future(cId);
   }
 
+  Future<Uint8List> getThumbnail(int id,
+      [int width = 640, int height = 640]) async {
+    final cId = completer<Uint8List>();
+    sendRequest(
+      _method.GET_THUMBNAIL,
+      data: {
+        'id': id,
+        'width': width,
+        'height': height,
+      },
+    );
+    messages.listenCancellable((event) {
+      if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
+          event.header.method == _method.GET_THUMBNAIL &&
+          event.data['image'] == id) {
+        getPayloadData(
+          event.payload!.stream,
+          size: event.payload!.size,
+        ).then((value) {
+          complete(cId, value: value);
+        });
+        return true;
+      } else {
+        return false;
+      }
+    });
+    return future(cId);
+  }
+
   Future<Uint8List> getImage(int id) async {
     final cId = completer<Uint8List>();
     sendRequest(
-      _Method.GET_IMAGE,
+      _method.GET_IMAGE,
       data: {'id': id},
     );
     messages.listenCancellable((event) {
       if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
-          event.header.method == _Method.GET_IMAGE &&
+          event.header.method == _method.GET_IMAGE &&
           event.data['image'] == id) {
         getPayloadData(
           event.payload!.stream,

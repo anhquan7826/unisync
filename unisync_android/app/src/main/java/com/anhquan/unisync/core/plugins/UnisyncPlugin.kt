@@ -7,8 +7,15 @@ import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.infoLog
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage.Type) {
+    data class Event(
+        val header: DeviceMessage.DeviceMessageHeader,
+        val data: Map<String, Any?>,
+        val payload: DeviceConnection.Payload?,
+    )
+
     val notifier = BehaviorSubject.create<Map<String, Any?>>()
     var isClosed: Boolean = false
         private set
@@ -19,7 +26,22 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
 
     open val requiredPermission: List<String> = listOf()
 
-    open fun listen(header: DeviceMessage.DeviceMessageHeader, data: Map<String, Any?>, payload: DeviceConnection.Payload?) {}
+    protected val events: PublishSubject<Event> = PublishSubject.create()
+
+    @CallSuper
+    open fun listen(
+        header: DeviceMessage.DeviceMessageHeader,
+        data: Map<String, Any?>,
+        payload: DeviceConnection.Payload?
+    ) {
+        events.onNext(
+            Event(
+                header = header,
+                data = data,
+                payload = payload
+            )
+        )
+    }
 
     fun onReceive(message: DeviceMessage, payload: DeviceConnection.Payload?) {
         if (!hasPermission) {
@@ -29,7 +51,12 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
         }
     }
 
-    fun sendRequest(method: String, data: Map<String, Any?> = mapOf(), payloadData: ByteArray? = null) {
+    fun sendRequest(
+        method: String,
+        data: Map<String, Any?> = mapOf(),
+        payload: DeviceConnection.Payload? = null,
+        onProgress: ((Float) -> Unit)? = null
+    ) {
         device.sendMessage(
             DeviceMessage(
                 type = type,
@@ -39,11 +66,17 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
                 ),
                 body = data,
             ),
-            payloadData = payloadData
+            payload = payload,
+            onProgress = onProgress
         )
     }
 
-    fun sendResponse(method: String, data: Map<String, Any?>, payloadData: ByteArray? = null) {
+    fun sendResponse(
+        method: String,
+        data: Map<String, Any?>,
+        payload: DeviceConnection.Payload? = null,
+        onProgress: ((Float) -> Unit)? = null
+    ) {
         device.sendMessage(
             DeviceMessage(
                 type = type,
@@ -54,11 +87,17 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
                 ),
                 body = data,
             ),
-            payloadData = payloadData
+            payload = payload,
+            onProgress = onProgress
         )
     }
 
-    fun sendNotification(method: String, data: Map<String, Any?>, payloadData: ByteArray? = null) {
+    fun sendNotification(
+        method: String,
+        data: Map<String, Any?>,
+        payload: DeviceConnection.Payload? = null,
+        onProgress: ((Float) -> Unit)? = null
+    ) {
         device.sendMessage(
             DeviceMessage(
                 type = type,
@@ -68,7 +107,8 @@ abstract class UnisyncPlugin(private val device: Device, val type: DeviceMessage
                 ),
                 body = data,
             ),
-            payloadData = payloadData
+            payload = payload,
+            onProgress = onProgress
         )
     }
 

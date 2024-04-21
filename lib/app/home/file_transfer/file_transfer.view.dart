@@ -6,6 +6,7 @@ import 'package:unisync/app/home/file_transfer/file_transfer.state.dart';
 import 'package:unisync/components/enums/file_type.dart';
 import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/components/widgets/clickable.dart';
+import 'package:unisync/models/file/file.model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
@@ -20,7 +21,7 @@ class _FileTransferScreenState extends State<FileTransferScreen>
     with AutomaticKeepAliveClientMixin {
   final height = 42.0;
 
-  ({String name, FileType type})? selectedFile;
+  UnisyncFile? selectedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +52,12 @@ class _FileTransferScreenState extends State<FileTransferScreen>
         ],
       ),
       actions: [
+        IconButton(
+          onPressed: () {
+            getCubit<FileTransferCubit>().refresh();
+          },
+          icon: const Icon(Icons.refresh_rounded),
+        ),
         TextButton.icon(
           onPressed: () {
             getCubit<FileTransferCubit>().putFile();
@@ -58,7 +65,7 @@ class _FileTransferScreenState extends State<FileTransferScreen>
           icon: const Icon(Icons.upload_rounded),
           label: const Text('Upload'),
         ),
-        if (selectedFile != null)
+        if (selectedFile != null && selectedFile!.type == UnisyncFile.Type.FILE)
           TextButton.icon(
             onPressed: () {
               getCubit<FileTransferCubit>().getFiles(selectedFile!.name);
@@ -92,10 +99,10 @@ class _FileTransferScreenState extends State<FileTransferScreen>
     );
   }
 
-  Widget buildFile(({String name, FileType type}) file) {
+  Widget buildFile(UnisyncFile file) {
     return Clickable(
       onDoubleTap: () {
-        if (file.type == FileType.directory) {
+        if (file.type == UnisyncFile.Type.DIRECTORY) {
           getCubit<FileTransferCubit>().goToFolder(file.name);
         }
       },
@@ -113,11 +120,13 @@ class _FileTransferScreenState extends State<FileTransferScreen>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Icon(
                 () {
-                  return switch (file.type) {
-                    FileType.directory => Icons.folder_rounded,
-                    FileType.file => Icons.description_rounded,
-                    FileType.symlink => Icons.link,
-                  };
+                  if (file.type == UnisyncFile.Type.DIRECTORY) {
+                    return Icons.folder_rounded;
+                  }
+                  if (file.type == UnisyncFile.Type.SYMLINK) {
+                    return Icons.link;
+                  }
+                  return Icons.description_rounded;
                 }.call(),
               ),
             ),

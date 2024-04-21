@@ -23,6 +23,7 @@ class VolumePlugin(
         data: Map<String, Any?>,
         payload: DeviceConnection.Payload?
     ) {
+        super.listen(header, data, payload)
         if (header.method == Method.VOLUME_CHANGED) {
             notifier.onNext(data)
         }

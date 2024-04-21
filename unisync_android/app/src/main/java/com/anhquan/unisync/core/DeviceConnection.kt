@@ -10,11 +10,11 @@ import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
 import java.io.BufferedReader
-import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.ServerSocket
 import javax.net.ssl.SSLSocket
+import kotlin.math.min
 
 class DeviceConnection(
     private val socket: SSLSocket,
@@ -87,22 +87,21 @@ class DeviceConnection(
         })
     }
 
-    fun send(message: DeviceMessage, data: ByteArray? = null) {
+    fun send(message: DeviceMessage, payload: Payload? = null, onProgress: ((Float) -> Unit)? = null) {
         if (isConnected) {
             runSingle(callback = {
                 writer.apply {
-                    if (data != null) {
+                    if (payload != null) {
                         ThreadHelper.run {
                             try {
                                 infoLog("Opening server socket for payload...")
                                 val payloadServer = ServerSocket(0)
-                                val payloadSize = data.size
                                 write(
                                     gson.toJson(
                                         message.copy(
                                             payload = DeviceMessage.DeviceMessagePayload(
                                                 port = payloadServer.localPort,
-                                                size = payloadSize
+                                                size = payload.size
                                             )
                                         )
                                     ).toByteArray(Charsets.UTF_8)
@@ -113,25 +112,28 @@ class DeviceConnection(
                                 infoLog("Payload socket server found a connection!")
                                 payloadServer.close()
                                 val payloadOutput = payloadSocket.getOutputStream()
-                                val dataStream = ByteArrayInputStream(data)
-                                infoLog("Sending payload of size $payloadSize...")
-                                val buffer = ByteArray(4096)
-                                var byteRead = dataStream.read(buffer)
+                                infoLog("Sending payload of size ${payload.size}...")
+                                var byteRead: Int
                                 var progress = 0
-                                while (byteRead != -1) {
-                                    payloadOutput.write(buffer, 0, byteRead)
-                                    progress += byteRead
-                                    infoLog(
-                                        "Sending payload: ${
-                                            String.format(
-                                                "%.2f",
-                                                progress.toDouble() / payloadSize * 100
-                                            )
-                                        }%"
-                                    )
-                                    byteRead = dataStream.read(buffer)
-                                }
-                                payloadOutput.flush()
+                                do {
+                                    val buffer = ByteArray(min(payload.size - progress, 4096))
+                                    byteRead = payload.stream.read(buffer)
+                                    if (byteRead > 0) {
+                                        payloadOutput.write(buffer)
+                                        payloadOutput.flush()
+                                        progress += byteRead
+                                        onProgress?.invoke(progress.toFloat() / payload.size)
+                                        infoLog(
+                                            "Sending payload: $byteRead - ${
+                                                String.format(
+                                                    "%.2f",
+                                                    progress.toFloat() / payload.size * 100
+                                                )
+                                            }%"
+                                        )
+                                    }
+                                } while (byteRead > 0)
+                                payload.stream.close()
                                 infoLog("Payload sent!")
                             } catch (e: Exception) {
                                 e.printStackTrace()

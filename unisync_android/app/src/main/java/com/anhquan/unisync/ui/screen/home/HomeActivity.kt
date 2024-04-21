@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -57,14 +56,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
+import com.anhquan.unisync.ui.composables.DeviceDisconnected
 import com.anhquan.unisync.ui.composables.SliderTile
 import com.anhquan.unisync.ui.composables.UDialog
+import com.anhquan.unisync.ui.screen.home.file_transfer.FileTransferActivity
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.pair.PairActivity
 import com.anhquan.unisync.ui.theme.setView
@@ -328,7 +328,16 @@ class HomeActivity : ComponentActivity() {
                                 FeatureTile(
                                     icon = painterResource(id = R.drawable.data_transfer),
                                     title = stringResource(R.string.browse_files),
-                                ) {}
+                                ) {
+                                    startActivity(
+                                        Intent(
+                                            this@HomeActivity,
+                                            FileTransferActivity::class.java
+                                        ).apply {
+                                            putExtra("device", gson.toJson(viewModel.device.info))
+                                        }
+                                    )
+                                }
                             }
                             item {
                                 FeatureTile(
@@ -372,30 +381,7 @@ class HomeActivity : ComponentActivity() {
                         )
                     }
                 } else {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    ) {
-                        Icon(
-                            painterResource(id = R.drawable.error),
-                            contentDescription = null,
-                            tint = Color.Gray,
-                            modifier = Modifier
-                                .size(64.dp)
-                                .padding(
-                                    bottom = 12.dp
-                                )
-                        )
-                        Text(
-                            stringResource(R.string.device_offline),
-                            color = Color.Gray,
-                            fontSize = 12.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    DeviceDisconnected()
                 }
             }
         }

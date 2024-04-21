@@ -3,13 +3,16 @@ package com.anhquan.unisync.core.plugins.gallery
 import android.Manifest
 import android.content.ContentUris
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Size
 import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 class GalleryPlugin(device: Device) :
@@ -17,6 +20,7 @@ class GalleryPlugin(device: Device) :
     private object Method {
         const val GET_GALLERY = "get_gallery"
         const val GET_IMAGE = "get_image"
+        const val GET_THUMBNAIL = "get_thumbnail"
     }
 
     data class Media(
@@ -33,6 +37,7 @@ class GalleryPlugin(device: Device) :
         data: Map<String, Any?>,
         payload: DeviceConnection.Payload?
     ) {
+        super.listen(header, data, payload)
         when (header.method) {
             Method.GET_GALLERY -> {
                 sendResponse(
@@ -57,7 +62,23 @@ class GalleryPlugin(device: Device) :
                         mapOf(
                             "image" to data["id"]
                         ),
-                        payloadData = it
+                        payload = it
+                    )
+                }
+            }
+
+            Method.GET_THUMBNAIL -> {
+                getThumbnail(
+                    (data["id"] as Double).toLong(),
+                    (data["width"] as Double).toInt(),
+                    (data["height"] as Double).toInt()
+                )?.let {
+                    sendResponse(
+                        Method.GET_THUMBNAIL,
+                        mapOf(
+                            "image" to data["id"]
+                        ),
+                        payload = it
                     )
                 }
             }
@@ -98,22 +119,74 @@ class GalleryPlugin(device: Device) :
         return images
     }
 
-    private fun getImage(id: Long): ByteArray? {
+    private fun queryImage(id: Long): Media? {
+        val projection = arrayOf(
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.SIZE,
+            MediaStore.Images.Media.MIME_TYPE,
+        )
+        var image: Media? = null
+        context.contentResolver.query(
+            collectionUri,
+            projection,
+            "${MediaStore.Images.Media._ID} = $id",
+            null,
+            null
+        )?.use { cursor ->
+            val displayNameColumn =
+                cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+            val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
+            val mimeTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
+
+            cursor.moveToNext()
+            val name = cursor.getString(displayNameColumn)
+            val size = cursor.getLong(sizeColumn)
+            val mimeType = cursor.getString(mimeTypeColumn)
+            image = Media(id, name, size, mimeType)
+
+        }
+        return image
+    }
+
+    private fun getImage(id: Long): DeviceConnection.Payload? {
         try {
+            val size = queryImage(id)?.size ?: return null
             val uri = ContentUris.withAppendedId(collectionUri, id);
             val inputStream = context.contentResolver.openInputStream(uri) ?: return null
-            val buffer = ByteArray(inputStream.available())
-            var bytesRead = 0
-            while (bytesRead < buffer.size) {
-                val count = inputStream.read(buffer, bytesRead, buffer.size - bytesRead)
-                if (count == -1) break
-                bytesRead += count
-            }
-            inputStream.close()
-            return buffer
+            return DeviceConnection.Payload(inputStream, size.toInt())
         } catch (e: IOException) {
             e.printStackTrace()
             return null
+        }
+    }
+
+    private fun getThumbnail(id: Long, width: Int, height: Int): DeviceConnection.Payload? {
+        return try {
+            val uri = ContentUris.withAppendedId(collectionUri, id)
+            val bitmap = context.contentResolver.loadThumbnail(uri, Size(width, height), null)
+            return convertBitmapToByteArray(bitmap)?.let {
+                DeviceConnection.Payload(it.inputStream(), it.size)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    private fun convertBitmapToByteArray(bitmap: Bitmap?): ByteArray? {
+        if (bitmap == null) return null
+        var baos: ByteArrayOutputStream? = null
+        return try {
+            baos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
+            baos.toByteArray()
+        } finally {
+            if (baos != null) {
+                try {
+                    baos.close()
+                } catch (_: IOException) {
+                }
+            }
         }
     }
 

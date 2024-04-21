@@ -58,32 +58,43 @@ class DeviceConnection {
     );
   }
 
-  Future<void> send(DeviceMessage message, Uint8List? data) async {
+  Future<void> send(DeviceMessage message, [Payload? payload, void Function(double)? onProgress]) async {
     if (_isConnected) {
-      final payloadServer = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
-      _socket.writeln(
-        message
-            .copyWith(
-              payload: data == null
-                  ? null
-                  : DeviceMessagePayload(
-                      port: payloadServer.port,
-                      size: data.length,
-                    ),
-            )
-            .toJson()
-            .toJsonString(),
-      );
-      if (data != null) {
+      if (payload != null) {
+        final payloadServer = await ServerSocket.bind(
+          InternetAddress.anyIPv4,
+          0,
+        );
+        _socket.writeln(
+          message
+              .copyWith(
+                  payload: DeviceMessagePayload(
+                port: payloadServer.port,
+                size: payload.size,
+              ))
+              .toJson()
+              .toJsonString(),
+        );
         infoLog('Opening server socket for payload...');
         final payloadSocket = await payloadServer.first;
         infoLog('Payload socket server found a connection!');
         payloadServer.close();
-        infoLog('Sending payload of size ${data.length}...');
-        payloadSocket
-          ..writeAll(data)
-          ..flush()
-          ..close();
+        infoLog('Sending payload of size ${payload.size}...');
+        var progress = 0;
+        onProgress?.call(progress / payload.size);
+        await for (final data in payload.stream) {
+          payloadSocket.add(data);
+          progress += data.length;
+          infoLog('Sending payload: ${((progress / payload.size) * 100).toStringAsFixed(2)}%');
+          onProgress?.call(progress / payload.size);
+        }
+        // payloadSocket.flush();
+        payloadSocket.close();
+        infoLog('Payload sent!');
+      } else {
+        _socket.writeln(
+          message.toJson().toJsonString(),
+        );
       }
     }
   }

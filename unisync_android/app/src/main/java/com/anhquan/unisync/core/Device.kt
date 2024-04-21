@@ -16,8 +16,6 @@ import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.infoLog
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 class Device private constructor(
@@ -123,9 +121,13 @@ class Device private constructor(
         connection = null
     }
 
-    fun sendMessage(message: DeviceMessage, payloadData: ByteArray? = null) {
+    fun sendMessage(
+        message: DeviceMessage,
+        payload: DeviceConnection.Payload? = null,
+        onProgress: ((Float) -> Unit)? = null
+    ) {
         if (pairingHandler.state == PairingHandler.PairState.PAIRED || message.type == DeviceMessage.Type.PAIR) {
-            connection?.send(message, payloadData)
+            connection?.send(message, payload, onProgress)
             infoLog("${this::class.simpleName}@${info.name}: Message sent:\n$message")
         }
     }
@@ -155,26 +157,48 @@ class Device private constructor(
         return plugins.filterIsInstance(type).first()
     }
 
-    private val notifier = BehaviorSubject.create<DeviceEvent>()
-    val eventNotifier get() = notifier as Observable<DeviceEvent>
+    private val listeners = mutableListOf<DeviceEventListener>()
+
+    fun addEventListener(listener: DeviceEventListener) {
+        listeners.add(listener)
+        listener.onDeviceEvent(
+            DeviceEvent(
+                connected = isOnline, pairState = pairState
+            )
+        )
+    }
+
+    fun removeEventListener(listener: DeviceEventListener) {
+        listeners.remove(listener)
+    }
 
     private fun notifyNewEvent() {
+
         if (isOnline && pairState == PairingHandler.PairState.PAIRED) {
             initiatePlugins()
+            informListeners()
         } else {
+            informListeners()
             disposePlugins()
         }
-        try {
-            notifier.onNext(
+    }
+
+    private fun informListeners() {
+        for (listener in listeners) {
+            listener.onDeviceEvent(
                 DeviceEvent(
                     connected = isOnline, pairState = pairState
                 )
             )
-        } catch (_: Exception) {}
+        }
     }
 
     data class DeviceEvent(
         val connected: Boolean = true,
         val pairState: PairingHandler.PairState = PairingHandler.PairState.UNKNOWN
     )
+
+    interface DeviceEventListener {
+        fun onDeviceEvent(event: DeviceEvent)
+    }
 }

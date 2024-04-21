@@ -14,9 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel : ViewModel(), Device.DeviceEventListener {
     private lateinit var _device: Device
-    private var disposable: Disposable? = null
     private var volumeDisposable: Disposable? = null
 
     var device: Device
@@ -24,31 +23,11 @@ class HomeViewModel : ViewModel() {
         set(value) {
             if (this::_device.isInitialized && _device == value) return
             volumeDisposable?.dispose()
-            disposable?.dispose()
-            _device = value
-            disposable = value.eventNotifier.listen(
-                observeOn = AndroidSchedulers.mainThread()
-            ) {
-                debugLog("Event from device ${value.info.name}:\n${it.connected}\n${it.pairState}")
-                _state.update { state ->
-                    state.copy(
-                        isOnline = it.connected,
-                    )
-                }
-                if (it.connected) {
-                    volumeDisposable = volumeDisposable ?: value.getPlugin(VolumePlugin::class.java).notifier.listen(
-                        observeOn = AndroidSchedulers.mainThread()
-                    ) {
-                        _state.update { state ->
-                            state.copy(
-                                volume = it["volume"].toString().toFloat()
-                            )
-                        }
-                    }
-                } else {
-                    volumeDisposable?.dispose()
-                }
+            if (this::_device.isInitialized) {
+                _device.removeEventListener(this)
             }
+            _device = value
+            _device.addEventListener(this)
         }
 
     val thisDeviceInfo = ConfigUtil.Device.getDeviceInfo()
@@ -91,14 +70,39 @@ class HomeViewModel : ViewModel() {
 
     fun renameDevice(name: String) {
         if (name.isEmpty()) return
-        ConfigUtil.Device.setDeviceInfo(_device.info.copy(
-            name = name.trim()
-        ))
+        ConfigUtil.Device.setDeviceInfo(
+            _device.info.copy(
+                name = name.trim()
+            )
+        )
     }
 
     override fun onCleared() {
         volumeDisposable?.dispose()
-        disposable?.dispose()
+        _device.removeEventListener(this)
         super.onCleared()
+    }
+
+    override fun onDeviceEvent(event: Device.DeviceEvent) {
+        debugLog(event)
+        _state.update { state ->
+            state.copy(
+                isOnline = event.connected,
+            )
+        }
+        if (event.connected) {
+            volumeDisposable =
+                volumeDisposable ?: _device.getPlugin(VolumePlugin::class.java).notifier.listen(
+                    observeOn = AndroidSchedulers.mainThread()
+                ) {
+                    _state.update { state ->
+                        state.copy(
+                            volume = it["volume"].toString().toFloat()
+                        )
+                    }
+                }
+        } else {
+            volumeDisposable?.dispose()
+        }
     }
 }

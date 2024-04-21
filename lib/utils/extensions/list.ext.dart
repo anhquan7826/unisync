@@ -26,4 +26,28 @@ extension ListExtension<T> on List<T> {
     }
     return false;
   }
+
+  List<R> mapIndexed<R>(R Function(int index, T element) callback) {
+    return asMap().entries.map((e) => callback(e.key, e.value)).toList();
+  }
+
+  List<T> copyReplaced(T? Function(T) predicate) {
+    final result = <T>[];
+    for (final e in this) {
+      result.add(predicate(e) ?? e);
+    }
+    return result;
+  }
+
+  List<T> copyReplacedIndex(T? Function(int index) predicate) {
+    final result = <T>[];
+    for (int i = 0; i < length; i++) {
+      result.add(predicate(i) ?? this[i]);
+    }
+    return result;
+  }
+
+  Map<T, R> associate<R>(R Function(T) value) {
+    return {for (final e in this) e: value(e)};
+  }
 }

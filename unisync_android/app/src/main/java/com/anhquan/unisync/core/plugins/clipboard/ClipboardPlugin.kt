@@ -21,6 +21,7 @@ class ClipboardPlugin(
         data: Map<String, Any?>,
         payload: DeviceConnection.Payload?
     ) {
+        super.listen(header, data, payload)
         data["clipboard"]?.toString()?.let {
             clipboardManager.setPrimaryClip(ClipData.newPlainText(it, it))
         }

@@ -2,6 +2,7 @@ package com.anhquan.unisync.ui.theme
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -67,3 +68,11 @@ fun ComponentActivity.setView(content: @Composable () -> Unit) {
         }
     }
 }
+
+fun ComponentActivity.defaultWindowInsets() =
+    WindowInsets(
+        left = 16.dp,
+        right = 16.dp,
+        top = 16.dp,
+        bottom = 16.dp
+    )

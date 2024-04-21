@@ -51,7 +51,8 @@ abstract class UnisyncPlugin {
   void sendRequest(
     String method, {
     Map<String, dynamic> data = const {},
-    Uint8List? payload,
+    Payload? payload,
+    void Function(double)? onProgress,
   }) {
     device.sendMessage(
       DeviceMessage(
@@ -70,7 +71,8 @@ abstract class UnisyncPlugin {
   void sendResponse(
     String method, {
     required Map<String, dynamic> data,
-    Uint8List? payload,
+    Payload? payload,
+    void Function(double)? onProgress,
   }) {
     device.sendMessage(
       DeviceMessage(
@@ -90,7 +92,8 @@ abstract class UnisyncPlugin {
   void sendNotification(
     String method, {
     required Map<String, dynamic> data,
-    Uint8List? payload,
+    Payload? payload,
+    void Function(double)? onProgress,
   }) {
     device.sendMessage(
       DeviceMessage(

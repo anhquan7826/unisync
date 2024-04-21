@@ -20,6 +20,7 @@ class RingPhonePlugin(
         data: Map<String, Any?>,
         payload: DeviceConnection.Payload?
     ) {
+        super.listen(header, data, payload)
         notificationManager.notify(1, NotificationUtil.buildFindMyPhoneNotification(context))
     }
 }

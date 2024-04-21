@@ -22,13 +22,21 @@ fun runSingle(
         } catch (e: Exception) {
             it.onError(e)
         }
-    }.subscribeOn(subscribeOn).subscribe({
-        disposable.dispose()
-    }, {
-        onError?.invoke(it)
-        it.printStackTrace()
-        disposable.dispose()
-    })
+    }.subscribeOn(subscribeOn).subscribe(
+        {
+            disposable.dispose()
+        },
+        {
+            try {
+                onError?.invoke(it)
+                it.printStackTrace()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                disposable.dispose()
+            }
+        }
+    )
 }
 
 fun runPeriodic(

@@ -6,9 +6,7 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.PairingHandler.PairState.NOT_PAIRED
 import com.anhquan.unisync.core.PairingHandler.PairState.PAIRED
 import com.anhquan.unisync.core.PairingHandler.PairState.REQUESTED
-import com.anhquan.unisync.utils.extensions.addTo
 import com.anhquan.unisync.utils.listen
-import io.reactivex.rxjava3.disposables.CompositeDisposable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,8 +21,6 @@ class PairViewModel : ViewModel() {
     private var _state = MutableStateFlow(PairViewState())
     val state = _state.asStateFlow()
 
-    private val disposables = CompositeDisposable()
-
     fun initialize(context: Context) {
         Device.getAllDevices(context) {
             it.forEach { device -> listenDeviceChange(device) }
@@ -37,38 +33,40 @@ class PairViewModel : ViewModel() {
     }
 
     private fun listenDeviceChange(device: Device) {
-        device.eventNotifier.listen {
-            _state.update { s ->
-                PairViewState(
-                    s.availableDevices.minus(device),
-                    s.requestedDevices.minus(device),
-                    s.pairedDevices.minus(device)
-                )
-            }
-            if (it.connected) {
-                when (it.pairState) {
-                    NOT_PAIRED -> _state.update { s ->
-                        s.copy(availableDevices = s.availableDevices.plus(device))
-                    }
+        _state.update { s ->
+            PairViewState(
+                s.availableDevices.minus(device),
+                s.requestedDevices.minus(device),
+                s.pairedDevices.minus(device)
+            )
+        }
+        device.addEventListener(object: Device.DeviceEventListener {
+            override fun onDeviceEvent(event: Device.DeviceEvent) {
+                if (event.connected) {
+                    when (event.pairState) {
+                        NOT_PAIRED -> _state.update { s ->
+                            s.copy(availableDevices = s.availableDevices.plus(device))
+                        }
 
-                    PAIRED -> _state.update { s ->
-                        s.copy(pairedDevices = s.pairedDevices.plus(device))
-                    }
+                        PAIRED -> _state.update { s ->
+                            s.copy(pairedDevices = s.pairedDevices.plus(device))
+                        }
 
-                    REQUESTED -> _state.update { s ->
-                        s.copy(requestedDevices = s.requestedDevices.plus(device))
-                    }
+                        REQUESTED -> _state.update { s ->
+                            s.copy(requestedDevices = s.requestedDevices.plus(device))
+                        }
 
-                    else -> {}
+                        else -> {}
+                    }
+                } else {
+                    if (event.pairState == PAIRED) {
+                        _state.update { s ->
+                            s.copy(pairedDevices = s.pairedDevices.plus(device))
+                        }
+                    }
                 }
-            } else {
-                if (it.pairState == PAIRED) {
-                    _state.update { s ->
-                        s.copy(pairedDevices = s.pairedDevices.plus(device))
-                    }
-                }
             }
-        }.addTo(disposables)
+        })
     }
 
     fun sendPairRequest(device: Device) {
@@ -86,9 +84,4 @@ class PairViewModel : ViewModel() {
 //            )
 //        }
 //    }
-
-    override fun onCleared() {
-        super.onCleared()
-        disposables.dispose()
-    }
 }

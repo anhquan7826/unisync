@@ -35,6 +35,7 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
         data: Map<String, Any?>,
         payload: DeviceConnection.Payload?
     ) {
+        super.listen(header, data, payload)
         when (header.method) {
             Method.GET_MESSAGES -> {
                 sendResponse(

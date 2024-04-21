@@ -9,7 +9,9 @@ import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/gallery/gallery.plugin.dart';
 import 'package:unisync/models/media/media.model.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
+import 'package:unisync/utils/extensions/list.ext.dart';
 import 'package:unisync/utils/logger.dart';
+import 'package:unisync/utils/push_notification.dart';
 
 class GalleryCubit extends Cubit<GalleryState> with BaseCubit {
   GalleryCubit(this.device) : super(const GalleryState()) {
@@ -23,15 +25,19 @@ class GalleryCubit extends Cubit<GalleryState> with BaseCubit {
     safeEmit(state.copyWith(
       media: gallery.map((e) => (e, null)).toList(),
     ));
-    final images = <Uint8List>[];
-    for (final g in gallery) {
-      images.add(await device.getPlugin<GalleryPlugin>().getImage(g.id));
+    _loadThumbnails();
+  }
+
+  Future<void> _loadThumbnails() async {
+    for (int i = 0; i < state.media.length; i++) {
+      final medium = state.media[i].$1;
+      device.getPlugin<GalleryPlugin>().getThumbnail(medium.id).then((value) {
+        safeEmit(state.copyWith(
+          media: state.media.copyReplacedIndex(
+              (index) => index == i ? (medium, value) : null),
+        ));
+      });
     }
-    safeEmit(state.copyWith(
-      media: List.generate(gallery.length, (index) {
-        return (gallery[index], images[index]);
-      }),
-    ));
   }
 
   Future<void> saveImage(Media media) async {
@@ -43,8 +49,11 @@ class GalleryCubit extends Cubit<GalleryState> with BaseCubit {
       return;
     }
     final file = File(path);
-    await file.writeAsBytes(
-      state.media.firstWhere((element) => element.$1 == media).$2!,
+    final image = await device.getPlugin<GalleryPlugin>().getImage(media.id);
+    await file.writeAsBytes(image);
+    PushNotification.showNotification(
+      title: 'Image received!',
+      text: path,
     );
   }
 }

@@ -55,6 +55,7 @@ class StatusPlugin(
         data: Map<String, Any?>,
         payload: DeviceConnection.Payload?
     ) {
+        super.listen(header, data, payload)
         latestStatus?.let {
             sendNotification(
                 Method.STATUS_CHANGED,
