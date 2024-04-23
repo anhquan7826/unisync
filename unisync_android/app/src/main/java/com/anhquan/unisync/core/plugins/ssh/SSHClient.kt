@@ -25,6 +25,8 @@ class SSHClient {
     val inputStream: InputStream get() = channel.inputStream
     val outputStream: OutputStream get() = channel.outputStream
 
+    val isReady: Boolean get() = this::channel.isInitialized
+
     fun connect(
         address: String,
         port: Int = 22,

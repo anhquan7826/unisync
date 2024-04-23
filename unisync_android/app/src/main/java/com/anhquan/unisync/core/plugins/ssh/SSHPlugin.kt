@@ -49,6 +49,8 @@ class SSHPlugin(private val device: Device) : UnisyncPlugin(device, DeviceMessag
         }
     }
 
+    val sshConnected: Boolean get() = client.isReady
+
     fun connect(username: String, password: String): Boolean {
         return client.connect(address = device.ipAddress!!, username = username, password = password)
     }
