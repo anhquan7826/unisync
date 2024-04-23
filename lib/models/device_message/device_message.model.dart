@@ -35,6 +35,7 @@ class DeviceMessage with _$DeviceMessage {
     SHARING: 'sharing',
     GALLERY: 'gallery',
     STORAGE: 'storage',
+    SSH: 'ssh',
   );
 }
 

@@ -39,7 +39,9 @@ data class DeviceMessage(
         @SerializedName("gallery")
         GALLERY,
         @SerializedName("storage")
-        STORAGE
+        STORAGE,
+        @SerializedName("ssh")
+        SSH
     }
 
     override fun toString(): String {

@@ -65,6 +65,7 @@ import com.anhquan.unisync.ui.composables.DeviceDisconnected
 import com.anhquan.unisync.ui.composables.SliderTile
 import com.anhquan.unisync.ui.composables.UDialog
 import com.anhquan.unisync.ui.screen.home.file_transfer.FileTransferActivity
+import com.anhquan.unisync.ui.screen.home.remote_ssh.RemoteSSHActivity
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.pair.PairActivity
 import com.anhquan.unisync.ui.theme.setView
@@ -364,7 +365,14 @@ class HomeActivity : ComponentActivity() {
                                     icon = painterResource(id = R.drawable.ssh),
                                     title = stringResource(R.string.ssh),
                                 ) {
-
+                                    startActivity(
+                                        Intent(
+                                            this@HomeActivity,
+                                            RemoteSSHActivity::class.java
+                                        ).apply {
+                                            putExtra("device", gson.toJson(viewModel.device.info))
+                                        }
+                                    )
                                 }
                             }
                         }

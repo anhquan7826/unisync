@@ -59,6 +59,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.activity:activity-ktx:1.9.0'
+    implementation 'androidx.activity:activity:1.8.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
@@ -89,5 +90,6 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15to18:1.77'
     implementation 'de.mindpipe.android:android-logging-log4j:1.0.3'
     implementation 'net.i2p.crypto:eddsa:0.3.0'
+    implementation 'com.jcraft:jsch:0.1.55'
 //    implementation 'javax.management:jmx:1.2.1'
 }
