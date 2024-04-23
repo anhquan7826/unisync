@@ -68,7 +68,7 @@ class _FileTransferScreenState extends State<FileTransferScreen>
         if (selectedFile != null && selectedFile!.type == UnisyncFile.Type.FILE)
           TextButton.icon(
             onPressed: () {
-              getCubit<FileTransferCubit>().getFiles(selectedFile!.name);
+              getCubit<FileTransferCubit>().getFiles(selectedFile!);
             },
             icon: const Icon(Icons.download_rounded),
             label: const Text('Download'),

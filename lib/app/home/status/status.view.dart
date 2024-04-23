@@ -5,6 +5,7 @@ import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/components/widgets/image.dart';
+import 'package:unisync/utils/extensions/list.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
 import 'status.state.dart';
@@ -57,13 +58,7 @@ class _StatusScreenState extends State<StatusScreen>
       decoration: BoxDecoration(
         image: DecorationImage(
           image: Image.memory(state.wallpaper!).image,
-          fit: BoxFit.fitWidth,
-          colorFilter: true
-              ? null
-              : const ColorFilter.mode(
-                  Colors.grey,
-                  BlendMode.saturation,
-                ),
+          fit: BoxFit.cover,
         ),
       ),
       child: Container(
@@ -235,16 +230,25 @@ class _StatusScreenState extends State<StatusScreen>
           children: [
             buildButton(
               label: 'Find my phone',
-              icon: UImage.asset(
-                R.vectors.phone_ring,
-                width: 32,
-                height: 32,
+              icon: const Icon(
+                Icons.phonelink_ring_rounded,
+                size: 32,
               ),
               onTap: () {
                 getCubit<StatusCubit>().ringMyPhone();
               },
             ),
-          ],
+            buildButton(
+              label: 'Send clipboard',
+              icon: const Icon(
+                Icons.content_paste_rounded,
+                size: 32,
+              ),
+              onTap: () {
+                getCubit<StatusCubit>().sendClipboard();
+              },
+            ),
+          ].addBetween(const SizedBox(width: 16)),
         ),
       ),
     );

@@ -79,14 +79,19 @@ class NotificationPlugin(
                 val subText = getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
                 val bigText = getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()
                 runTask(task = {
-                    val icon = extractIcon(sbn)
-                    val picture = extractPicture(sbn)
-                    it.onNext(
-                        mapOf(
-                            "icon" to icon, "picture" to picture
+                    try {
+                        val icon = extractIcon(sbn)
+                        val picture = extractPicture(sbn)
+                        it.onNext(
+                            mapOf(
+                                "icon" to icon, "picture" to picture
+                            )
                         )
-                    )
-                    it.onComplete()
+                        it.onComplete()
+                    } catch (e: Exception) {
+                        it.onNext(mapOf())
+                        it.onComplete()
+                    }
                 }, subscribeOn = Schedulers.computation(), onResult = {
                     val picture = it["picture"]
                     sendNotification(

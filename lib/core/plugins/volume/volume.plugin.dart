@@ -43,7 +43,7 @@ class VolumePlugin extends UnisyncPlugin {
   ) async {
     super.onReceive(header, data, payload);
     if (header.method == _method.SET_VOLUME) {
-      _setVolume(data['set_volume']);
+      _setVolume(data['volume']);
     }
     if (header.method == _method.GET_VOLUME) {
       sendNotification(

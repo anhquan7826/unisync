@@ -116,7 +116,9 @@ class GalleryPlugin(device: Device) :
                 images.add(image)
             }
         }
-        return images
+        return images.filter {
+            listOf("image/png", "image/jpg", "image/jpeg").contains(it.mimeType)
+        }
     }
 
     private fun queryImage(id: Long): Media? {

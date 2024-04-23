@@ -38,7 +38,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeCubit, HomeState>(
+    return BlocConsumer<HomeCubit, HomeState>(
+      listener: (context, state) {
+        if (!state.currentDevice.isOnline) {
+          setState(() {
+            currentDest = 0;
+          });
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           body: Row(
@@ -154,7 +161,11 @@ class _HomeScreenState extends State<HomeScreen> {
               : () {
                   setState(() {
                     currentDest = index;
-                    pageController.jumpToPage(index);
+                    pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.ease,
+                    );
                   });
                 },
           child: Opacity(

@@ -1,14 +1,19 @@
 package com.anhquan.unisync.core.plugins.status
 
 import android.Manifest
+import android.app.WallpaperManager
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.toMap
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 
 class StatusPlugin(
@@ -18,6 +23,8 @@ class StatusPlugin(
         const val GET_STATUS = "get_status"
         const val STATUS_CHANGED = "status_changed"
     }
+
+    private val wallpaperManager = context.getSystemService(WallpaperManager::class.java)
 
     data class Status(
         val level: Int,
@@ -38,16 +45,24 @@ class StatusPlugin(
 
     override val requiredPermission: List<String>
         get() {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                listOf(Manifest.permission.POST_NOTIFICATIONS).filterNot {
-                    ContextCompat.checkSelfPermission(
+            val permissions = mutableListOf<String>()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(
                         context,
                         Manifest.permission.POST_NOTIFICATIONS
-                    ) == PackageManager.PERMISSION_GRANTED
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissions.add(Manifest.permission.POST_NOTIFICATIONS)
                 }
-            } else {
-                listOf()
             }
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            return permissions
         }
 
     override fun listen(
@@ -59,10 +74,25 @@ class StatusPlugin(
         latestStatus?.let {
             sendNotification(
                 Method.STATUS_CHANGED,
-                toMap(it)
+                toMap(it),
+                wallpaper?.let { w ->
+                    DeviceConnection.Payload(
+                        w.inputStream(),
+                        w.size
+                    )
+                }
             )
         }
     }
+
+    private val wallpaper: ByteArray?
+        get() {
+            if (hasPermission) {
+                return convertBitmapToByteArray(wallpaperManager.drawable?.toBitmap())
+            } else {
+                return null
+            }
+        }
 
     override fun onStatusChanged(batteryLevel: Int, isCharging: Boolean) {
         latestStatus = Status(
@@ -71,7 +101,30 @@ class StatusPlugin(
         )
         sendNotification(
             Method.STATUS_CHANGED,
-            toMap(latestStatus!!)
+            toMap(latestStatus!!),
+            wallpaper?.let {
+                DeviceConnection.Payload(
+                    it.inputStream(),
+                    it.size
+                )
+            }
         )
+    }
+
+    private fun convertBitmapToByteArray(bitmap: Bitmap?): ByteArray? {
+        if (bitmap == null) return null
+        var baos: ByteArrayOutputStream? = null
+        return try {
+            baos = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
+            baos.toByteArray()
+        } finally {
+            if (baos != null) {
+                try {
+                    baos.close()
+                } catch (_: IOException) {
+                }
+            }
+        }
     }
 }

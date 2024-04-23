@@ -56,6 +56,7 @@ class NotificationPlugin extends UnisyncPlugin {
       title: '${notification.appName} • ${notification.title}',
       text:
           '${notification.text}${notification.subText != null ? '\n${notification.subText}' : ''}${notification.bigText != null ? '\n${notification.bigText}' : ''}',
+      icon: notification.icon,
     );
     _addNotification(notification);
   }

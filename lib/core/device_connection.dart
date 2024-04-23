@@ -39,7 +39,6 @@ class DeviceConnection {
         final message = DeviceMessage.fromJson(
           event.string.toMap(),
         );
-        debugLog(message);
         if (message.payload != null) {
           final stream = await getPayloadStream(
             address: ipAddress,

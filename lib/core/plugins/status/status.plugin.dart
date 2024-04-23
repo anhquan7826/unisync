@@ -3,6 +3,7 @@ import 'package:unisync/core/device.dart';
 import 'package:unisync/core/device_connection.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/models/device_message/device_message.model.dart';
+import 'package:unisync/utils/payload_handler.dart';
 
 class StatusPlugin extends UnisyncPlugin {
   StatusPlugin(Device device) : super(device, type: DeviceMessage.Type.STATUS);
@@ -12,10 +13,20 @@ class StatusPlugin extends UnisyncPlugin {
   );
 
   @override
-  void onReceive(DeviceMessageHeader header, Map<String, dynamic> data, Payload? payload) {
+  void onReceive(
+      DeviceMessageHeader header, Map<String, dynamic> data, Payload? payload) {
     super.onReceive(header, data, payload);
     if (header.method == _method.STATUS_CHANGED) {
-      notifier.add(data);
+      if (payload != null) {
+        getPayloadData(payload.stream, size: payload.size).then((value) {
+          notifier.add({
+            ...data,
+            'wallpaper': value,
+          });
+        });
+      } else {
+        notifier.add(data);
+      }
     }
   }
 

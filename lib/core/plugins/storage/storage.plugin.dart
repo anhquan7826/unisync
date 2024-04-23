@@ -102,25 +102,6 @@ class StoragePlugin extends UnisyncPlugin {
     sendRequest(_method.STOP_SERVER);
   }
 
-  Future<List<UnisyncFile>> to(String dir) async {
-    return (await _client.to(dir)).map((e) {
-      return UnisyncFile(
-        name: e.filename,
-        type: () {
-          if (e.attr.isDirectory) {
-            return UnisyncFile.Type.DIRECTORY;
-          }
-          if (e.attr.isSymbolicLink) {
-            return UnisyncFile.Type.SYMLINK;
-          }
-          return UnisyncFile.Type.FILE;
-        }.call(),
-        size: e.attr.size ?? -1,
-        fullPath: e.longname,
-      );
-    }).toList();
-  }
-
   Future<List<UnisyncFile>> list(String path) async {
     return (await _client.list(path)).map((e) {
       return UnisyncFile(
@@ -135,35 +116,14 @@ class StoragePlugin extends UnisyncPlugin {
           return UnisyncFile.Type.FILE;
         }.call(),
         size: e.attr.size ?? -1,
-        fullPath: e.longname,
+        fullPath: '${path.replaceAll(RegExp(r' / $'), '')}/${e.filename}',
       );
     }).toList();
   }
 
-  Future<List<UnisyncFile>> back() async {
-    return (await _client.back()).map((e) {
-      return UnisyncFile(
-        name: e.filename,
-        type: () {
-          if (e.attr.isDirectory) {
-            return UnisyncFile.Type.DIRECTORY;
-          }
-          if (e.attr.isSymbolicLink) {
-            return UnisyncFile.Type.SYMLINK;
-          }
-          return UnisyncFile.Type.FILE;
-        }.call(),
-        size: e.attr.size ?? -1,
-        fullPath: e.longname,
-      );
-    }).toList();
-  }
+  Future<void> put(String remoteDest, String localSource, {void Function(double)? onProgress}) =>
+      _client.put(remoteDest, localSource, onProgress: onProgress);
 
-  Future<void> put(String name, String path, {void Function(double)? onProgress}) =>
-      _client.put(name, path, onProgress: onProgress);
-
-  Future<void> get(String name, String dest, {void Function(double)? onProgress}) =>
-      _client.get(name, dest, onProgress: onProgress);
-
-  String get currentPath => _client.currentDir;
+  Future<void> get(String remoteSource, String localDest, {void Function(double)? onProgress}) =>
+      _client.get(remoteSource, localDest, onProgress: onProgress);
 }

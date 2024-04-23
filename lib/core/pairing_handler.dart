@@ -104,23 +104,17 @@ class PairingHandler implements PairOperation {
     }
   }
 
-  void handle(Map<String, dynamic> messageBody) {
-    switch (messageBody['message'].toString()) {
-      case 'requested':
-        {
-          if (_state == PairState.unpaired) {
-            _state = PairState.pairRequested;
-            onStateChanged(_state);
-          }
-          break;
-        }
-      case 'unpair':
-        {
-          ConfigUtil.device.removePairedDevice(device.info);
-          _state = PairState.unpaired;
-          onStateChanged(_state);
-          break;
-        }
+  void handle(DeviceMessage message) {
+    if (message.header.method == _Method.REQUEST) {
+      if (_state == PairState.unpaired) {
+        _state = PairState.pairRequested;
+        onStateChanged(_state);
+      }
+    }
+    if (message.header.method == _Method.UNPAIR) {
+      ConfigUtil.device.removePairedDevice(device.info);
+      _state = PairState.unpaired;
+      onStateChanged(_state);
     }
   }
 }

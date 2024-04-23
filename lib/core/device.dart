@@ -113,7 +113,7 @@ class Device with ConnectionListener {
     infoLog('Device@${info.name}: Message received:');
     infoLog(message.toJson());
     if (message.type == DeviceMessage.Type.PAIR) {
-      _pairingHandler.handle(message.body);
+      _pairingHandler.handle(message);
     } else if (_pairingHandler.state == PairState.paired) {
       for (final plugin in plugins) {
         if (plugin.type == message.type) {

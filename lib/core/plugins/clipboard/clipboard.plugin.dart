@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 import 'package:clipboard_watcher/clipboard_watcher.dart';
 import 'package:flutter/services.dart';
 import 'package:unisync/core/device_connection.dart';
@@ -15,7 +16,7 @@ class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
       ..start();
   }
 
-  static const _Method = (CLIPBOARD_CHANGED: 'clipboard_changed',);
+  static const _method = (CLIPBOARD_CHANGED: 'clipboard_changed',);
 
   @override
   Future<void> onClipboardChanged() async {
@@ -23,7 +24,7 @@ class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
     if (content != null && _latestClipboard != content) {
       _latestClipboard = content;
       sendNotification(
-        _Method.CLIPBOARD_CHANGED,
+        _method.CLIPBOARD_CHANGED,
         data: {'clipboard': content},
       );
     }
@@ -33,7 +34,10 @@ class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
 
   @override
   void onReceive(
-      DeviceMessageHeader header, Map<String, dynamic> data, Payload? payload) {
+    DeviceMessageHeader header,
+    Map<String, dynamic> data,
+    Payload? payload,
+  ) {
     super.onReceive(header, data, payload);
     data['clipboard']?.toString().let((it) async {
       if (_latestClipboard == it) {

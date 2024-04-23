@@ -77,20 +77,19 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
     var state: PairState = PairState.UNKNOWN
         private set
 
-    fun handle(data: Map<String, Any?>) {
-        when (data["message"].toString()) {
-            "accepted" -> {
-                ConfigUtil.Device.addPairedDevice(device.info)
-                state = PairState.PAIRED
-                onStateChanged(state)
+    fun handle(message: DeviceMessage) {
+        when (message.header.method) {
+            Method.REQUEST -> {
+                if (message.body["accepted"] == true) {
+                    ConfigUtil.Device.addPairedDevice(device.info)
+                    state = PairState.PAIRED
+                    onStateChanged(state)
+                } else {
+                    state = PairState.NOT_PAIRED
+                    onStateChanged(state)
+                }
             }
-
-            "rejected" -> {
-                state = PairState.NOT_PAIRED
-                onStateChanged(state)
-            }
-
-            "unpair" -> {
+            Method.UNPAIR -> {
                 ConfigUtil.Device.removePairedDevice(device.info)
                 state = PairState.NOT_PAIRED
                 onStateChanged(state)

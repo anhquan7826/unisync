@@ -6,12 +6,12 @@ import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/storage/storage.plugin.dart';
 import 'package:unisync/models/file/file.model.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
-import 'package:unisync/utils/extensions/scope.ext.dart';
+import 'package:unisync/utils/logger.dart';
 
 class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
   FileTransferCubit(this.device) : super(const FileTransferState()) {
     _plugin.startServer().whenComplete(() {
-      _plugin.to(state.path).then((value) {
+      _plugin.list(state.path).then((value) {
         safeEmit(state.copyWith(
           status: Status.loaded,
           currentDirectory: value,
@@ -39,8 +39,7 @@ class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
   Future<void> goToFolder(String folder) async {
     safeEmit(state.copyWith(
       status: Status.loading,
-      path:
-          state.path != '/' ? '${state.path}/$folder' : '${state.path}$folder',
+      path: _append(folder),
       currentDirectory: [],
     ));
     final dir = await toDir(state.path);
@@ -53,9 +52,7 @@ class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
   Future<void> goBack() async {
     safeEmit(state.copyWith(
       status: Status.loading,
-      path: state.path.lastIndexOf('/').let((it) {
-        return (it == 0) ? '/' : state.path.substring(0, it);
-      }),
+      path: _remove(),
     ));
     final dir = await toDir(state.path);
     safeEmit(state.copyWith(
@@ -65,20 +62,20 @@ class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
   }
 
   Future<List<UnisyncFile>> toDir(String path) async {
-    return _plugin.to(path);
+    return _plugin.list(path);
   }
 
-  Future<void> getFiles(String name) async {
+  Future<void> getFiles(UnisyncFile file) async {
     final dest = await FilePicker.platform.saveFile(
       dialogTitle: 'Choose destination path...',
-      fileName: name,
+      fileName: file.name,
     );
     if (dest != null) {
       await _plugin.get(
-        name,
+        file.fullPath,
         dest,
         onProgress: (progress) {
-
+          debugLog('Downloading ${file.name}: ${(progress * 100).toStringAsFixed(2)}%');
         },
       );
     }
@@ -92,12 +89,32 @@ class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
     final name = pickerResult?.files.firstOrNull?.name;
     if (name != null && path != null) {
       await _plugin.put(
-        name,
+        '${state.path}/$name',
         path,
         onProgress: (progress) {
-
+          debugLog('Uploading $name: ${(progress * 100).toStringAsFixed(2)}%');
         },
       );
     }
+  }
+
+  String _append(String directory) {
+    String newPath;
+    if (state.path.endsWith('/')) {
+      newPath = '${state.path}$directory';
+    } else {
+      newPath = '${state.path}/$directory';
+    }
+    return newPath.replaceAll(RegExp(r'/$'), '');
+  }
+
+  String _remove() {
+    final parts =
+        state.path.split('/').skipWhile((value) => value.isEmpty).toList();
+    if (parts.isEmpty) {
+      return '/';
+    }
+    parts.removeLast();
+    return '/${parts.join('/')}';
   }
 }

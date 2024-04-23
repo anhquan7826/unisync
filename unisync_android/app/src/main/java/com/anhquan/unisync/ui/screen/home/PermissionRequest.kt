@@ -39,7 +39,7 @@ fun PermissionRequest(
             Text(text = stringResource(R.string.permission_need_granted))
             val permissions = notGrantedPlugins.map {
                 it.requiredPermission
-            }.flatten()
+            }.flatten().toSet().toList()
             val permissionStates = permissions.map {
                 rememberPermissionState(permission = it)
             }

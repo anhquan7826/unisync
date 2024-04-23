@@ -22,9 +22,6 @@ class UnisyncSFTPClient {
 
   final FileServer _server = FileServer();
   late final SftpClient _client;
-  String _currentDir = '/';
-
-  String get currentDir => _currentDir;
 
   Future<void> connect() async {
     try {
@@ -42,41 +39,22 @@ class UnisyncSFTPClient {
     _client.close();
   }
 
-  Future<List<SftpName>> to(String dir) async {
-    _append(dir);
-    try {
-      return _sort((await _client.listdir(_currentDir)).skipWhile((value) {
-        return value.filename.startsWith('.');
-      }).toList());
-    } catch (e) {
-      errorLog(e);
-      _remove();
-      return [];
-    }
-  }
-
   Future<List<SftpName>> list(String path) async {
     try {
       return _sort((await _client.listdir(path)).skipWhile((value) {
         return value.filename.startsWith('.');
       }).toList());
-    } on Exception catch (e) {
+    } catch (e) {
       errorLog(e);
       return [];
     }
   }
 
-  Future<List<SftpName>> back() async {
-    _remove();
-    return _sort((await _client.listdir(_currentDir)).skipWhile((value) {
-      return value.filename.startsWith('.');
-    }).toList());
-  }
-
-  Future<SftpJob?> get(String name, String dest, {void Function(double)? onProgress}) async {
-    final file = await _client.open(_fullPath(name));
+  Future<SftpJob?> get(String remoteSource, String localDest,
+      {void Function(double)? onProgress}) async {
+    final file = await _client.open(remoteSource);
     final size = (await file.stat()).size;
-    final fileDest = File(dest).openWrite();
+    final fileDest = File(localDest).openWrite();
     return SftpJob(
       subscription: file.read(onProgress: (transferred) {
         onProgress?.call(size == null ? -1 : transferred / size);
@@ -89,14 +67,15 @@ class UnisyncSFTPClient {
         },
       ),
     );
-      return null;
+    return null;
   }
 
-  Future<SftpJob?> put(String name, String path, {void Function(double)? onProgress}) async {
-    final file = File(path);
+  Future<SftpJob?> put(String remoteDest, String filePath,
+      {void Function(double)? onProgress}) async {
+    final file = File(filePath);
     final size = await file.length();
     final destFile = await _client.open(
-      _fullPath(name),
+      remoteDest,
       mode: SftpFileOpenMode.create | SftpFileOpenMode.write,
     );
     return SftpJob(
@@ -107,37 +86,7 @@ class UnisyncSFTPClient {
         },
       ),
     );
-      return null;
-  }
-
-  void _append(String directory) {
-    if (_currentDir.endsWith('/')) {
-      _currentDir = '$_currentDir$directory';
-    } else {
-      _currentDir = '$_currentDir/$directory';
-    }
-    _currentDir = _currentDir.replaceAll(RegExp(r'/$'), '');
-  }
-
-  String _fullPath(String name) {
-    String path;
-    if (_currentDir.endsWith('/')) {
-      path = '$_currentDir$name';
-    } else {
-      path = '$_currentDir/$name';
-    }
-    return path.replaceAll(RegExp(r'/$'), '');
-  }
-
-  void _remove() {
-    final parts =
-        _currentDir.split('/').skipWhile((value) => value.isEmpty).toList();
-    if (parts.isEmpty) {
-      _currentDir = '/';
-      return;
-    }
-    parts.removeLast();
-    _currentDir = '/${parts.join('/')}';
+    return null;
   }
 
   List<SftpName> _sort(List<SftpName> list) {

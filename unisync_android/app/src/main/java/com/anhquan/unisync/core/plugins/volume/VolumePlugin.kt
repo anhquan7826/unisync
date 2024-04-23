@@ -33,7 +33,7 @@ class VolumePlugin(
         sendRequest(
             Method.SET_VOLUME,
             mapOf(
-                "value" to value
+                "volume" to value
             )
         )
     }
