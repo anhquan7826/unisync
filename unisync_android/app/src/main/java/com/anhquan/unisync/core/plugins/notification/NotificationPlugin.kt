@@ -1,13 +1,19 @@
 package com.anhquan.unisync.core.plugins.notification
 
 import android.app.Notification
+import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.media.session.MediaController
+import android.media.session.MediaSessionManager
+import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener
+import android.media.session.PlaybackState
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
+import androidx.core.content.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.DeviceConnection
@@ -25,19 +31,23 @@ import java.io.IOException
 class NotificationPlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.NOTIFICATION),
-    NotificationReceiver.NotificationListener {
+    NotificationReceiver.NotificationListener, OnActiveSessionsChangedListener {
     private object Method {
         const val NEW_NOTIFICATION = "new_notification"
     }
+
+    private val packageManager = context.packageManager
+    private val mediaManager = context.getSystemService(MediaSessionManager::class.java)
 
     init {
         NotificationReceiver.apply {
             addListener(this@NotificationPlugin)
             startService(context)
         }
+        mediaManager.addOnActiveSessionsChangedListener(
+            this, ComponentName(context, NotificationReceiver::class.java)
+        )
     }
-
-    private val packageManager = context.packageManager
 
     override val requiredPermission: List<String>
         get() {
@@ -52,6 +62,7 @@ class NotificationPlugin(
 
     override fun onDispose() {
         NotificationReceiver.removeListener(this)
+        mediaManager.removeOnActiveSessionsChangedListener(this)
         super.onDispose()
     }
 
@@ -157,6 +168,14 @@ class NotificationPlugin(
                 } catch (_: IOException) {
                 }
             }
+        }
+    }
+
+    override fun onActiveSessionsChanged(controllers: MutableList<MediaController>?) {
+        (controllers ?: listOf()).forEach {
+            debugLog(it.packageName)
+            debugLog(it.playbackState)
+            debugLog(it.extras)
         }
     }
 }

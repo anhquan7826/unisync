@@ -21,31 +21,33 @@ class NotificationPlugin extends UnisyncPlugin {
   void onReceive(
       DeviceMessageHeader header, Map<String, dynamic> data, Payload? payload) {
     super.onReceive(header, data, payload);
-    var notification = NotificationData(
-        timestamp: data['timestamp'],
-        appName: data['app_name'].toString(),
-        title: data['title'].toString(),
-        text: data['text'].toString(),
-        subText: data['sub_text']?.toString(),
-        bigText: data['big_text']?.toString());
-    if (payload != null) {
-      getPayloadData(
-        payload.stream,
-        size: payload.size,
-      ).then(
-        (value) {
-          notification = notification.copyWith(
-            icon: value,
-          );
-          _displayNotification(notification);
-        },
-        onError: (e) {
-          errorLog(e);
-          _displayNotification(notification);
-        },
-      );
-    } else {
-      _displayNotification(notification);
+    if (header.method == _method.NEW_NOTIFICATION) {
+      var notification = NotificationData(
+          timestamp: data['timestamp'],
+          appName: data['app_name'].toString(),
+          title: data['title'].toString(),
+          text: data['text'].toString(),
+          subText: data['sub_text']?.toString(),
+          bigText: data['big_text']?.toString());
+      if (payload != null) {
+        getPayloadData(
+          payload.stream,
+          size: payload.size,
+        ).then(
+          (value) {
+            notification = notification.copyWith(
+              icon: value,
+            );
+            _displayNotification(notification);
+          },
+          onError: (e) {
+            errorLog(e);
+            _displayNotification(notification);
+          },
+        );
+      } else {
+        _displayNotification(notification);
+      }
     }
   }
 
