@@ -1,6 +1,5 @@
 package com.anhquan.unisync.core.plugins.ssh
 
-import android.os.Environment
 import com.jcraft.jsch.ChannelShell
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.JSchException
@@ -19,7 +18,7 @@ class SSHClient {
     private lateinit var channel: ChannelShell
 
     private val jSch = JSch().also {
-        it.addIdentity("${Environment.getDataDirectory().path}/ssh_host_rsa_key")
+//        it.addIdentity("${Environment.getDataDirectory().path}/ssh_host_rsa_key")
     }
 
     val inputStream: InputStream get() = channel.inputStream

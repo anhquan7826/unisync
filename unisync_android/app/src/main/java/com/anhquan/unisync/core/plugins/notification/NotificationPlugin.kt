@@ -10,10 +10,8 @@ import android.graphics.drawable.Drawable
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener
-import android.media.session.PlaybackState
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
-import androidx.core.content.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.DeviceConnection
@@ -21,8 +19,10 @@ import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.extensions.toPrettyString
+import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -44,9 +44,11 @@ class NotificationPlugin(
             addListener(this@NotificationPlugin)
             startService(context)
         }
-        mediaManager.addOnActiveSessionsChangedListener(
-            this, ComponentName(context, NotificationReceiver::class.java)
-        )
+        runSingle(subscribeOn = AndroidSchedulers.mainThread()) {
+            mediaManager.addOnActiveSessionsChangedListener(
+                this, ComponentName(context, NotificationReceiver::class.java)
+            )
+        }
     }
 
     override val requiredPermission: List<String>

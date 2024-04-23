@@ -44,8 +44,6 @@ class RemoteSSHActivity : ComponentActivity() {
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
-            } else if () {
-
             }
         }
     }

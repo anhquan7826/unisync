@@ -8,6 +8,7 @@ import com.anhquan.unisync.core.plugins.notification.NotificationPlugin
 import com.anhquan.unisync.core.plugins.ring_phone.RingPhonePlugin
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
 import com.anhquan.unisync.core.plugins.sharing.SharingPlugin
+import com.anhquan.unisync.core.plugins.ssh.SSHPlugin
 import com.anhquan.unisync.core.plugins.status.StatusPlugin
 import com.anhquan.unisync.core.plugins.storage.StoragePlugin
 import com.anhquan.unisync.core.plugins.telephony.TelephonyPlugin
@@ -143,7 +144,8 @@ class Device private constructor(
             TelephonyPlugin(this),
             SharingPlugin(this),
             GalleryPlugin(this),
-            StoragePlugin(this)
+            StoragePlugin(this),
+            SSHPlugin(this)
         )
     }
 

@@ -56,6 +56,7 @@ class SSHPlugin(private val device: Device) : UnisyncPlugin(device, DeviceMessag
     }
 
     fun foo() {
+        connect("anhquan7826", "quan7826")
         client.outputStream.write("echo hello".encodeToByteArray())
         val reader = BufferedReader(InputStreamReader(client.inputStream))
         while (true) {
