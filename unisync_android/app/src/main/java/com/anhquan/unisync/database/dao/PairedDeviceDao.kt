@@ -30,7 +30,7 @@ interface PairedDeviceDao {
     fun exist(id: String): Single<Int>
 
     @Query("SELECT * FROM paired_devices ORDER BY lastAccessed DESC LIMIT 1")
-    fun getLastUsed(): Single<PairedDeviceEntity>
+    fun getLastUsed(): Single<List<PairedDeviceEntity>>
 
     @Query("UPDATE paired_devices SET lastAccessed = :lastAccessed WHERE id = :id")
     fun setLastUsed(id: String, lastAccessed: Long = System.currentTimeMillis()): Completable

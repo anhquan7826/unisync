@@ -22,7 +22,7 @@ import com.anhquan.unisync.models.UnisyncFile
 import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.fromMap
 import com.anhquan.unisync.utils.getPayloadData
-import com.anhquan.unisync.utils.listenCancellable
+import com.anhquan.unisync.utils.execute
 import com.anhquan.unisync.utils.runSingle
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
@@ -66,7 +66,7 @@ class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.S
     fun getDir(path: String): Single<List<UnisyncFile>> {
         return Single.create { emitter ->
             sendRequest(Method.LIST_DIR, mapOf("path" to path))
-            events.listenCancellable {
+            events.execute {
                 if (it.header.type == DeviceMessage.DeviceMessageHeader.Type.RESPONSE && it.header.method == Method.LIST_DIR) {
                     emitter.onSuccess(
                         (it.data["dir"] as List<*>).map { d ->
@@ -74,9 +74,9 @@ class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.S
                             fromMap(d as Map<String, Any?>, UnisyncFile::class.java)!!
                         }
                     )
-                    return@listenCancellable true
+                    return@execute true
                 }
-                return@listenCancellable false
+                return@execute false
             }
         }
     }
@@ -91,7 +91,7 @@ class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.S
             return
         }
         sendRequest(Method.GET_FILE, mapOf("path" to file.fullPath))
-        events.listenCancellable {
+        events.execute {
             if (it.header.type == DeviceMessage.DeviceMessageHeader.Type.RESPONSE && it.header.method == Method.GET_FILE) {
                 debugLog(it.payload?.size)
                 try {
@@ -117,9 +117,9 @@ class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.S
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
-                return@listenCancellable true
+                return@execute true
             }
-            return@listenCancellable false
+            return@execute false
         }
     }
 
@@ -152,7 +152,9 @@ class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.S
     }
 
     override fun onDispose() {
-        context.unbindService(this)
+        try {
+            context.unbindService(this)
+        } catch (_: Exception) {}
         super.onDispose()
     }
 

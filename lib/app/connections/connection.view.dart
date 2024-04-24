@@ -23,34 +23,35 @@ class ConnectionScreen extends StatefulWidget {
 class _ConnectionScreenState extends State<ConnectionScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: buildAppBar(),
-      body: BlocBuilder<ConnectionCubit, DeviceConnectionState>(
-        builder: (context, state) {
-          return buildBody(state);
-        },
-      ),
+    return BlocBuilder<ConnectionCubit, DeviceConnectionState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: buildAppBar(state),
+          body: buildBody(state),
+        );
+      },
     );
   }
 
-  AppBar buildAppBar() {
+  AppBar buildAppBar(DeviceConnectionState state) {
     return AppBar(
       title: Text(R.strings.device_connection.manage_devices).tr(),
-      leading: IconButton(
+      leading: state.pairedDevices.isEmpty ? null : IconButton(
         icon: const Icon(Icons.arrow_back_rounded),
         onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            getCubit<ConnectionCubit>().getLastConnected().then((value) {
-              value?.apply((it) {
-                context.goNamed(
-                  routes.home,
-                  extra: Device(it),
-                );
-              });
-            });
-          }
+          context.goNamed(routes.landing);
+          // if (context.canPop()) {
+          //   context.pop();
+          // } else {
+          //   getCubit<ConnectionCubit>().getLastConnected().then((value) {
+          //     value?.apply((it) {
+          //       context.goNamed(
+          //         routes.home,
+          //         extra: Device(it),
+          //       );
+          //     });
+          //   });
+          // }
         },
       ),
     );
@@ -99,20 +100,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             }).toList(),
           ),
         ],
-        // if (state.availableDevices.isNotEmpty) ...[
-        //   SliverAppBar(
-        //     title: Text(R.strings.device_connection.available_devices).tr(),
-        //     automaticallyImplyLeading: false,
-        //     primary: false,
-        //     floating: true,
-        //     pinned: true,
-        //   ),
-        //   SliverList.list(
-        //     children: state.availableDevices.map((e) {
-        //       return buildDeviceTile(e);
-        //     }).toList(),
-        //   ),
-        // ],
       ],
     );
   }
@@ -125,7 +112,7 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
         width: 24,
       ),
       title: Text(device.info.name),
-      subtitle: Text(device.ipAddress!),
+      subtitle: Text('Connected at ${device.ipAddress}'),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -154,7 +141,9 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
         width: 24,
       ),
       title: Text(device.info.name),
-      subtitle: Text(device.ipAddress ?? ''),
+      subtitle: Text(device.isOnline
+          ? 'Connected at ${device.ipAddress}'
+          : 'Disconnected'),
       trailing: IconButton(
         icon: const Icon(Icons.delete_outline_rounded),
         color: Colors.red,
@@ -166,7 +155,6 @@ class _ConnectionScreenState extends State<ConnectionScreen> {
             },
           ).then((value) {
             if (value == true) {
-              // TODO: Delete device,
               getCubit<ConnectionCubit>().unpair(device);
             }
           });
@@ -183,7 +171,8 @@ class _DeleteConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(R.strings.device_connection.warning.tr()),
-      content: Text(R.strings.device_connection.delete_device_confirmation.tr()),
+      content:
+          Text(R.strings.device_connection.delete_device_confirmation.tr()),
       actions: [
         TextButton(
           onPressed: () {

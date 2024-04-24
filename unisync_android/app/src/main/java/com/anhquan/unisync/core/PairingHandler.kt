@@ -33,7 +33,7 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
         }
 
         override fun unpair() {
-            if (state == PairState.PAIRED) {
+            if (state == PairState.PAIRED || state == PairState.MARK_UNPAIRED) {
                 ConfigUtil.Device.removePairedDevice(device.info)
                 device.sendMessage(
                     DeviceMessage(

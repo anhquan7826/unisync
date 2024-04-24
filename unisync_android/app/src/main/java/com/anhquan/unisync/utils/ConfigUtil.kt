@@ -8,6 +8,7 @@ import com.anhquan.unisync.database.UnisyncDatabase
 import com.anhquan.unisync.database.entity.DeviceCommandEntity
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
 import com.anhquan.unisync.models.DeviceInfo
+import io.reactivex.rxjava3.core.Single
 
 object ConfigUtil {
     private lateinit var sharedPreferences: SharedPreferences
@@ -38,20 +39,20 @@ object ConfigUtil {
                 PairedDeviceEntity(
                     id = info.id, name = info.name, type = info.deviceType
                 )
-            ).listen {}
+            ).execute()
         }
 
         fun removePairedDevice(info: DeviceInfo) {
             database.pairedDeviceDao().remove(info.id).listen {}
         }
 
-        fun getAllPairedDevices(callback: (List<DeviceInfo>) -> Unit) {
-            database.pairedDeviceDao().getAll().listen { list ->
-                callback(list.map {
+        fun getAllPairedDevices(): Single<List<DeviceInfo>> {
+            return database.pairedDeviceDao().getAll().map { entities ->
+                entities.map {
                     DeviceInfo(
                         id = it.id, name = it.name, deviceType = it.type
                     )
-                })
+                }
             }
         }
 
@@ -76,26 +77,23 @@ object ConfigUtil {
 
         fun getLastUsedDevice(
             context: Context,
-            callback: (com.anhquan.unisync.core.Device?) -> Unit
-        ) {
-            database.pairedDeviceDao().getLastUsed().listen(onError = {
-                callback(null)
-            }) {
-                callback(
+        ): Single<List<com.anhquan.unisync.core.Device>> {
+            return database.pairedDeviceDao().getLastUsed().map {
+                it.map { e ->
                     com.anhquan.unisync.core.Device.of(
                         context,
                         DeviceInfo(
-                            id = it.id, name = it.name, deviceType = it.type
+                            id = e.id, name = e.name, deviceType = e.type
                         )
                     )
-                )
+                }
             }
         }
 
         fun setLastUsedDevice(device: com.anhquan.unisync.core.Device) {
             database.pairedDeviceDao().setLastUsed(
                 id = device.info.id
-            ).listen { }
+            ).execute()
         }
     }
 

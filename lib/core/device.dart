@@ -27,7 +27,7 @@ class Device with ConnectionListener {
     }
     _instances[info] = Device._(info);
     debugLog('Created an instance of Device.');
-    _instanceNotifier.add(_instances.values.toList());
+    _notifyInstances();
     debugLog('Device instances notified.');
     return _instances[info]!;
   }
@@ -41,7 +41,7 @@ class Device with ConnectionListener {
   }
 
   static final Map<DeviceInfo, Device> _instances = {};
-  static final _instanceNotifier = BehaviorSubject<List<Device>>();
+  static final _instanceNotifier = PublishSubject<List<Device>>();
 
   static Stream<List<Device>> get instanceNotifier =>
       _instanceNotifier.asBroadcastStream();
@@ -49,8 +49,12 @@ class Device with ConnectionListener {
   static void _removeInstance(DeviceInfo info) {
     final instance = _instances.remove(info);
     if (instance != null) {
-      _instanceNotifier.add(_instances.values.toList());
+      _notifyInstances();
     }
+  }
+
+  static void _notifyInstances() {
+    _instanceNotifier.add(_instances.values.toList());
   }
 
   static Future<List<Device>> getAllDevices() async {
@@ -186,6 +190,7 @@ class Device with ConnectionListener {
       connected: isOnline,
       pairState: pairState,
     ));
+    _notifyInstances();
     if (isOnline && pairState == PairState.paired) {
       _initiatePlugins();
     } else {

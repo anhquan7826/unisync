@@ -22,21 +22,18 @@ fun runSingle(
         } catch (e: Exception) {
             it.onError(e)
         }
-    }.subscribeOn(subscribeOn).subscribe(
-        {
+    }.subscribeOn(subscribeOn).subscribe({
+        disposable.dispose()
+    }, {
+        try {
+            onError?.invoke(it)
+            it.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
             disposable.dispose()
-        },
-        {
-            try {
-                onError?.invoke(it)
-                it.printStackTrace()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                disposable.dispose()
-            }
         }
-    )
+    })
 }
 
 fun runPeriodic(
@@ -79,7 +76,7 @@ fun <T : Any> Observable<T>.listen(
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onNext, onError)
 }
 
-fun <T : Any> Observable<T>.listenCancellable(
+fun <T : Any> Observable<T>.execute(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
     onError: ((Throwable) -> Unit)? = null,
@@ -107,15 +104,15 @@ fun <T : Any> Single<T>.listen(
     return this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe(onResult, onError)
 }
 
-fun <T : Any> Single<T>.listenCancellable(
+fun <T : Any> Single<T>.execute(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
     onError: ((Throwable) -> Unit)? = null,
-    onNext: (T) -> Unit
+    onSuccess: (T) -> Unit
 ) {
     lateinit var disposable: Disposable
     disposable = this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe({
-        onNext(it)
+        onSuccess(it)
         disposable.dispose()
     }, {
         onError?.invoke(it)
@@ -136,15 +133,15 @@ fun Completable.listen(
     )
 }
 
-fun Completable.listenCancellable(
+fun Completable.execute(
     subscribeOn: Scheduler = Schedulers.io(),
     observeOn: Scheduler = Schedulers.io(),
     onError: ((Throwable) -> Unit)? = null,
-    onNext: () -> Unit
+    onComplete: (() -> Unit)? = null,
 ) {
     lateinit var disposable: Disposable
     disposable = this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe({
-        onNext()
+        onComplete?.invoke()
         disposable.dispose()
     }, {
         onError?.invoke(it)

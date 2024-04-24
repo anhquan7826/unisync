@@ -6,14 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,12 +29,13 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.anhquan.unisync.R
 import com.anhquan.unisync.UnisyncActivity
 import com.anhquan.unisync.UnisyncService
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
+import com.anhquan.unisync.ui.composables.UDialog
+import com.anhquan.unisync.ui.theme.defaultWindowInsets
 import com.anhquan.unisync.ui.theme.setView
 
 class PairActivity : ComponentActivity() {
@@ -58,30 +53,26 @@ class PairActivity : ComponentActivity() {
     @Composable
     private fun PairScreen() {
         val state by viewModel.state.collectAsState()
-        var manualDialog by remember {
-            mutableStateOf(false)
-        }
-        Scaffold(contentWindowInsets = WindowInsets(left = 16.dp, right = 16.dp), topBar = {
+        Scaffold(contentWindowInsets = defaultWindowInsets(), topBar = {
             TopAppBar(
                 title = {
                     Text(text = stringResource(R.string.manage_devices))
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-//                            if (intent.extras?.getBoolean("isInitial") == true) {
-//                                ConfigUtil.Device.getLastUsedDevice(this@PairActivity) {
-//                                    if (it == null) return@getLastUsedDevice
-//                                    startActivity(Intent(
-//                                        this@PairActivity, HomeActivity::class.java
-//                                    ).apply {
-//                                        putExtra("device", gson.toJson(it))
-//                                    })
-//                                }
-//                            }
-                        startActivity(Intent(this@PairActivity, UnisyncActivity::class.java))
-                        finish()
-                    }) {
-                        Icon(painterResource(id = R.drawable.arrow_back), contentDescription = null)
+                    if (state.pairedDevices.isNotEmpty()) {
+                        IconButton({
+                            startActivity(
+                                Intent(
+                                    this@PairActivity, UnisyncActivity::class.java
+                                )
+                            )
+                            finish()
+                        }) {
+                            Icon(
+                                painterResource(id = R.drawable.arrow_back),
+                                contentDescription = null
+                            )
+                        }
                     }
                 },
                 actions = {
@@ -94,7 +85,7 @@ class PairActivity : ComponentActivity() {
                         )
                         Text(text = stringResource(R.string.refresh))
                     }
-                }
+                },
             )
         }) { padding ->
             Column(
@@ -124,106 +115,127 @@ class PairActivity : ComponentActivity() {
 
     @Composable
     private fun AvailableDeviceTile(device: Device) {
-        ListItem(leadingContent = {
-            Image(
-                painterResource(id = R.drawable.computer),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
-        }, headlineContent = {
-            Text(device.info.name)
-        }, supportingContent = {
-            device.ipAddress?.let { Text(it) }
-        }, trailingContent = {
-            TextButton(onClick = {
-                viewModel.sendPairRequest(device)
-            }) {
-                Icon(
-                    painterResource(id = R.drawable.link),
+        ListItem(
+            leadingContent = {
+                Image(
+                    painterResource(id = R.drawable.computer),
                     contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 8.dp)
+                    modifier = Modifier.size(32.dp)
                 )
-                Text(
-                    stringResource(id = R.string.request_pair),
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-            }
-        })
+            },
+            headlineContent = {
+                Text(device.info.name)
+            },
+            supportingContent = {
+                device.ipAddress?.let { Text(it) }
+            },
+            trailingContent = {
+                TextButton(onClick = {
+                    viewModel.sendPairRequest(device)
+                }) {
+                    Icon(
+                        painterResource(id = R.drawable.link),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 8.dp)
+                    )
+                    Text(
+                        stringResource(id = R.string.request_pair),
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                }
+            },
+        )
     }
 
     @Composable
     private fun RequestedDeviceTile(device: Device) {
-        ListItem(leadingContent = {
-            Image(
-                painterResource(id = R.drawable.computer),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
-        }, headlineContent = {
-            Text(device.info.name)
-        }, supportingContent = {
-            device.ipAddress?.let { Text(it) }
-        }, trailingContent = {
-            Icon(
-                painterResource(id = R.drawable.pending), contentDescription = null
-            )
-        })
+        ListItem(
+            leadingContent = {
+                Image(
+                    painterResource(id = R.drawable.computer),
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            headlineContent = {
+                Text(device.info.name)
+            },
+            supportingContent = {
+                device.ipAddress?.let { Text(it) }
+            },
+            trailingContent = {
+                Icon(
+                    painterResource(id = R.drawable.pending), contentDescription = null
+                )
+            },
+        )
     }
 
     @Composable
     private fun PairedDeviceTile(device: Device) {
-        ListItem(leadingContent = {
-            Image(
-                painterResource(id = R.drawable.computer),
-                contentDescription = null,
-                colorFilter = if (device.isOnline) null else ColorFilter.colorMatrix(ColorMatrix().apply {
-                    setToSaturation(0f)
-                }),
-                modifier = Modifier.size(32.dp)
-            )
-        }, headlineContent = {
-            Text(device.info.name)
-        }, supportingContent = {
-            if (device.isOnline) {
-                if (device.ipAddress != null) {
-                    Text(stringResource(R.string.connected_at, device.ipAddress ?: ""))
-                } else {
-                    Text(stringResource(id = R.string.connected))
-                }
-            } else {
-                Text(stringResource(id = R.string.disconnected))
-            }
-        }, trailingContent = {
-            IconButton(onClick = {
+        var showUnpairDialog by remember {
+            mutableStateOf(false)
+        }
+        if (showUnpairDialog) {
+            DeviceUnpairDialog(
+                info = device.info,
+                onDismiss = {
+                    showUnpairDialog = false
+                },
+            ) {
                 viewModel.unpair(device)
-            }) {
-                Icon(
-                    painterResource(id = R.drawable.unlink), contentDescription = null
-                )
+                showUnpairDialog = false
             }
-        })
+        }
+        ListItem(
+            leadingContent = {
+                Image(
+                    painterResource(id = R.drawable.computer),
+                    contentDescription = null,
+                    colorFilter = if (device.isOnline) null else ColorFilter.colorMatrix(ColorMatrix().apply {
+                        setToSaturation(0f)
+                    }),
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            headlineContent = {
+                Text(device.info.name)
+            },
+            supportingContent = {
+                if (device.isOnline) {
+                    if (device.ipAddress != null) {
+                        Text(stringResource(R.string.connected_at, device.ipAddress ?: ""))
+                    } else {
+                        Text(stringResource(id = R.string.connected))
+                    }
+                } else {
+                    Text(stringResource(id = R.string.disconnected))
+                }
+            },
+            trailingContent = {
+                IconButton({
+                    showUnpairDialog = true
+                }) {
+                    Icon(
+                        painterResource(id = R.drawable.unlink), contentDescription = null
+                    )
+                }
+            },
+        )
     }
 
     @Composable
-    fun DeviceDialog(info: DeviceInfo, onDismiss: () -> Unit, onAccept: () -> Unit) {
-        Dialog(
-            onDismissRequest = onDismiss
+    fun DeviceUnpairDialog(info: DeviceInfo, onDismiss: () -> Unit, onAccept: () -> Unit) {
+        UDialog(
+            title = stringResource(id = R.string.warning),
+            cancelText = stringResource(id = R.string.cancel),
+            confirmText = stringResource(R.string.unpair),
+            onCancel = onDismiss,
+            onConfirm = onAccept
         ) {
-            Card(
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column {
-                    Text(info.name)
-                    Divider(modifier = Modifier.fillMaxWidth())
-                    Row {
-                        TextButton(onClick = onAccept) {
-                            Text(stringResource(R.string.request_pair))
-                        }
-                    }
-                }
-            }
+            Text(text = stringResource(R.string.unpair_confirm_specific, info.name))
         }
     }
 }

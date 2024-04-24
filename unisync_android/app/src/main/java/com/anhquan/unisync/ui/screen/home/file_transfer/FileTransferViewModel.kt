@@ -7,7 +7,7 @@ import com.anhquan.unisync.constants.Status
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.storage.StoragePlugin
 import com.anhquan.unisync.models.UnisyncFile
-import com.anhquan.unisync.utils.listenCancellable
+import com.anhquan.unisync.utils.execute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -79,7 +79,7 @@ class FileTransferViewModel : ViewModel(), Device.DeviceEventListener {
     }
 
     private fun loadDir() {
-        device.getPlugin(StoragePlugin::class.java).getDir(_currentDir).listenCancellable { files ->
+        device.getPlugin(StoragePlugin::class.java).getDir(_currentDir).execute { files ->
             _state.update {
                 it.copy(
                     status = Status.Loaded,

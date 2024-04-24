@@ -8,6 +8,7 @@ import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.listen
+import com.anhquan.unisync.utils.execute
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +42,7 @@ class HomeViewModel : ViewModel(), Device.DeviceEventListener {
     )
 
     fun initialize(context: Context) {
-        ConfigUtil.Device.getAllPairedDevices {
+        ConfigUtil.Device.getAllPairedDevices().execute {
             pairedDevices = it.map { info ->
                 Device.of(context, info)
             }

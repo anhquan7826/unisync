@@ -17,29 +17,21 @@ import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.infoLog
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 class Device private constructor(
-    val context: Context,
-    val info: DeviceInfo
+    val context: Context, val info: DeviceInfo
 ) : DeviceConnection.ConnectionListener {
     companion object {
-        data class InstantNotifyValue(
-            val added: Boolean, val instance: Device
-        )
-
         private val instances = mutableMapOf<DeviceInfo, Device>()
-        val instanceNotifier = PublishSubject.create<InstantNotifyValue>()
+        val instancesNotifier = PublishSubject.create<List<Device>>()
 
         fun of(context: Context, info: DeviceInfo): Device {
             if (instances.containsKey(info)) return instances[info]!!
             val device = Device(context, info)
             instances[info] = device
-            instanceNotifier.onNext(
-                InstantNotifyValue(
-                    added = true, instance = device
-                )
-            )
+            notifyInstances()
             return device
         }
 
@@ -50,18 +42,17 @@ class Device private constructor(
         private fun removeInstance(info: DeviceInfo) {
             val device = instances.remove(info)
             if (device != null) {
-                instanceNotifier.onNext(
-                    InstantNotifyValue(
-                        added = true, instance = device
-                    )
-                )
+                notifyInstances()
             }
         }
 
-        fun getAllDevices(context: Context, callback: (List<Device>) -> Unit) {
-            ConfigUtil.Device.getAllPairedDevices {
-                it.forEach { info -> of(context, info) }
-                callback(instances.values.toList())
+        private fun notifyInstances() {
+            instancesNotifier.onNext(instances.values.toList())
+        }
+
+        fun getAllDevices(context: Context): Single<List<Device>> {
+            return ConfigUtil.Device.getAllPairedDevices().map {
+                it.map { info -> of(context, info) }
             }
         }
 
@@ -175,7 +166,6 @@ class Device private constructor(
     }
 
     private fun notifyNewEvent() {
-
         if (isOnline && pairState == PairingHandler.PairState.PAIRED) {
             initiatePlugins()
             informListeners()
@@ -186,6 +176,7 @@ class Device private constructor(
     }
 
     private fun informListeners() {
+        notifyInstances()
         for (listener in listeners) {
             listener.onDeviceEvent(
                 DeviceEvent(

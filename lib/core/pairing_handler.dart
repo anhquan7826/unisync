@@ -1,3 +1,4 @@
+// ignore_for_file: non_constant_identifier_names
 import 'package:unisync/utils/configs.dart';
 
 import '../models/device_message/device_message.model.dart';
@@ -16,7 +17,10 @@ abstract interface class PairOperation {
 class PairingHandler implements PairOperation {
   PairingHandler(this.device, {required this.onStateChanged});
 
-  static const _Method = (REQUEST: 'request', UNPAIR: 'unpair',);
+  static const _method = (
+    REQUEST: 'request',
+    UNPAIR: 'unpair',
+  );
 
   final Device device;
   final void Function(PairState state) onStateChanged;
@@ -55,7 +59,7 @@ class PairingHandler implements PairOperation {
         header: DeviceMessageHeader(
           type: DeviceMessageHeader.Type.RESPONSE,
           status: DeviceMessageHeader.Status.SUCCESS,
-          method: _Method.REQUEST,
+          method: _method.REQUEST,
         ),
         body: {
           'accepted': true,
@@ -76,7 +80,7 @@ class PairingHandler implements PairOperation {
         header: DeviceMessageHeader(
           type: DeviceMessageHeader.Type.RESPONSE,
           status: DeviceMessageHeader.Status.SUCCESS,
-          method: _Method.REQUEST,
+          method: _method.REQUEST,
         ),
         body: {
           'accepted': false,
@@ -89,13 +93,13 @@ class PairingHandler implements PairOperation {
 
   @override
   void unpair() {
-    if (_state == PairState.paired) {
+    if (_state == PairState.paired || _state == PairState.markUnpaired) {
       device.sendMessage(DeviceMessage(
         time: DateTime.now().millisecondsSinceEpoch,
         type: DeviceMessage.Type.PAIR,
         header: DeviceMessageHeader(
           type: DeviceMessageHeader.Type.NOTIFICATION,
-          method: _Method.UNPAIR,
+          method: _method.UNPAIR,
         ),
       ));
       ConfigUtil.device.removePairedDevice(device.info);
@@ -105,13 +109,13 @@ class PairingHandler implements PairOperation {
   }
 
   void handle(DeviceMessage message) {
-    if (message.header.method == _Method.REQUEST) {
+    if (message.header.method == _method.REQUEST) {
       if (_state == PairState.unpaired) {
         _state = PairState.pairRequested;
         onStateChanged(_state);
       }
     }
-    if (message.header.method == _Method.UNPAIR) {
+    if (message.header.method == _method.UNPAIR) {
       ConfigUtil.device.removePairedDevice(device.info);
       _state = PairState.unpaired;
       onStateChanged(_state);

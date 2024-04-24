@@ -45,7 +45,7 @@ class SharingActivity : ComponentActivity() {
         val devices = Device.getConnectedDevices().filter {
             it.pairState == PairingHandler.PairState.PAIRED
         }
-        if (devices.size == 1 && false) {
+        if (devices.size == 1) {
             sendContent(devices.first())
             finish()
         } else {

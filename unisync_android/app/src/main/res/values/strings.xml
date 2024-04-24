@@ -45,4 +45,6 @@
     <string name="read_all_files">Read all files</string>
     <string name="upload">Upload</string>
     <string name="refresh">Refresh</string>
+    <string name="unpair">Unpair</string>
+    <string name="unpair_confirm_specific">Do you want to unpair %1$s?</string>
 </resources>
