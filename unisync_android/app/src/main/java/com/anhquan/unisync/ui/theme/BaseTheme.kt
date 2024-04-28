@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
-fun ComponentActivity.typography() = Typography(
+fun typography() = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -30,7 +30,7 @@ fun ComponentActivity.typography() = Typography(
     )
 )
 
-fun ComponentActivity.shapes() = Shapes(
+fun shapes() = Shapes(
     extraSmall = RoundedCornerShape(8.dp),
     extraLarge = RoundedCornerShape(8.dp),
     large = RoundedCornerShape(8.dp),
@@ -38,7 +38,7 @@ fun ComponentActivity.shapes() = Shapes(
     small = RoundedCornerShape(8.dp),
 )
 
-fun ComponentActivity.colorSchemes() = lightColorScheme(
+fun colorSchemes() = lightColorScheme(
 //    primary = Color.Blue,
 //    onPrimary = Color.White,
 //    primaryContainer = Color.Blue.copy(alpha = 0.15f),

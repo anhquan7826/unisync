@@ -63,6 +63,7 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.DeviceDisconnected
 import com.anhquan.unisync.ui.composables.SliderTile
+import com.anhquan.unisync.ui.composables.TitledButton
 import com.anhquan.unisync.ui.composables.UDialog
 import com.anhquan.unisync.ui.screen.home.file_transfer.FileTransferActivity
 import com.anhquan.unisync.ui.screen.home.remote_ssh.RemoteSSHActivity
@@ -273,6 +274,31 @@ class HomeActivity : ComponentActivity() {
                         }
                         LaunchedEffect(state.volume) {
                             sliderValue = state.volume
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            TitledButton(
+                                modifier = Modifier.weight(1f),
+                                icon = painterResource(R.drawable.power_settings_new),
+                                title = stringResource(R.string.shut_down)
+                            ) {
+                                viewModel.shutdown()
+                            }
+                            TitledButton(
+                                modifier = Modifier.weight(1f),
+                                icon = painterResource(R.drawable.restart_alt),
+                                title = stringResource(R.string.restart)
+                            ) {
+                                viewModel.restart()
+                            }
+                            TitledButton(
+                                modifier = Modifier.weight(1f),
+                                icon = painterResource(R.drawable.lock),
+                                title = stringResource(R.string.lock)
+                            ) {
+                                viewModel.lock()    
+                            }
                         }
                         SliderTile(
                             value = sliderValue,

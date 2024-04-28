@@ -22,6 +22,9 @@ class StatusPlugin(
     private object Method {
         const val GET_STATUS = "get_status"
         const val STATUS_CHANGED = "status_changed"
+        const val SHUT_DOWN = "shut_down"
+        const val RESTART = "restart"
+        const val LOCK = "lock"
     }
 
     private val wallpaperManager = context.getSystemService(WallpaperManager::class.java)
@@ -87,10 +90,10 @@ class StatusPlugin(
 
     private val wallpaper: ByteArray?
         get() {
-            if (hasPermission) {
-                return convertBitmapToByteArray(wallpaperManager.drawable?.toBitmap())
+            return if (hasPermission) {
+                convertBitmapToByteArray(wallpaperManager.drawable?.toBitmap())
             } else {
-                return null
+                null
             }
         }
 
@@ -126,5 +129,17 @@ class StatusPlugin(
                 }
             }
         }
+    }
+
+    fun shutdown() {
+        sendRequest(Method.SHUT_DOWN)
+    }
+
+    fun restart() {
+        sendRequest(Method.RESTART)
+    }
+
+    fun lock() {
+        sendRequest(Method.LOCK)
     }
 }

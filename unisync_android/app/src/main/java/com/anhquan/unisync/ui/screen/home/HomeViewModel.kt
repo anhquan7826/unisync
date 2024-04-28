@@ -4,11 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
+import com.anhquan.unisync.core.plugins.status.StatusPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.debugLog
-import com.anhquan.unisync.utils.listen
 import com.anhquan.unisync.utils.execute
+import com.anhquan.unisync.utils.listen
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,6 +64,18 @@ class HomeViewModel : ViewModel(), Device.DeviceEventListener {
         device.getPlugin(ClipboardPlugin::class.java).apply {
             sendLatestClipboard()
         }
+    }
+
+    fun shutdown() {
+        device.getPlugin(StatusPlugin::class.java).shutdown()
+    }
+
+    fun restart() {
+        device.getPlugin(StatusPlugin::class.java).restart()
+    }
+
+    fun lock() {
+        device.getPlugin(StatusPlugin::class.java).lock()
     }
 
     fun unpair() {

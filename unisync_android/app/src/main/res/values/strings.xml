@@ -47,4 +47,7 @@
     <string name="refresh">Refresh</string>
     <string name="unpair">Unpair</string>
     <string name="unpair_confirm_specific">Do you want to unpair %1$s?</string>
+    <string name="shut_down">Shut down</string>
+    <string name="restart">Restart</string>
+    <string name="lock">Lock</string>
 </resources>
