@@ -1,12 +1,14 @@
 package com.anhquan.unisync.ui.screen.home.file_transfer
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.anhquan.unisync.constants.Status
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.storage.StoragePlugin
 import com.anhquan.unisync.models.UnisyncFile
+import com.anhquan.unisync.utils.NotificationUtil
 import com.anhquan.unisync.utils.execute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,15 +60,35 @@ class FileTransferViewModel : ViewModel(), Device.DeviceEventListener {
         loadDir()
     }
 
-    fun saveFile(file: UnisyncFile) {
+    fun saveFile(context: Context, file: UnisyncFile) {
         device.getPlugin(StoragePlugin::class.java).getFile(file) {
-
+            NotificationUtil.apply {
+                showNotification(
+                    context, file.hashCode(), buildProgressNotification(
+                        context,
+                        title = "Downloading...",
+                        text = file.name,
+                        progress = it
+                    )
+                )
+            }
         }
     }
 
     @SuppressLint("Recycle")
-    fun sendFile(uri: Uri) {
-        device.getPlugin(StoragePlugin::class.java).sendFile(uri, _currentDir) {}
+    fun sendFile(context: Context, uri: Uri) {
+        device.getPlugin(StoragePlugin::class.java).sendFile(uri, _currentDir) {
+            NotificationUtil.apply {
+                showNotification(
+                    context, uri.hashCode(), buildProgressNotification(
+                        context,
+                        title = "Downloading...",
+                        text = "File",
+                        progress = it
+                    )
+                )
+            }
+        }
     }
 
     fun refresh() {

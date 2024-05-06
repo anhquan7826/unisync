@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path/path.dart' hide context;
 import 'package:unisync/app/home/file_transfer/file_transfer.cubit.dart';
 import 'package:unisync/app/home/file_transfer/file_transfer.state.dart';
-import 'package:unisync/components/enums/file_type.dart';
 import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/models/file/file.model.dart';
@@ -83,19 +82,97 @@ class _FileTransferScreenState extends State<FileTransferScreen>
         child: CircularProgressIndicator(),
       );
     }
-    return ListView(
+    return Column(
       children: [
-        if (state.path != '/') buildBack(),
-        ...state.currentDirectory.map((e) {
-          return buildFile(e);
-        }),
+        Expanded(
+          child: ListView(
+            children: [
+              if (state.path != '/') buildBack(),
+              ...state.currentDirectory.map((e) {
+                return buildFile(e);
+              }),
+            ],
+          ),
+        ),
+        buildProgressBar(state),
       ],
     );
   }
 
-  Widget buildProgressBar() {
-    return Row(
-      children: [],
+  Widget buildProgressBar(FileTransferState state) {
+    Widget buildProgress(
+      String path,
+      double progress, {
+      bool download = true,
+    }) {
+      return Container(
+        height: double.infinity,
+        width: 200,
+        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            const Icon(Icons.upload_file_rounded),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${download ? 'Downloading' : 'Uploading'} ${basename(path)}...',
+                      ),
+                    ),
+                    Expanded(
+                      child: progress == 1
+                          ? const Text('Completed!')
+                          : LinearProgressIndicator(
+                              value: progress,
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                if (download) {
+                  getCubit<FileTransferCubit>().removeDownloadProgress(path);
+                } else {
+                  getCubit<FileTransferCubit>().removeUploadProgress(path);
+                }
+              },
+              icon: const Icon(
+                Icons.cancel,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 100,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            ...state.downloads.entries.map((e) {
+              return buildProgress(e.key, e.value);
+            }),
+            ...state.uploads.entries.map((e) {
+              return buildProgress(
+                e.key,
+                e.value,
+                download: false,
+              );
+            }),
+          ],
+        ),
+      ),
     );
   }
 

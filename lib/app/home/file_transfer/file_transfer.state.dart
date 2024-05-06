@@ -10,5 +10,7 @@ class FileTransferState with _$FileTransferState {
     @Default(Status.loading) Status status,
     @Default('/') String path,
     @Default([])List<UnisyncFile> currentDirectory,
+    @Default({}) Map<String, double> uploads,
+    @Default({}) Map<String, double> downloads,
   }) = _FileTransferState;
 }

@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class SharingPlugin extends UnisyncPlugin {
   SharingPlugin(Device device)
       : super(device, type: DeviceMessage.Type.SHARING);
-  static const _Method = (
+  static const _method = (
     OPEN_URL: 'open_url',
     COPY_TEXT: 'copy_text',
   );
@@ -18,10 +18,10 @@ class SharingPlugin extends UnisyncPlugin {
   void onReceive(
       DeviceMessageHeader header, Map<String, dynamic> data, Payload? payload) {
     super.onReceive(header, data, payload);
-    if (header.method == _Method.OPEN_URL) {
+    if (header.method == _method.OPEN_URL) {
       _handleUrl(data['url']);
     }
-    if (header.method == _Method.COPY_TEXT) {
+    if (header.method == _method.COPY_TEXT) {
       _handleText(data['text']);
     }
   }

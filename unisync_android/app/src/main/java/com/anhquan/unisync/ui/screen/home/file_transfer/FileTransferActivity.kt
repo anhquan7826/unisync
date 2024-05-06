@@ -52,7 +52,7 @@ class FileTransferActivity : ComponentActivity() {
     private val filePickerLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) {
             if (it != null) {
-                viewModel.sendFile(it)
+                viewModel.sendFile(this@FileTransferActivity, it)
             }
         }
 
@@ -163,7 +163,7 @@ class FileTransferActivity : ComponentActivity() {
                                     if (file.type != UnisyncFile.Type.FILE) {
                                         viewModel.goTo(file.name)
                                     } else {
-                                        viewModel.saveFile(file)
+                                        viewModel.saveFile(this@FileTransferActivity, file)
                                     }
                                 }
                             }

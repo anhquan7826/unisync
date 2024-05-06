@@ -11,25 +11,23 @@ import com.anhquan.unisync.UnisyncActivity
 import com.anhquan.unisync.ui.screen.find_my_phone.FindMyPhoneActivity
 
 object NotificationUtil {
-    abstract class NotificationHandler(private val channel: String) {
-        fun showNotification(
-            context: Context, id: Int = 1, scope: Notification.Builder.() -> Unit
-        ) {
-            val notification = buildNotification(context, channel, scope)
-            notiManager.notify(id, notification)
-        }
-    }
-
-    val CHANNEL_ID_PERSISTENCE = "unisync.channel_persistence"
-    val CHANNEL_ID_PAIR = "unisync.channel_pair"
-    val CHANNEL_ID_SFTP = "unisync.channel_sftp"
-    val CHANNEL_ID_RING_PHONE = "unisync.channel_ring_phone"
+    private const val CHANNEL_ID_PERSISTENCE = "unisync.channel_persistence"
+    private const val CHANNEL_ID_PAIR = "unisync.channel_pair"
+    private const val CHANNEL_ID_SFTP = "unisync.channel_sftp"
+    private const val CHANNEL_ID_RING_PHONE = "unisync.channel_ring_phone"
+    private const val CHANNEL_ID_PROGRESS = "unisync.channel_progress"
 
     private lateinit var notiManager: NotificationManager
 
     fun configure(context: Context) {
         notiManager = context.getSystemService(NotificationManager::class.java)
         registerChannels()
+    }
+
+    fun showNotification(
+        context: Context, id: Int, notification: Notification
+    ) {
+        notiManager.notify(id, notification)
     }
 
     private fun registerChannels() {
@@ -102,7 +100,7 @@ object NotificationUtil {
             .setContentTitle(context.getString(R.string.found_my_phone))
             .setAutoCancel(true)
             .setFullScreenIntent(
-                PendingIntent.getActivity(
+                PendingIntent.getActivity( 
                     context,
                     1,
                     Intent(context, FindMyPhoneActivity::class.java).apply {
@@ -129,5 +127,24 @@ object NotificationUtil {
                     PendingIntent.FLAG_IMMUTABLE
                 )
             ).build()
+    }
+    
+    fun buildProgressNotification(
+        context: Context,
+        title: String,
+        text: String,
+        progress: Float,
+        actions: Map<String, () -> Unit> = mapOf()
+    ): Notification {
+        return Notification.Builder(context, CHANNEL_ID_PROGRESS).apply {
+            setOngoing(progress < 1)
+            setContentTitle(title)
+            setContentText(text)
+            setProgress(
+                100,
+                (progress * 100).toInt(),
+                false,
+            )
+        }.build()
     }
 }

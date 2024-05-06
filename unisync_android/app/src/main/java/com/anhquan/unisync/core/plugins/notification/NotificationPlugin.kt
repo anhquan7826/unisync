@@ -12,6 +12,7 @@ import android.media.session.MediaSessionManager
 import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
+import androidx.core.app.NotificationCompat
 import androidx.core.content.res.ResourcesCompat
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.DeviceConnection
@@ -54,8 +55,7 @@ class NotificationPlugin(
     override val requiredPermission: List<String>
         get() {
             val notificationListenerList = Settings.Secure.getString(
-                context.contentResolver,
-                "enabled_notification_listeners"
+                context.contentResolver, "enabled_notification_listeners"
             )
             return listOf("enabled_notification_listeners").filterNot {
                 notificationListenerList.contains(context.packageName)
@@ -71,11 +71,22 @@ class NotificationPlugin(
     override fun onNotificationReceived(sbn: StatusBarNotification) {
         try {
             val notification = sbn.notification
+            val packageName = sbn.packageName
+            val appName = packageManager.getApplicationInfo(sbn.packageName, 0).let {
+                packageManager.getApplicationLabel(it).toString()
+            }
+
+            if (notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0 || notification.flags and Notification.FLAG_ONGOING_EVENT != 0 || notification.flags and Notification.FLAG_LOCAL_ONLY != 0 || notification.flags and NotificationCompat.FLAG_GROUP_SUMMARY != 0) {
+                return
+            }
+
+            if (context.packageName == packageName) {
+                // Don't send our own notifications
+                return
+            }
+
             notification.extras.apply {
                 debugLog(toPrettyString())
-                val appName = packageManager.getApplicationInfo(sbn.packageName, 0).let {
-                    packageManager.getApplicationLabel(it).toString()
-                }
                 val title = getCharSequence(Notification.EXTRA_TITLE).toString()
                 val text = getCharSequence(Notification.EXTRA_TEXT).toString()
                 val subText = getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
@@ -96,23 +107,18 @@ class NotificationPlugin(
                     }
                 }, subscribeOn = Schedulers.computation(), onResult = {
                     val picture = it["picture"]
-                    sendNotification(
-                        Method.NEW_NOTIFICATION,
-                        mapOf(
-                            "timestamp" to sbn.postTime,
-                            "app_name" to appName,
-                            "title" to title,
-                            "text" to text,
-                            "sub_text" to subText,
-                            "big_text" to if (text == bigText) null else bigText
-                        ),
-                        payload = picture?.let { p ->
-                            DeviceConnection.Payload(
-                                size = p.size,
-                                stream = p.inputStream()
-                            )
-                        }
-                    )
+                    sendNotification(Method.NEW_NOTIFICATION, mapOf(
+                        "timestamp" to sbn.postTime,
+                        "app_name" to appName,
+                        "title" to title,
+                        "text" to text,
+                        "sub_text" to subText,
+                        "big_text" to if (text == bigText) null else bigText
+                    ), payload = picture?.let { p ->
+                        DeviceConnection.Payload(
+                            size = p.size, stream = p.inputStream()
+                        )
+                    })
                 })
             }
         } catch (e: Exception) {

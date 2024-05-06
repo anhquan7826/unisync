@@ -6,7 +6,6 @@ import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/storage/storage.plugin.dart';
 import 'package:unisync/models/file/file.model.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
-import 'package:unisync/utils/logger.dart';
 
 class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
   FileTransferCubit(this.device) : super(const FileTransferState()) {
@@ -75,10 +74,18 @@ class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
         file.fullPath,
         dest,
         onProgress: (progress) {
-          debugLog('Downloading ${file.name}: ${(progress * 100).toStringAsFixed(2)}%');
+          safeEmit(state.copyWith(
+            downloads: {...state.downloads}..[file.fullPath] = progress,
+          ));
         },
       );
     }
+  }
+
+  void removeDownloadProgress(String fullPath) {
+    safeEmit(state.copyWith(
+      downloads: {...state.downloads}..remove(fullPath),
+    ));
   }
 
   Future<void> putFile() async {
@@ -92,10 +99,18 @@ class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
         '${state.path}/$name',
         path,
         onProgress: (progress) {
-          debugLog('Uploading $name: ${(progress * 100).toStringAsFixed(2)}%');
+          safeEmit(state.copyWith(
+            uploads: {...state.uploads}..[path] = progress,
+          ));
         },
       );
     }
+  }
+
+  void removeUploadProgress(String path) {
+    safeEmit(state.copyWith(
+      uploads: {...state.uploads}..remove(path),
+    ));
   }
 
   String _append(String directory) {
