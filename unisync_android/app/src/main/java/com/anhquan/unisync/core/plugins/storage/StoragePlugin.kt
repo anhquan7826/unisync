@@ -19,10 +19,9 @@ import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.models.UnisyncFile
-import com.anhquan.unisync.utils.debugLog
+import com.anhquan.unisync.utils.execute
 import com.anhquan.unisync.utils.fromMap
 import com.anhquan.unisync.utils.getPayloadData
-import com.anhquan.unisync.utils.execute
 import com.anhquan.unisync.utils.runSingle
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
@@ -93,7 +92,6 @@ class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.S
         sendRequest(Method.GET_FILE, mapOf("path" to file.fullPath))
         events.execute {
             if (it.header.type == DeviceMessage.DeviceMessageHeader.Type.RESPONSE && it.header.method == Method.GET_FILE) {
-                debugLog(it.payload?.size)
                 try {
                     val downloadsDir =
                         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -172,7 +170,6 @@ class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.S
         }
 
     override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        debugLog("service connected")
         serviceBinder = service as SftpService.SftpServiceBinder
         serviceBinder.informBound()
         sendResponse(

@@ -59,6 +59,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
+import com.anhquan.unisync.UnisyncActivity
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.DeviceDisconnected
@@ -101,6 +102,11 @@ class HomeActivity : ComponentActivity() {
     private fun HomeScreen() {
         val scope = rememberCoroutineScope()
         val state by viewModel.state.collectAsState()
+
+        if (state.reload) {
+            startActivity(Intent(this@HomeActivity, UnisyncActivity::class.java))
+            finish()
+        }
 
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         var unlinkDialog by remember { mutableStateOf(false) }

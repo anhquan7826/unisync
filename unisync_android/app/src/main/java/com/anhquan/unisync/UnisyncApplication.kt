@@ -7,6 +7,7 @@ import com.anhquan.unisync.constants.DeviceType
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.IDUtil
+import com.anhquan.unisync.utils.infoLog
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
@@ -23,7 +24,9 @@ class UnisyncApplication : Application() {
         Security.addProvider(BouncyCastleProvider())
         try {
             ConfigUtil.Device.getDeviceInfo()
+            infoLog("Found device info")
         } catch (e: Exception) {
+            infoLog("Device info not created!")
             ConfigUtil.Device.setDeviceInfo(
                 DeviceInfo(
                     id = IDUtil.generateId(),

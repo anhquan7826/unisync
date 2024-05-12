@@ -77,20 +77,23 @@ class StoragePlugin extends UnisyncPlugin {
     final c = completer();
     sendRequest(_method.START_SERVER);
     messages.listenCancellable((event) {
-      if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
-          event.header.method == _method.START_SERVER) {
-        final port = event.data['port'] as int;
-        final username = event.data['username'] as String;
-        final password = event.data['password'] as String;
-        _client = UnisyncSFTPClient(
-          address: device.ipAddress!,
-          port: port,
-          username: username,
-          password: password,
-        );
-        _client.connect().whenComplete(() {
-          complete(c, value: null);
-        });
+      if (event.header.type == DeviceMessageHeader.Type.RESPONSE) {
+        if (event.header.method == _method.START_SERVER) {
+          final port = event.data['port'] as int;
+          final username = event.data['username'] as String;
+          final password = event.data['password'] as String;
+          _client = UnisyncSFTPClient(
+            address: device.ipAddress!,
+            port: port,
+            username: username,
+            password: password,
+          );
+          _client.connect().whenComplete(() {
+            complete(c, value: null);
+          });
+        } else if (event.header.status == DeviceMessageHeader.Status.ERROR) {
+            completeError(c, error: Exception('No permission!'));
+        }
         return true;
       }
       return false;

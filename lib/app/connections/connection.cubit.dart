@@ -18,7 +18,7 @@ class ConnectionCubit extends Cubit<DeviceConnectionState> with BaseCubit {
 
   Future<void> load() async {
     _deviceSubscription = Device.instanceNotifier.listen(_updateList);
-    await Device.getAllDevices();
+    _updateList(await Device.getAllDevices());
   }
 
   void _updateList(List<Device> devices) {

@@ -8,6 +8,7 @@ part 'home.state.freezed.dart';
 class HomeState with _$HomeState {
   const factory HomeState({
     required int timestamp,
+    @Default(false) bool reload,
     @Default(null) DeviceInfo? myDevice,
     required Device currentDevice,
     @Default([]) List<Device> pairedDevices,

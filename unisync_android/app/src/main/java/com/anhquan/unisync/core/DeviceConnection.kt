@@ -123,14 +123,6 @@ class DeviceConnection(
                                         payloadOutput.flush()
                                         progress += byteRead
                                         onProgress?.invoke(progress.toFloat() / payload.size)
-                                        infoLog(
-                                            "Sending payload: $byteRead - ${
-                                                String.format(
-                                                    "%.2f",
-                                                    progress.toFloat() / payload.size * 100
-                                                )
-                                            }%"
-                                        )
                                     }
                                 } while (byteRead > 0)
                                 payload.stream.close()

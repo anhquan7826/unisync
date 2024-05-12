@@ -41,7 +41,6 @@ import com.anhquan.unisync.utils.debugLog
 class SharingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        debugLog(intent.getStringExtra(Intent.EXTRA_TEXT))
         val devices = Device.getConnectedDevices().filter {
             it.pairState == PairingHandler.PairState.PAIRED
         }

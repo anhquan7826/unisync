@@ -18,8 +18,6 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
-import com.anhquan.unisync.utils.debugLog
-import com.anhquan.unisync.utils.extensions.toPrettyString
 import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
@@ -46,9 +44,11 @@ class NotificationPlugin(
             startService(context)
         }
         runSingle(subscribeOn = AndroidSchedulers.mainThread()) {
-            mediaManager.addOnActiveSessionsChangedListener(
-                this, ComponentName(context, NotificationReceiver::class.java)
-            )
+            if (hasPermission) {
+                mediaManager.addOnActiveSessionsChangedListener(
+                    this, ComponentName(context, NotificationReceiver::class.java)
+                )
+            }
         }
     }
 
@@ -86,7 +86,6 @@ class NotificationPlugin(
             }
 
             notification.extras.apply {
-                debugLog(toPrettyString())
                 val title = getCharSequence(Notification.EXTRA_TITLE).toString()
                 val text = getCharSequence(Notification.EXTRA_TEXT).toString()
                 val subText = getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
@@ -186,9 +185,6 @@ class NotificationPlugin(
 
     override fun onActiveSessionsChanged(controllers: MutableList<MediaController>?) {
         (controllers ?: listOf()).forEach {
-            debugLog(it.packageName)
-            debugLog(it.playbackState)
-            debugLog(it.extras)
         }
     }
 }

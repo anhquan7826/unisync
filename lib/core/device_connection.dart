@@ -84,7 +84,6 @@ class DeviceConnection {
         await for (final data in payload.stream) {
           payloadSocket.add(data);
           progress += data.length;
-          infoLog('Sending payload: ${((progress / payload.size) * 100).toStringAsFixed(2)}%');
           onProgress?.call(progress / payload.size);
         }
         // payloadSocket.flush();

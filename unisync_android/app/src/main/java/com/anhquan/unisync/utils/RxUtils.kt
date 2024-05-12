@@ -14,7 +14,7 @@ fun runSingle(
     onError: ((Throwable) -> Unit)? = null,
     callback: () -> Unit,
 ) {
-    lateinit var disposable: Disposable
+    var disposable: Disposable? = null
     disposable = Completable.create {
         try {
             callback.invoke()
@@ -23,7 +23,7 @@ fun runSingle(
             it.onError(e)
         }
     }.subscribeOn(subscribeOn).subscribe({
-        disposable.dispose()
+        disposable?.dispose()
     }, {
         try {
             onError?.invoke(it)
@@ -31,7 +31,7 @@ fun runSingle(
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
-            disposable.dispose()
+            disposable?.dispose()
         }
     })
 }
@@ -110,15 +110,15 @@ fun <T : Any> Single<T>.execute(
     onError: ((Throwable) -> Unit)? = null,
     onSuccess: (T) -> Unit
 ) {
-    lateinit var disposable: Disposable
+    var disposable: Disposable? = null
     disposable = this.subscribeOn(subscribeOn).observeOn(observeOn).subscribe({
         onSuccess(it)
-        disposable.dispose()
+        disposable?.dispose()
     }, {
         onError?.invoke(it)
         errorLog(it.message)
         it.printStackTrace()
-        disposable.dispose()
+        disposable?.dispose()
     })
 }
 

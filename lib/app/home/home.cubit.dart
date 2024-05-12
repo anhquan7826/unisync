@@ -19,6 +19,7 @@ class HomeCubit extends Cubit<HomeState> with BaseCubit {
   }
 
   StreamSubscription? _currentDeviceSubscription;
+  final Map<Device, StreamSubscription> _subscriptions = {};
 
   Future<void> _load() async {
     final myDevice = await ConfigUtil.device.getDeviceInfo();
@@ -26,28 +27,38 @@ class HomeCubit extends Cubit<HomeState> with BaseCubit {
       myDevice: myDevice,
     ));
     Device.instanceNotifier.listen((devices) {
-      devices.forEach(_listenNewDevice);
+      final pairedDevices = devices.where(
+        (element) => element.pairState == PairState.paired,
+      )..forEach(_listenNewDevice);
       _subscriptions.removeWhere((key, value) {
-        final toRemove = !devices.contains(key);
+        final toRemove = !pairedDevices.contains(key);
         if (toRemove) {
           value.cancel();
         }
         return toRemove;
       });
+      if (_subscriptions.isEmpty) {
+        safeEmit(state.copyWith(reload: true));
+      }
     });
     Device.getAllDevices();
   }
-
-  final Map<Device, StreamSubscription> _subscriptions = {};
 
   void _listenNewDevice(Device device) {
     if (_subscriptions.containsKey(device)) {
       return;
     }
-    _subscriptions[device] = device.notifier.listen((event) {
+    _subscriptions[device] = device.notifier.listen((event) async {
       if (event.pairState == PairState.unpaired) {
+        var current = state.currentDevice;
+        if (device == state.currentDevice) {
+          (await ConfigUtil.device.getLastUsedDevice())?.apply((it) {
+            current = Device(it);
+          });
+        }
         safeEmit(state.copyWith(
           timestamp: DateTime.now().millisecondsSinceEpoch,
+          currentDevice: current,
           pairedDevices: state.pairedDevices.minus(device),
         ));
       } else if (event.pairState == PairState.paired) {

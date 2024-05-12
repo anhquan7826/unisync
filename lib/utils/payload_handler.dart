@@ -62,12 +62,10 @@ Future<Uint8List> getPayloadData(
   final Uint8List data = Uint8List(size);
   infoLog('Receiving payload of size $size...');
   int progress = 0;
-  infoLog('Progress: ${(progress / size).toStringAsFixed(2)}%');
   stream.listenCancellable(
     (event) {
       data.setRange(progress, progress + event.length, event);
       progress += event.length;
-      infoLog('Progress: ${((progress / size) * 100).toStringAsFixed(2)}%');
       onProgress?.call(progress);
       if (progress == size) {
         completer.complete(data);

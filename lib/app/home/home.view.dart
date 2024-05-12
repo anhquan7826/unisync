@@ -40,7 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<HomeCubit, HomeState>(
       listener: (context, state) {
-        if (!state.currentDevice.isOnline) {
+        if (state.reload) {
+          context.goNamed(routes.landing);
+        }
+        else if (!state.currentDevice.isOnline) {
           setState(() {
             currentDest = 0;
           });
@@ -108,6 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     return PageView(
+      key: ValueKey(state.currentDevice),
       scrollDirection: Axis.vertical,
       controller: pageController,
       physics: const NeverScrollableScrollPhysics(),

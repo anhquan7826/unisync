@@ -23,7 +23,6 @@ fun getPayloadData(payload: DeviceConnection.Payload, onProgress: ((Float) -> Un
                 progress += byteRead
                 onReceive(buffer)
                 onProgress?.invoke(progress.toFloat() / payload.size)
-                infoLog("Progress: ${String.format("%.2f", (progress.toFloat() / payload.size) * 100)}%")
                 if (progress >= payload.size) break
             }
             payload.stream.close()

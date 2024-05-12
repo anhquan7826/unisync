@@ -13,6 +13,10 @@ extension ContextExtension on BuildContext {
   T getCubit<T extends Cubit>() {
     return BlocProvider.of<T>(this);
   }
+
+  ThemeData get theme => Theme.of(this);
+
+  ColorScheme get colorScheme => theme.colorScheme;
 }
 
 extension TypoExtension on BuildContext {

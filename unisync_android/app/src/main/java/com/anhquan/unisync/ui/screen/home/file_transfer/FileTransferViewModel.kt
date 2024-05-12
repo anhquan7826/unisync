@@ -64,7 +64,7 @@ class FileTransferViewModel : ViewModel(), Device.DeviceEventListener {
         device.getPlugin(StoragePlugin::class.java).getFile(file) {
             NotificationUtil.apply {
                 showNotification(
-                    context, file.hashCode(), buildProgressNotification(
+                    file.hashCode(), buildProgressNotification(
                         context,
                         title = "Downloading...",
                         text = file.name,
@@ -80,7 +80,7 @@ class FileTransferViewModel : ViewModel(), Device.DeviceEventListener {
         device.getPlugin(StoragePlugin::class.java).sendFile(uri, _currentDir) {
             NotificationUtil.apply {
                 showNotification(
-                    context, uri.hashCode(), buildProgressNotification(
+                    uri.hashCode(), buildProgressNotification(
                         context,
                         title = "Downloading...",
                         text = "File",

@@ -9,19 +9,30 @@ import 'package:unisync/utils/extensions/cubit.ext.dart';
 
 class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
   FileTransferCubit(this.device) : super(const FileTransferState()) {
-    _plugin.startServer().whenComplete(() {
-      _plugin.list(state.path).then((value) {
-        safeEmit(state.copyWith(
-          status: Status.loaded,
-          currentDirectory: value,
-        ));
-      });
-    });
+    start();
   }
 
   final Device device;
 
   StoragePlugin get _plugin => device.getPlugin<StoragePlugin>();
+
+  Future<void> start() async {
+    try {
+      safeEmit(state.copyWith(
+        status: Status.loading,
+      ));
+      await _plugin.startServer();
+      final dir = await _plugin.list(state.path);
+      safeEmit(state.copyWith(
+        status: Status.loaded,
+        currentDirectory: dir,
+      ));
+    } on Exception catch (e) {
+      safeEmit(state.copyWith(
+        status: Status.error,
+      ));
+    }
+  }
 
   Future<void> refresh() async {
     safeEmit(state.copyWith(

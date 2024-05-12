@@ -27,7 +27,6 @@ class SharingPlugin extends UnisyncPlugin {
   }
 
   void _handleUrl(String url) {
-    debugLog('handling url: $url');
     launchUrlString(url);
   }
 

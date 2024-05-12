@@ -25,7 +25,7 @@ object NotificationUtil {
     }
 
     fun showNotification(
-        context: Context, id: Int, notification: Notification
+        id: Int, notification: Notification
     ) {
         notiManager.notify(id, notification)
     }
@@ -100,7 +100,7 @@ object NotificationUtil {
             .setContentTitle(context.getString(R.string.found_my_phone))
             .setAutoCancel(true)
             .setFullScreenIntent(
-                PendingIntent.getActivity( 
+                PendingIntent.getActivity(
                     context,
                     1,
                     Intent(context, FindMyPhoneActivity::class.java).apply {
@@ -128,18 +128,20 @@ object NotificationUtil {
                 )
             ).build()
     }
-    
+
     fun buildProgressNotification(
         context: Context,
         title: String,
         text: String,
         progress: Float,
+        download: Boolean = true,
         actions: Map<String, () -> Unit> = mapOf()
     ): Notification {
         return Notification.Builder(context, CHANNEL_ID_PROGRESS).apply {
             setOngoing(progress < 1)
             setContentTitle(title)
             setContentText(text)
+            setSmallIcon(if (download) R.drawable.download else R.drawable.upload)
             setProgress(
                 100,
                 (progress * 100).toInt(),

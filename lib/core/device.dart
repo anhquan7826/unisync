@@ -26,9 +26,7 @@ class Device with ConnectionListener {
       return _instances[info]!;
     }
     _instances[info] = Device._(info);
-    debugLog('Created an instance of Device.');
     _notifyInstances();
-    debugLog('Device instances notified.');
     return _instances[info]!;
   }
 
@@ -81,6 +79,7 @@ class Device with ConnectionListener {
     } else {
       _connection!.connectionListener = this;
       infoLog('Device@${info.name}: Connected!');
+      infoLog('Device id: ${info.id}');
       if (pairState == PairState.markUnpaired) {
         pairOperation.unpair();
       }

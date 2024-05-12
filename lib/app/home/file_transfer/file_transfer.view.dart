@@ -82,6 +82,31 @@ class _FileTransferScreenState extends State<FileTransferScreen>
         child: CircularProgressIndicator(),
       );
     }
+    if (state.status == Status.error) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.warning_rounded,
+              size: 64,
+            ),
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Please grant storage permission in your phone to continue!',
+              ),
+            ),
+            FilledButton(
+              onPressed: () {
+                getCubit<FileTransferCubit>().start();
+              },
+              child: const Text('Reload'),
+            ),
+          ],
+        ),
+      );
+    }
     return Column(
       children: [
         Expanded(
@@ -94,7 +119,8 @@ class _FileTransferScreenState extends State<FileTransferScreen>
             ],
           ),
         ),
-        buildProgressBar(state),
+        if (state.downloads.isNotEmpty || state.uploads.isNotEmpty)
+          buildProgressBar(state),
       ],
     );
   }
@@ -107,71 +133,91 @@ class _FileTransferScreenState extends State<FileTransferScreen>
     }) {
       return Container(
         height: double.infinity,
-        width: 200,
-        padding: const EdgeInsets.all(8),
+        width: 400,
+        padding: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 16,
+        ),
         margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: context.colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Row(
           children: [
-            const Icon(Icons.upload_file_rounded),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Icon(
+                download ? Icons.download_rounded : Icons.upload_rounded,
+              ),
+            ),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${download ? 'Downloading' : 'Uploading'} ${basename(path)}...',
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${download ? 'Downloading' : 'Uploading'}: ${basename(path)}...',
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.titleS.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Expanded(
-                      child: progress == 1
-                          ? const Text('Completed!')
-                          : LinearProgressIndicator(
-                              value: progress,
-                            ),
+                  ),
+                  if (progress == 1)
+                    const Text('Completed!')
+                  else
+                    LinearProgressIndicator(
+                      value: progress,
                     ),
-                  ],
+                ],
+              ),
+            ),
+            if (progress == 1)
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: IconButton(
+                  onPressed: () {
+                    if (download) {
+                      getCubit<FileTransferCubit>()
+                          .removeDownloadProgress(path);
+                    } else {
+                      getCubit<FileTransferCubit>().removeUploadProgress(path);
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.cancel,
+                    color: Colors.red,
+                  ),
                 ),
               ),
-            ),
-            IconButton(
-              onPressed: () {
-                if (download) {
-                  getCubit<FileTransferCubit>().removeDownloadProgress(path);
-                } else {
-                  getCubit<FileTransferCubit>().removeUploadProgress(path);
-                }
-              },
-              icon: const Icon(
-                Icons.cancel,
-                color: Colors.red,
-              ),
-            ),
           ],
         ),
       );
     }
 
     return SizedBox(
-      height: 100,
-      child: SingleChildScrollView(
+      height: 72,
+      child: ListView(
         scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            ...state.downloads.entries.map((e) {
-              return buildProgress(e.key, e.value);
-            }),
-            ...state.uploads.entries.map((e) {
-              return buildProgress(
-                e.key,
-                e.value,
-                download: false,
-              );
-            }),
-          ],
-        ),
+        children: [
+          ...state.downloads.entries.map((e) {
+            return buildProgress(
+              e.key,
+              e.value,
+            );
+          }),
+          ...state.uploads.entries.map((e) {
+            return buildProgress(
+              e.key,
+              e.value,
+              download: false,
+            );
+          }),
+        ],
       ),
     );
   }

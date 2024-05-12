@@ -1,8 +1,12 @@
 package com.anhquan.unisync.ui.screen.home
 
 import android.content.Context
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
+import com.anhquan.unisync.UnisyncActivity
 import com.anhquan.unisync.core.Device
+import com.anhquan.unisync.core.PairingHandler
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
 import com.anhquan.unisync.core.plugins.status.StatusPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
@@ -23,6 +27,7 @@ class HomeViewModel : ViewModel(), Device.DeviceEventListener {
     var device: Device
         get() = _device
         set(value) {
+            debugLog("_device is set to $value")
             if (this::_device.isInitialized && _device == value) return
             volumeDisposable?.dispose()
             if (this::_device.isInitialized) {
@@ -38,16 +43,29 @@ class HomeViewModel : ViewModel(), Device.DeviceEventListener {
         private set
 
     data class HomeState(
+        val pairedDevices: List<Device> = listOf(),
         val isOnline: Boolean = false,
+        val reload: Boolean = false,
         val volume: Float = 0F,
     )
 
     fun initialize(context: Context) {
-        ConfigUtil.Device.getAllPairedDevices().execute {
-            pairedDevices = it.map { info ->
-                Device.of(context, info)
+        Device.instancesNotifier.listen { devices ->
+            val pairedDevices = devices.filter {
+                it.pairState == PairingHandler.PairState.PAIRED
+            }
+            if (devices.isEmpty()) {
+                context.startActivity(Intent(context, UnisyncActivity::class.java))
+                (context as ComponentActivity).finish()
+            } else {
+                _state.update { state ->
+                    state.copy(
+                        pairedDevices = pairedDevices
+                    )
+                }
             }
         }
+        Device.getAllDevices(context).execute {}
     }
 
     private var _state = MutableStateFlow(HomeState())
@@ -98,13 +116,12 @@ class HomeViewModel : ViewModel(), Device.DeviceEventListener {
     }
 
     override fun onDeviceEvent(event: Device.DeviceEvent) {
-        debugLog(event)
         _state.update { state ->
             state.copy(
                 isOnline = event.connected,
             )
         }
-        if (event.connected) {
+        if (event.connected && event.pairState == PairingHandler.PairState.PAIRED) {
             volumeDisposable =
                 volumeDisposable ?: _device.getPlugin(VolumePlugin::class.java).notifier.listen(
                     observeOn = AndroidSchedulers.mainThread()
@@ -117,6 +134,20 @@ class HomeViewModel : ViewModel(), Device.DeviceEventListener {
                 }
         } else {
             volumeDisposable?.dispose()
+            volumeDisposable = null
+            if (event.pairState != PairingHandler.PairState.PAIRED) {
+                Device.getConnectedDevices().firstOrNull {
+                    it.pairState == PairingHandler.PairState.PAIRED
+                }.let {
+                    if (it != null) {
+                        device = it
+                    } else {
+                        _state.update { s ->
+                            s.copy(reload = true)
+                        }
+                    }
+                }
+            }
         }
     }
 }

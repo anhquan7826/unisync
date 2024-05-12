@@ -15,7 +15,7 @@ import 'package:unisync/utils/push_notification.dart';
 
 class GalleryCubit extends Cubit<GalleryState> with BaseCubit {
   GalleryCubit(this.device) : super(const GalleryState()) {
-    getGallery().then((value) => debugLog);
+    getGallery();
   }
 
   final Device device;

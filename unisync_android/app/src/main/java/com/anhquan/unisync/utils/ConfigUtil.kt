@@ -8,6 +8,7 @@ import com.anhquan.unisync.database.UnisyncDatabase
 import com.anhquan.unisync.database.entity.DeviceCommandEntity
 import com.anhquan.unisync.database.entity.PairedDeviceEntity
 import com.anhquan.unisync.models.DeviceInfo
+import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 
 object ConfigUtil {
@@ -42,8 +43,8 @@ object ConfigUtil {
             ).execute()
         }
 
-        fun removePairedDevice(info: DeviceInfo) {
-            database.pairedDeviceDao().remove(info.id).listen {}
+        fun removePairedDevice(info: DeviceInfo): Completable {
+            return database.pairedDeviceDao().remove(info.id)
         }
 
         fun getAllPairedDevices(): Single<List<DeviceInfo>> {

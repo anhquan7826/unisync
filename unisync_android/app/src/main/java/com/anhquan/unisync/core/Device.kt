@@ -52,7 +52,8 @@ class Device private constructor(
 
         fun getAllDevices(context: Context): Single<List<Device>> {
             return ConfigUtil.Device.getAllPairedDevices().map {
-                it.map { info -> of(context, info) }
+                it.forEach { info -> of(context, info) }
+                instances.values.toList()
             }
         }
 
@@ -69,6 +70,8 @@ class Device private constructor(
     var connection: DeviceConnection?
         get() = _connection
         set(value) {
+            if (_connection != null && value != null) return
+            if (_connection == null && value == null) return
             _connection = value
             if (value == null) {
                 infoLog("${this::class.simpleName}@${info.name}: Disconnected!")
@@ -89,8 +92,7 @@ class Device private constructor(
     val pairState: PairingHandler.PairState get() = pairingHandler.state
     val pairOperation: PairingHandler.PairOperation get() = pairingHandler.operation
 
-    var plugins: List<UnisyncPlugin> = listOf()
-        private set
+    val plugins: MutableList<UnisyncPlugin> = mutableListOf()
 
     private val pairingHandler = PairingHandler(this) {
         notifyNewEvent()
@@ -125,18 +127,20 @@ class Device private constructor(
     }
 
     private fun initiatePlugins() {
-        plugins = listOf(
-            StatusPlugin(this),
-            ClipboardPlugin(this),
-            NotificationPlugin(this),
-            VolumePlugin(this),
-            RunCommandPlugin(this),
-            RingPhonePlugin(this),
-            TelephonyPlugin(this),
-            SharingPlugin(this),
-            GalleryPlugin(this),
-            StoragePlugin(this),
-            SSHPlugin(this)
+        plugins.addAll(
+            arrayOf(
+                StatusPlugin(this),
+                ClipboardPlugin(this),
+                NotificationPlugin(this),
+                VolumePlugin(this),
+                RunCommandPlugin(this),
+                RingPhonePlugin(this),
+                TelephonyPlugin(this),
+                SharingPlugin(this),
+                GalleryPlugin(this),
+                StoragePlugin(this),
+                SSHPlugin(this)
+            )
         )
     }
 
@@ -144,6 +148,7 @@ class Device private constructor(
         for (plugin in plugins) {
             plugin.onDispose()
         }
+        plugins.clear()
     }
 
     fun <T : UnisyncPlugin> getPlugin(type: Class<T>): T {

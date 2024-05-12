@@ -2,6 +2,7 @@ package com.anhquan.unisync.core
 
 import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ConfigUtil
+import com.anhquan.unisync.utils.execute
 
 class PairingHandler(private val device: Device, private val onStateChanged: (PairState) -> Unit) {
     interface PairOperation {
@@ -34,18 +35,19 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
 
         override fun unpair() {
             if (state == PairState.PAIRED || state == PairState.MARK_UNPAIRED) {
-                ConfigUtil.Device.removePairedDevice(device.info)
-                device.sendMessage(
-                    DeviceMessage(
-                        type = DeviceMessage.Type.PAIR,
-                        header = DeviceMessage.DeviceMessageHeader(
-                            type = DeviceMessage.DeviceMessageHeader.Type.NOTIFICATION,
-                            method = Method.UNPAIR
+                ConfigUtil.Device.removePairedDevice(device.info).execute {
+                    device.sendMessage(
+                        DeviceMessage(
+                            type = DeviceMessage.Type.PAIR,
+                            header = DeviceMessage.DeviceMessageHeader(
+                                type = DeviceMessage.DeviceMessageHeader.Type.NOTIFICATION,
+                                method = Method.UNPAIR
+                            )
                         )
                     )
-                )
-                state = PairState.NOT_PAIRED
-                onStateChanged(state)
+                    state = PairState.NOT_PAIRED
+                    onStateChanged(state)
+                }
             }
         }
     }
@@ -90,9 +92,10 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
                 }
             }
             Method.UNPAIR -> {
-                ConfigUtil.Device.removePairedDevice(device.info)
-                state = PairState.NOT_PAIRED
-                onStateChanged(state)
+                ConfigUtil.Device.removePairedDevice(device.info).execute {
+                    state = PairState.NOT_PAIRED
+                    onStateChanged(state)
+                }
             }
         }
     }

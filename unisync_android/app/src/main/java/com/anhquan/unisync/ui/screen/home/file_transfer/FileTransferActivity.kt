@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
@@ -40,7 +42,6 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.models.UnisyncFile
 import com.anhquan.unisync.ui.composables.DeviceDisconnected
-import com.anhquan.unisync.ui.theme.defaultWindowInsets
 import com.anhquan.unisync.ui.theme.setView
 import com.anhquan.unisync.ui.theme.typography
 import com.anhquan.unisync.utils.UnitFormatter
@@ -118,7 +119,7 @@ class FileTransferActivity : ComponentActivity() {
                     }
                 }
             },
-            contentWindowInsets = defaultWindowInsets()
+//            contentWindowInsets = defaultWindowInsets()
         ) { padding ->
             if (!state.connected) {
                 DeviceDisconnected()
@@ -171,9 +172,11 @@ class FileTransferActivity : ComponentActivity() {
                     }
                     PullToRefreshContainer(
                         state = pullToRefreshState,
-                        modifier = Modifier.align(
-                            Alignment.TopCenter
-                        )
+                        modifier = Modifier
+                            .align(
+                                Alignment.TopCenter
+                            )
+                            .padding(ScaffoldDefaults.contentWindowInsets.asPaddingValues())
                     )
                 }
             }
