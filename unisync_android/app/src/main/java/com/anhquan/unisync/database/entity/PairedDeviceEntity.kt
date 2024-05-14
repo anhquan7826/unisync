@@ -9,5 +9,5 @@ data class  PairedDeviceEntity(
     val name: String,
     val type: String,
     val lastAccessed: Long = System.currentTimeMillis(),
-    val unpaired: Boolean = false
+    val unpaired: Int = 0
 )

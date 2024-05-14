@@ -35,19 +35,23 @@ class PairingHandler(private val device: Device, private val onStateChanged: (Pa
 
         override fun unpair() {
             if (state == PairState.PAIRED || state == PairState.MARK_UNPAIRED) {
-                ConfigUtil.Device.removePairedDevice(device.info).execute {
-                    device.sendMessage(
-                        DeviceMessage(
-                            type = DeviceMessage.Type.PAIR,
-                            header = DeviceMessage.DeviceMessageHeader(
-                                type = DeviceMessage.DeviceMessageHeader.Type.NOTIFICATION,
-                                method = Method.UNPAIR
+                if (device.isOnline) {
+                    ConfigUtil.Device.removePairedDevice(device.info).execute {
+                        device.sendMessage(
+                            DeviceMessage(
+                                type = DeviceMessage.Type.PAIR,
+                                header = DeviceMessage.DeviceMessageHeader(
+                                    type = DeviceMessage.DeviceMessageHeader.Type.NOTIFICATION,
+                                    method = Method.UNPAIR
+                                )
                             )
                         )
-                    )
-                    state = PairState.NOT_PAIRED
-                    onStateChanged(state)
+                    }
+                } else {
+                    ConfigUtil.Device.markDeviceUnpaired(device.info).execute()
                 }
+                state = PairState.NOT_PAIRED
+                onStateChanged(state)
             }
         }
     }

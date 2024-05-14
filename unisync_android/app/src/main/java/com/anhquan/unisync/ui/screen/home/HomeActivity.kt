@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import com.anhquan.unisync.R
 import com.anhquan.unisync.UnisyncActivity
 import com.anhquan.unisync.core.Device
+import com.anhquan.unisync.core.plugins.media.MediaPlugin
 import com.anhquan.unisync.models.DeviceInfo
 import com.anhquan.unisync.ui.composables.DeviceDisconnected
 import com.anhquan.unisync.ui.composables.SliderTile
@@ -94,6 +95,11 @@ class HomeActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         permissionRequestController.update()
+        try {
+            Device.getConnectedDevices().forEach {
+                it.getPlugin(MediaPlugin::class.java).registerMediaSession()
+            }
+        } catch (_: Exception) {}
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

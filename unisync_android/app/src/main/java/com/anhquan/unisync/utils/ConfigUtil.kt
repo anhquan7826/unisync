@@ -47,6 +47,10 @@ object ConfigUtil {
             return database.pairedDeviceDao().remove(info.id)
         }
 
+        fun markDeviceUnpaired(info: DeviceInfo): Completable {
+            return database.pairedDeviceDao().markUnpaired(info.id)
+        }
+
         fun getAllPairedDevices(): Single<List<DeviceInfo>> {
             return database.pairedDeviceDao().getAll().map { entities ->
                 entities.map {
@@ -71,7 +75,7 @@ object ConfigUtil {
                     DeviceInfo(
                         id = it.id, name = it.name, deviceType = it.type
                     ),
-                    it.unpaired
+                    it.unpaired == 1
                 )
             }
         }

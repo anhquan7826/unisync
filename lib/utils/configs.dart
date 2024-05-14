@@ -69,6 +69,10 @@ class _DeviceConfig {
     await _database.pairedDeviceDao.remove(info.id);
   }
 
+  Future<void> markDeviceUnpaired(DeviceInfo info) async {
+    await _database.pairedDeviceDao.markUnpaired(info.id);
+  }
+
   Future<List<DeviceInfo>> getAllPairedDevices() async {
     return (await _database.pairedDeviceDao.getAll()).map((e) {
       return DeviceInfo(id: e.id, name: e.name, deviceType: e.type);
@@ -79,7 +83,7 @@ class _DeviceConfig {
     return (await _database.pairedDeviceDao.get(id))?.let((it) {
       return (
         DeviceInfo(id: it.id, name: it.name, deviceType: it.type),
-        it.unpaired,
+        it.unpaired == 1,
       );
     });
   }

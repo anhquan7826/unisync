@@ -4,6 +4,7 @@ import android.content.Context
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
 import com.anhquan.unisync.core.plugins.gallery.GalleryPlugin
+import com.anhquan.unisync.core.plugins.media.MediaPlugin
 import com.anhquan.unisync.core.plugins.notification.NotificationPlugin
 import com.anhquan.unisync.core.plugins.ring_phone.RingPhonePlugin
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
@@ -139,7 +140,8 @@ class Device private constructor(
                 SharingPlugin(this),
                 GalleryPlugin(this),
                 StoragePlugin(this),
-                SSHPlugin(this)
+                SSHPlugin(this),
+                MediaPlugin(this)
             )
         )
     }

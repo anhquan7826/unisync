@@ -1,9 +1,12 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:unisync/components/resources/resources.dart';
+import 'package:unisync/utils/debouncer.dart';
 
 class PushNotification {
   PushNotification._();
+
+  static final _debouncer = Debouncer(const Duration(seconds: 1));
 
   static final _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -21,26 +24,28 @@ class PushNotification {
     required String title,
     required String text,
   }) async {
-    final notification = LinuxNotificationDetails(
-      icon: ByteDataLinuxIcon(
-        LinuxRawIconData(
-          data: icon ?? await _getDefaultIcon(),
-          width: 256,
-          height: 256,
+    _debouncer.call(() async {
+      final notification = LinuxNotificationDetails(
+        icon: ByteDataLinuxIcon(
+          LinuxRawIconData(
+            data: icon ?? await _getDefaultIcon(),
+            width: 256,
+            height: 256,
+          ),
         ),
-      ),
-      category: LinuxNotificationCategory.transferComplete,
-      resident: true,
-    );
-    final details = NotificationDetails(
-      linux: notification,
-    );
-    await _flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      text,
-      details,
-    );
+        category: LinuxNotificationCategory.transferComplete,
+        resident: true,
+      );
+      final details = NotificationDetails(
+        linux: notification,
+      );
+      await _flutterLocalNotificationsPlugin.show(
+        0,
+        title,
+        text,
+        details,
+      );
+    });
   }
 
   static Uint8List? _defaultIcon;

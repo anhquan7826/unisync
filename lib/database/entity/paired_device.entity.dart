@@ -8,7 +8,7 @@ class PairedDeviceEntity {
     required this.id,
     required this.name,
     required this.type,
-    this.unpaired = false,
+    this.unpaired = 0,
   }) {
     lastAccessed = DateTime.now().millisecondsSinceEpoch;
   }
@@ -18,5 +18,5 @@ class PairedDeviceEntity {
   final String name;
   final String type;
   late final int lastAccessed;
-  final bool unpaired;
+  final int unpaired;
 }

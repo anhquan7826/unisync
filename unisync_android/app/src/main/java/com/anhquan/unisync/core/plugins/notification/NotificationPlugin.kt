@@ -1,15 +1,11 @@
 package com.anhquan.unisync.core.plugins.notification
 
 import android.app.Notification
-import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
-import android.media.session.MediaController
-import android.media.session.MediaSessionManager
-import android.media.session.MediaSessionManager.OnActiveSessionsChangedListener
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
@@ -18,10 +14,8 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
-import com.anhquan.unisync.utils.runSingle
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -30,25 +24,17 @@ import java.io.IOException
 class NotificationPlugin(
     private val device: Device,
 ) : UnisyncPlugin(device, DeviceMessage.Type.NOTIFICATION),
-    NotificationReceiver.NotificationListener, OnActiveSessionsChangedListener {
+    NotificationReceiver.NotificationListener {
     private object Method {
         const val NEW_NOTIFICATION = "new_notification"
     }
 
     private val packageManager = context.packageManager
-    private val mediaManager = context.getSystemService(MediaSessionManager::class.java)
 
     init {
         NotificationReceiver.apply {
             addListener(this@NotificationPlugin)
             startService(context)
-        }
-        runSingle(subscribeOn = AndroidSchedulers.mainThread()) {
-            if (hasPermission) {
-                mediaManager.addOnActiveSessionsChangedListener(
-                    this, ComponentName(context, NotificationReceiver::class.java)
-                )
-            }
         }
     }
 
@@ -64,7 +50,6 @@ class NotificationPlugin(
 
     override fun onDispose() {
         NotificationReceiver.removeListener(this)
-        mediaManager.removeOnActiveSessionsChangedListener(this)
         super.onDispose()
     }
 
@@ -72,9 +57,6 @@ class NotificationPlugin(
         try {
             val notification = sbn.notification
             val packageName = sbn.packageName
-            val appName = packageManager.getApplicationInfo(sbn.packageName, 0).let {
-                packageManager.getApplicationLabel(it).toString()
-            }
 
             if (notification.flags and Notification.FLAG_FOREGROUND_SERVICE != 0 || notification.flags and Notification.FLAG_ONGOING_EVENT != 0 || notification.flags and Notification.FLAG_LOCAL_ONLY != 0 || notification.flags and NotificationCompat.FLAG_GROUP_SUMMARY != 0) {
                 return
@@ -85,43 +67,54 @@ class NotificationPlugin(
                 return
             }
 
-            notification.extras.apply {
-                val title = getCharSequence(Notification.EXTRA_TITLE).toString()
-                val text = getCharSequence(Notification.EXTRA_TEXT).toString()
-                val subText = getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
-                val bigText = getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()
-                runTask(task = {
-                    try {
-                        val icon = extractIcon(sbn)
-                        val picture = extractPicture(sbn)
-                        it.onNext(
-                            mapOf(
-                                "icon" to icon, "picture" to picture
-                            )
-                        )
-                        it.onComplete()
-                    } catch (e: Exception) {
-                        it.onNext(mapOf())
-                        it.onComplete()
-                    }
-                }, subscribeOn = Schedulers.computation(), onResult = {
-                    val picture = it["picture"]
-                    sendNotification(Method.NEW_NOTIFICATION, mapOf(
-                        "timestamp" to sbn.postTime,
-                        "app_name" to appName,
-                        "title" to title,
-                        "text" to text,
-                        "sub_text" to subText,
-                        "big_text" to if (text == bigText) null else bigText
-                    ), payload = picture?.let { p ->
-                        DeviceConnection.Payload(
-                            size = p.size, stream = p.inputStream()
-                        )
-                    })
-                })
+            if (notification?.category != Notification.CATEGORY_TRANSPORT) {
+                onNormalNotification(sbn)
             }
+
         } catch (e: Exception) {
             warningLog("Something went wrong at ${this::class.simpleName}:\n${e.message}")
+        }
+    }
+
+    private fun onNormalNotification(sbn: StatusBarNotification) {
+        val notification = sbn.notification
+        val appName = packageManager.getApplicationInfo(sbn.packageName, 0).let {
+            packageManager.getApplicationLabel(it).toString()
+        }
+        notification.extras.apply {
+            val title = getCharSequence(Notification.EXTRA_TITLE).toString()
+            val text = getCharSequence(Notification.EXTRA_TEXT).toString()
+            val subText = getCharSequence(Notification.EXTRA_SUB_TEXT)?.toString()
+            val bigText = getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()
+            runTask(task = {
+                try {
+                    val icon = extractIcon(sbn)
+                    val picture = extractPicture(sbn)
+                    it.onNext(
+                        mapOf(
+                            "icon" to icon, "picture" to picture
+                        )
+                    )
+                    it.onComplete()
+                } catch (e: Exception) {
+                    it.onNext(mapOf())
+                    it.onComplete()
+                }
+            }, subscribeOn = Schedulers.computation(), onResult = {
+                val picture = it["picture"]
+                sendNotification(Method.NEW_NOTIFICATION, mapOf(
+                    "timestamp" to sbn.postTime,
+                    "app_name" to appName,
+                    "title" to title,
+                    "text" to text,
+                    "sub_text" to subText,
+                    "big_text" to if (text == bigText) null else bigText
+                ), payload = picture?.let { p ->
+                    DeviceConnection.Payload(
+                        size = p.size, stream = p.inputStream()
+                    )
+                })
+            })
         }
     }
 
@@ -180,11 +173,6 @@ class NotificationPlugin(
                 } catch (_: IOException) {
                 }
             }
-        }
-    }
-
-    override fun onActiveSessionsChanged(controllers: MutableList<MediaController>?) {
-        (controllers ?: listOf()).forEach {
         }
     }
 }

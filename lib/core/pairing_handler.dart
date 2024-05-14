@@ -94,15 +94,19 @@ class PairingHandler implements PairOperation {
   @override
   void unpair() {
     if (_state == PairState.paired || _state == PairState.markUnpaired) {
-      device.sendMessage(DeviceMessage(
-        time: DateTime.now().millisecondsSinceEpoch,
-        type: DeviceMessage.Type.PAIR,
-        header: DeviceMessageHeader(
-          type: DeviceMessageHeader.Type.NOTIFICATION,
-          method: _method.UNPAIR,
-        ),
-      ));
-      ConfigUtil.device.removePairedDevice(device.info);
+      if (device.isOnline) {
+        device.sendMessage(DeviceMessage(
+          time: DateTime.now().millisecondsSinceEpoch,
+          type: DeviceMessage.Type.PAIR,
+          header: DeviceMessageHeader(
+            type: DeviceMessageHeader.Type.NOTIFICATION,
+            method: _method.UNPAIR,
+          ),
+        ));
+        ConfigUtil.device.removePairedDevice(device.info);
+      } else {
+        ConfigUtil.device.markDeviceUnpaired(device.info);
+      }
       _state = PairState.unpaired;
       onStateChanged(_state);
     }

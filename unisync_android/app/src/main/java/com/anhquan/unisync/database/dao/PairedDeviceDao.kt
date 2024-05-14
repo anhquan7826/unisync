@@ -34,4 +34,7 @@ interface PairedDeviceDao {
 
     @Query("UPDATE paired_devices SET lastAccessed = :lastAccessed WHERE id = :id")
     fun setLastUsed(id: String, lastAccessed: Long = System.currentTimeMillis()): Completable
+
+    @Query("UPDATE paired_devices SET unpaired = 1 WHERE id = :id")
+    fun markUnpaired(id: String): Completable
 }
