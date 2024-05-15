@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:rxdart/rxdart.dart';
+
 extension StreamExtension<T> on Stream<T> {
   /// Adding an ability to close the stream subscription inside [callback].
   /// To close the stream subscription, simply return true inside [callback].
@@ -20,5 +22,11 @@ extension StreamExtension<T> on Stream<T> {
       onDone: onDone,
       cancelOnError: cancelOnError,
     );
+  }
+}
+
+extension StreamSubscriptionExtension on StreamSubscription {
+  void addTo(CompositeSubscription subscriptions) {
+    subscriptions.add(this);
   }
 }

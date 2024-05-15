@@ -3,6 +3,7 @@ import 'package:unisync/core/pairing_handler.dart';
 import 'package:unisync/core/plugins/base_plugin.dart';
 import 'package:unisync/core/plugins/clipboard/clipboard.plugin.dart';
 import 'package:unisync/core/plugins/gallery/gallery.plugin.dart';
+import 'package:unisync/core/plugins/media/media.plugin.dart';
 import 'package:unisync/core/plugins/notification/notification_plugin.dart';
 import 'package:unisync/core/plugins/ring_phone/ring_phone.plugin.dart';
 import 'package:unisync/core/plugins/run_command/run_command.plugin.dart';
@@ -153,6 +154,7 @@ class Device with ConnectionListener {
       GalleryPlugin(this),
       StoragePlugin(this),
       SSHPlugin(this),
+      MediaPlugin(this)
     ]);
   }
 

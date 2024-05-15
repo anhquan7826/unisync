@@ -14,11 +14,10 @@ import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.DeviceMessage
+import com.anhquan.unisync.utils.convertBitmapToByteArray
 import com.anhquan.unisync.utils.runTask
 import com.anhquan.unisync.utils.warningLog
 import io.reactivex.rxjava3.schedulers.Schedulers
-import java.io.ByteArrayOutputStream
-import java.io.IOException
 
 
 class NotificationPlugin(
@@ -157,22 +156,5 @@ class NotificationPlugin(
         drawable.setBounds(0, 0, res.width, res.height)
         drawable.draw(canvas)
         return res
-    }
-
-    private fun convertBitmapToByteArray(bitmap: Bitmap?): ByteArray? {
-        if (bitmap == null) return null
-        var baos: ByteArrayOutputStream? = null
-        return try {
-            baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
-            baos.toByteArray()
-        } finally {
-            if (baos != null) {
-                try {
-                    baos.close()
-                } catch (_: IOException) {
-                }
-            }
-        }
     }
 }

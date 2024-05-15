@@ -1,3 +1,4 @@
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +6,8 @@ import 'package:unisync/app/home/status/status.cubit.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/components/widgets/image.dart';
+import 'package:unisync/models/audio_playback/media_playback_state.dart';
+import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/list.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
@@ -39,6 +42,7 @@ class _StatusScreenState extends State<StatusScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       buildStatus(state),
+                      buildMediaControl(),
                       buildButtons(),
                     ],
                   ),
@@ -175,6 +179,142 @@ class _StatusScreenState extends State<StatusScreen>
           ],
         ],
       ),
+    );
+  }
+
+  Widget buildMediaControl() {
+    return StreamBuilder(
+      stream: getCubit<StatusCubit>().getMediaStream(),
+      builder: (context, snapshot) {
+        if (snapshot.data == null) {
+          return const SizedBox.shrink();
+        }
+        final textShadow = [
+          const Shadow(
+            blurRadius: 4,
+          ),
+        ];
+        return AnimatedContainer(
+          margin: const EdgeInsets.only(top: 32),
+          width: 328,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            image: snapshot.data!.$2 == null
+                ? null
+                : DecorationImage(
+                    image: MemoryImage(snapshot.data!.$2!),
+                    fit: BoxFit.cover,
+                  ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.all(16),
+          duration: const Duration(milliseconds: 250),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          snapshot.data!.$1.title ?? 'Unknown title',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.titleM.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: textShadow,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          snapshot.data!.$1.artist ?? 'Unknown artist',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.bodyM.copyWith(
+                            color: Colors.white,
+                            shadows: textShadow,
+                          ),
+                        ),
+                        if (snapshot.data!.$1.album != null)
+                          Text(
+                            snapshot.data!.$1.album!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.labelS.copyWith(
+                              color: Colors.white,
+                              shadows: textShadow,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: IconButton.filled(
+                      onPressed: getCubit<StatusCubit>().toggleMedia,
+                      icon: Icon(
+                        snapshot.data!.$3.state ==
+                                MediaPlaybackState.STATE_PAUSED
+                            ? Icons.play_arrow_rounded
+                            : snapshot.data!.$3.state ==
+                                    MediaPlaybackState.STATE_PLAYING
+                                ? Icons.pause_rounded
+                                : Icons.stop_rounded,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: getCubit<StatusCubit>().skipPrevious,
+                    icon: Icon(
+                      Icons.skip_previous_rounded,
+                      color: context.colorScheme.primary,
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: ProgressBar(
+                        progress: Duration(
+                          milliseconds: snapshot.data!.$3.position ?? 0,
+                        ),
+                        total: Duration(
+                          milliseconds: snapshot.data!.$1.duration ?? 0,
+                        ),
+                        thumbGlowRadius: 0,
+                        thumbRadius: 5,
+                        timeLabelTextStyle: context.labelM.copyWith(
+                          color: Colors.white,
+                          shadows: textShadow,
+                        ),
+                        onSeek: getCubit<StatusCubit>().seek,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: getCubit<StatusCubit>().skipNext,
+                    icon: Icon(
+                      Icons.skip_next_rounded,
+                      color: context.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
