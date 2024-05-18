@@ -42,8 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       listener: (context, state) {
         if (state.reload) {
           context.goNamed(routes.landing);
-        }
-        else if (!state.currentDevice.isOnline) {
+        } else if (!state.currentDevice.isOnline) {
           setState(() {
             currentDest = 0;
           });
@@ -165,11 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
               : () {
                   setState(() {
                     currentDest = index;
-                    pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.ease,
-                    );
+                    pageController.jumpToPage(index);
                   });
                 },
           child: Opacity(

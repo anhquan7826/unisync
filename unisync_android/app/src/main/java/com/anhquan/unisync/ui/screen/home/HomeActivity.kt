@@ -211,7 +211,7 @@ class HomeActivity : ComponentActivity() {
                             Text(stringResource(R.string.manage))
                         }
                     }
-                    viewModel.pairedDevices.forEach {
+                    state.pairedDevices.forEach {
                         DeviceTile(device = it) {
                             viewModel.device = it
                             scope.launch {

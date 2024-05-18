@@ -1,7 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:image/image.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/utils/debouncer.dart';
+import 'package:unisync/utils/extensions/scope.ext.dart';
+import 'package:unisync/utils/logger.dart';
 
 class PushNotification {
   PushNotification._();
@@ -9,14 +12,15 @@ class PushNotification {
   static final _debouncer = Debouncer(const Duration(seconds: 1));
 
   static final _flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+      LinuxFlutterLocalNotificationsPlugin();
 
   static Future<void> setup() async {
-    const initializationSettingsLinux =
-        LinuxInitializationSettings(defaultActionName: 'Open notification');
-    const initializationSettings =
-        InitializationSettings(linux: initializationSettingsLinux);
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    final initializationSettingsLinux = LinuxInitializationSettings(
+      defaultActionName: 'Open notification',
+      defaultIcon: AssetsLinuxIcon(R.images.app_icon),
+    );
+    await _flutterLocalNotificationsPlugin
+        .initialize(initializationSettingsLinux);
   }
 
   static Future<void> showNotification({
@@ -25,33 +29,34 @@ class PushNotification {
     required String text,
   }) async {
     _debouncer.call(() async {
-      final notification = LinuxNotificationDetails(
-        icon: ByteDataLinuxIcon(
-          LinuxRawIconData(
-            data: icon ?? await _getDefaultIcon(),
-            width: 256,
-            height: 256,
-          ),
-        ),
-        category: LinuxNotificationCategory.transferComplete,
-        resident: true,
+      final details = LinuxNotificationDetails(
+        icon: getIcon(icon),
       );
-      final details = NotificationDetails(
-        linux: notification,
-      );
+      debugLog('Showing notification...');
       await _flutterLocalNotificationsPlugin.show(
         0,
         title,
         text,
-        details,
+        notificationDetails: details,
       );
     });
   }
 
-  static Uint8List? _defaultIcon;
-  static Future<Uint8List> _getDefaultIcon() async {
-    _defaultIcon ??=
-        (await rootBundle.load(R.images.app_icon)).buffer.asUint8List();
-    return _defaultIcon!;
+  static ByteDataLinuxIcon? getIcon(Uint8List? icon) {
+    return icon?.let((it) {
+      final iconData = decodeImage(it);
+      if (iconData == null) {
+        return null;
+      }
+      return ByteDataLinuxIcon(
+        LinuxRawIconData(
+          data: iconData.getBytes(),
+          width: iconData.width,
+          height: iconData.height,
+          channels: 4,
+          hasAlpha: true,
+        ),
+      );
+    });
   }
 }

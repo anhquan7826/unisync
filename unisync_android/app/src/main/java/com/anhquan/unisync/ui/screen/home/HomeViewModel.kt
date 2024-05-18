@@ -39,9 +39,6 @@ class HomeViewModel : ViewModel(), Device.DeviceEventListener {
 
     val thisDeviceInfo = ConfigUtil.Device.getDeviceInfo()
 
-    var pairedDevices: List<Device> = listOf()
-        private set
-
     data class HomeState(
         val pairedDevices: List<Device> = listOf(),
         val isOnline: Boolean = false,
