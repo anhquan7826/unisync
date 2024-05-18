@@ -57,7 +57,6 @@ object NotificationUtil {
                     ).apply {
                         description = "This channel is used for Find my phone notification."
                         lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                        importance = NotificationManager.IMPORTANCE_HIGH
                     },
                     NotificationChannel(
                         CHANNEL_ID_SFTP,
@@ -65,6 +64,13 @@ object NotificationUtil {
                         NotificationManager.IMPORTANCE_DEFAULT
                     ).apply {
                         description = "This channel is used for SFTP server notification."
+                        lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    }, NotificationChannel(
+                        CHANNEL_ID_PROGRESS,
+                        "File transfer Notification",
+                        NotificationManager.IMPORTANCE_LOW,
+                    ).apply {
+                        description = "This channel is used for File transfer notification."
                         lockscreenVisibility = Notification.VISIBILITY_PUBLIC
                     }
                 )
@@ -142,11 +148,13 @@ object NotificationUtil {
             setContentTitle(title)
             setContentText(text)
             setSmallIcon(if (download) R.drawable.download else R.drawable.upload)
-            setProgress(
-                100,
-                (progress * 100).toInt(),
-                false,
-            )
+            if (progress < 1) {
+                setProgress(
+                    100,
+                    (progress * 100).toInt(),
+                    false,
+                )
+            }
         }.build()
     }
 }

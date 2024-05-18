@@ -87,7 +87,9 @@ class DeviceConnection(
         })
     }
 
-    fun send(message: DeviceMessage, payload: Payload? = null, onProgress: ((Float) -> Unit)? = null) {
+    fun send(
+        message: DeviceMessage, payload: Payload? = null, onProgress: ((Float) -> Unit)? = null
+    ) {
         if (isConnected) {
             runSingle(callback = {
                 writer.apply {
@@ -115,6 +117,7 @@ class DeviceConnection(
                                 infoLog("Sending payload of size ${payload.size}...")
                                 var byteRead: Int
                                 var progress = 0
+                                var prevProgress = 0
                                 do {
                                     val buffer = ByteArray(min(payload.size - progress, 4096))
                                     byteRead = payload.stream.read(buffer)
@@ -122,7 +125,10 @@ class DeviceConnection(
                                         payloadOutput.write(buffer)
                                         payloadOutput.flush()
                                         progress += byteRead
-                                        onProgress?.invoke(progress.toFloat() / payload.size)
+                                        if (progress - prevProgress > (payload.size * 0.05) || progress == payload.size) {
+                                            onProgress?.invoke(progress.toFloat() / payload.size)
+                                            prevProgress = progress
+                                        }
                                     }
                                 } while (byteRead > 0)
                                 payload.stream.close()

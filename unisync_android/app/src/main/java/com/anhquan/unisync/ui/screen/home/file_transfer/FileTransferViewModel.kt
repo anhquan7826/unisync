@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.anhquan.unisync.R
 import com.anhquan.unisync.constants.Status
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.storage.StoragePlugin
@@ -65,8 +66,8 @@ class FileTransferViewModel : ViewModel(), Device.DeviceEventListener {
             NotificationUtil.apply {
                 showNotification(
                     file.hashCode(), buildProgressNotification(
-                        context,
-                        title = "Downloading...",
+                        context, title = if (it == 1F) context.getString(R.string.downloaded)
+                        else context.getString(R.string.downloading),
                         text = file.name,
                         progress = it
                     )
@@ -82,7 +83,9 @@ class FileTransferViewModel : ViewModel(), Device.DeviceEventListener {
                 showNotification(
                     uri.hashCode(), buildProgressNotification(
                         context,
-                        title = "Downloading...",
+                        title = if (it == 1F) context.getString(R.string.uploaded) else context.getString(
+                            R.string.uploading
+                        ),
                         text = "File",
                         progress = it
                     )

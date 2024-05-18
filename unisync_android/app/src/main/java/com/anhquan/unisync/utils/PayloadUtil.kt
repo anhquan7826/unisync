@@ -12,17 +12,26 @@ fun getPayloadStream(address: String, port: Int, callback: (InputStream) -> Unit
     }
 }
 
-fun getPayloadData(payload: DeviceConnection.Payload, onProgress: ((Float) -> Unit)? = null, onDone: (() -> Unit)? = null, onReceive: (ByteArray) -> Unit) {
+fun getPayloadData(
+    payload: DeviceConnection.Payload,
+    onProgress: ((Float) -> Unit)? = null,
+    onDone: (() -> Unit)? = null,
+    onReceive: (ByteArray) -> Unit
+) {
     ThreadHelper.run {
         try {
             infoLog("Start getting payload data of size ${payload.size}...")
             var progress = 0
+            var prevProgress = 0
             while (true) {
                 val buffer = ByteArray(min(4096, payload.size - progress))
                 val byteRead = payload.stream.read(buffer)
                 progress += byteRead
                 onReceive(buffer)
-                onProgress?.invoke(progress.toFloat() / payload.size)
+                if (progress - prevProgress > (payload.size * 0.05) || progress == payload.size) {
+                    onProgress?.invoke(progress.toFloat() / payload.size)
+                    prevProgress = progress
+                }
                 if (progress >= payload.size) break
             }
             payload.stream.close()

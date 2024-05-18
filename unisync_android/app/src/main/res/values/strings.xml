@@ -50,4 +50,8 @@
     <string name="shut_down">Shut down</string>
     <string name="restart">Restart</string>
     <string name="lock">Lock</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="downloading">Downloading...</string>
+    <string name="uploaded">Uploaded</string>
+    <string name="uploading">Uploading...</string>
 </resources>
