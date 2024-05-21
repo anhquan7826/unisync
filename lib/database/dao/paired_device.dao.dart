@@ -22,7 +22,7 @@ abstract class PairedDeviceDao {
   @Query('SELECT COUNT(id) FROM ${DBTables.PAIRED_DEVICES} WHERE id = :id')
   Future<int?> exist(String id);
 
-  @Query('SELECT * FROM ${DBTables.PAIRED_DEVICES} ORDER BY lastAccessed DESC LIMIT 1')
+  @Query('SELECT * FROM ${DBTables.PAIRED_DEVICES} WHERE unpaired = 0 ORDER BY lastAccessed DESC LIMIT 1')
   Future<PairedDeviceEntity?> getLastUsed();
 
   @Query('UPDATE ${DBTables.PAIRED_DEVICES} SET lastAccessed = :lastAccessed WHERE id = :id')

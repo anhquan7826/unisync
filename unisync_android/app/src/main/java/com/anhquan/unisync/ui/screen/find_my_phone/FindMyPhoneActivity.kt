@@ -1,5 +1,6 @@
 package com.anhquan.unisync.ui.screen.find_my_phone
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -19,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.anhquan.unisync.R
+import com.anhquan.unisync.core.plugins.ring_phone.RingPhoneService
 import com.anhquan.unisync.ui.theme.setView
 
 
@@ -54,6 +56,7 @@ class FindMyPhoneActivity : ComponentActivity() {
                         .padding(bottom = 16.dp)
                 )
                 TextButton(onClick = {
+                    stopService(Intent(this@FindMyPhoneActivity, RingPhoneService::class.java))
                     finish()
                 }) {
                     Text(stringResource(R.string.found_it))

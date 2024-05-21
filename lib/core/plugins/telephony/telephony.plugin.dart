@@ -29,14 +29,17 @@ class TelephonyPlugin extends UnisyncPlugin {
     final c = completer<List<Conversation>>();
     sendRequest(_Method.GET_MESSAGES);
     messages.listenCancellable((event) {
-      if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
-          event.header.method == _Method.GET_MESSAGES) {
-        final conversations = (event.data['conversations'] as List)
+      if (event.header.type == DeviceMessageHeader.Type.RESPONSE) {
+        if (event.header.method == _Method.GET_MESSAGES) {
+          final conversations = (event.data['conversations'] as List)
             .map(
               (e) => Conversation.fromJson(e),
             )
             .toList();
-        complete(c, value: conversations);
+          complete(c, value: conversations);
+        } else if (event.header.status == DeviceMessageHeader.Status.ERROR) {
+          completeError(c, error: Exception('No Permission'));
+        }
         return true;
       }
       return false;

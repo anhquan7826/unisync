@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/core/device.dart';
 import 'package:unisync/models/media/media.model.dart';
 
@@ -10,6 +11,7 @@ part 'gallery.state.freezed.dart';
 class GalleryState with _$GalleryState {
   const factory GalleryState({
     Device? device,
+    @Default(Status.loading) Status status,
     @Default([]) List<(Media, Uint8List?)> media,
   }) = _GalleryState;
 }

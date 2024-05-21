@@ -34,6 +34,13 @@ class FileTransferCubit extends Cubit<FileTransferState> with BaseCubit {
     }
   }
 
+  void stop() {
+    _plugin.stopServer();
+    safeEmit(state.copyWith(
+      status: Status.idle,
+    ));
+  }
+
   Future<void> refresh() async {
     safeEmit(state.copyWith(
       status: Status.loading,

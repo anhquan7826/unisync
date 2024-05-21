@@ -29,7 +29,7 @@ interface PairedDeviceDao {
     @Query("SELECT COUNT(id) FROM paired_devices WHERE id = :id")
     fun exist(id: String): Single<Int>
 
-    @Query("SELECT * FROM paired_devices ORDER BY lastAccessed DESC LIMIT 1")
+    @Query("SELECT * FROM paired_devices WHERE unpaired = 0 ORDER BY lastAccessed DESC LIMIT 1")
     fun getLastUsed(): Single<List<PairedDeviceEntity>>
 
     @Query("UPDATE paired_devices SET lastAccessed = :lastAccessed WHERE id = :id")

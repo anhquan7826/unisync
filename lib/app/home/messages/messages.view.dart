@@ -8,6 +8,8 @@ import 'package:unisync/app/home/messages/messages.state.dart';
 import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/components/resources/resources.dart';
 import 'package:unisync/components/widgets/clickable.dart';
+import 'package:unisync/components/widgets/loading_view.dart';
+import 'package:unisync/components/widgets/no_permission_view.dart';
 import 'package:unisync/models/telephony/telephony.model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/scope.ext.dart';
@@ -28,8 +30,11 @@ class _MessagesScreenState extends State<MessagesScreen>
     return BlocBuilder<MessagesCubit, MessagesState>(
       builder: (context, state) {
         if (state.status == Status.loading) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return const LoadingView();
+        }
+        if (state.status == Status.error) {
+          return NoPermissionView(
+            onReload: getCubit<MessagesCubit>().load,
           );
         }
         return Row(
@@ -222,12 +227,17 @@ class _MessagesScreenState extends State<MessagesScreen>
 
   Widget buildMessage(Message m) {
     Widget buildTimestamp(int epoch) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          formatTimestamp(epoch),
-          style: context.labelM.copyWith(
-            color: Colors.grey,
+      return Flexible(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 12,
+          ),
+          child: Text(
+            formatTimestamp(epoch),
+            style: context.labelM.copyWith(
+              color: Colors.grey,
+            ),
           ),
         ),
       );
@@ -237,18 +247,22 @@ class _MessagesScreenState extends State<MessagesScreen>
       alignment: m.from == null ? Alignment.centerRight : Alignment.centerLeft,
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (m.from == null) buildTimestamp(m.timestamp),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: m.from == null
-                  ? Colors.grey.withOpacity(0.5)
-                  : Color(R.colors.main_color).withOpacity(0.25),
+          Flexible(
+            flex: 2,
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: m.from == null
+                    ? Colors.grey.withOpacity(0.5)
+                    : Color(R.colors.main_color).withOpacity(0.25),
+              ),
+              child: Text(m.content),
             ),
-            child: Text(m.content),
           ),
           if (m.from != null) buildTimestamp(m.timestamp),
         ],

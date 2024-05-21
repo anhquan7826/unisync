@@ -217,6 +217,7 @@ class _StatusScreenState extends State<StatusScreen>
                     fit: BoxFit.cover,
                   ),
             borderRadius: BorderRadius.circular(16),
+            boxShadow: shadow,
           ),
           padding: const EdgeInsets.all(16),
           duration: const Duration(milliseconds: 250),
@@ -339,6 +340,7 @@ class _StatusScreenState extends State<StatusScreen>
         onTap: onTap,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
+          boxShadow: shadow,
         ),
         child: Container(
           width: 256,
@@ -346,13 +348,6 @@ class _StatusScreenState extends State<StatusScreen>
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 16,
-                spreadRadius: 4,
-              )
-            ],
           ),
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -404,6 +399,14 @@ class _StatusScreenState extends State<StatusScreen>
       ),
     );
   }
+
+  List<BoxShadow> get shadow => [
+    BoxShadow(
+      blurRadius: 16,
+      spreadRadius: 2,
+      color: Colors.black.withOpacity(0.1),
+    ),
+  ];
 
   @override
   bool get wantKeepAlive => true;

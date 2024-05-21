@@ -25,12 +25,17 @@ class GalleryPlugin extends UnisyncPlugin {
     final cId = completer<List<Media>>();
     sendRequest(_method.GET_GALLERY);
     messages.listenCancellable((event) {
-      if (event.header.type == DeviceMessageHeader.Type.RESPONSE &&
-          event.header.method == _method.GET_GALLERY) {
-        complete(cId,
+      if (event.header.type == DeviceMessageHeader.Type.RESPONSE) {
+        if (event.header.method == _method.GET_GALLERY) {
+          complete(
+            cId,
             value: (event.data['gallery'] as List).map((e) {
               return Media.fromJson(e);
-            }).toList());
+            }).toList(),
+          );
+        } else if (event.header.status == DeviceMessageHeader.Status.ERROR) {
+          completeError(cId, error: Exception('No permission'));
+        }
         return true;
       } else {
         return false;
@@ -39,8 +44,11 @@ class GalleryPlugin extends UnisyncPlugin {
     return future(cId);
   }
 
-  Future<Uint8List> getThumbnail(int id,
-      [int width = 640, int height = 640]) async {
+  Future<Uint8List> getThumbnail(
+    int id, [
+    int width = 640,
+    int height = 640,
+  ]) async {
     final cId = completer<Uint8List>();
     sendRequest(
       _method.GET_THUMBNAIL,

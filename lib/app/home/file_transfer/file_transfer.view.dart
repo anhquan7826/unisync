@@ -5,6 +5,8 @@ import 'package:unisync/app/home/file_transfer/file_transfer.cubit.dart';
 import 'package:unisync/app/home/file_transfer/file_transfer.state.dart';
 import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/components/widgets/clickable.dart';
+import 'package:unisync/components/widgets/loading_view.dart';
+import 'package:unisync/components/widgets/no_permission_view.dart';
 import 'package:unisync/models/file/file.model.dart';
 import 'package:unisync/utils/extensions/context.ext.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
@@ -28,83 +30,93 @@ class _FileTransferScreenState extends State<FileTransferScreen>
     return BlocBuilder<FileTransferCubit, FileTransferState>(
       builder: (context, state) {
         return Scaffold(
-          appBar: buildAppBar(state.path),
+          appBar: buildAppBar(state),
           body: buildBody(state),
         );
       },
     );
   }
 
-  PreferredSizeWidget buildAppBar(String path) {
+  PreferredSizeWidget buildAppBar(FileTransferState state) {
     return AppBar(
       title: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Device Browser'),
-          Text(
-            path,
-            style: context.labelM.copyWith(
-              color: Colors.grey,
+          if (state.status == Status.loaded)
+            Text(
+              state.path,
+              style: context.labelM.copyWith(
+                color: Colors.grey,
+              ),
             ),
-          ),
         ],
       ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            getCubit<FileTransferCubit>().refresh();
-          },
-          icon: const Icon(Icons.refresh_rounded),
-        ),
-        TextButton.icon(
-          onPressed: () {
-            getCubit<FileTransferCubit>().putFile();
-          },
-          icon: const Icon(Icons.upload_rounded),
-          label: const Text('Upload'),
-        ),
-        if (selectedFile != null && selectedFile!.type == UnisyncFile.Type.FILE)
-          TextButton.icon(
-            onPressed: () {
-              getCubit<FileTransferCubit>().getFiles(selectedFile!);
-            },
-            icon: const Icon(Icons.download_rounded),
-            label: const Text('Download'),
-          ),
-      ],
+      actions: state.status != Status.loaded
+          ? null
+          : [
+              IconButton(
+                onPressed: () {
+                  getCubit<FileTransferCubit>().stop();
+                },
+                icon: const Icon(Icons.stop),
+              ),
+              IconButton(
+                onPressed: () {
+                  getCubit<FileTransferCubit>().refresh();
+                },
+                icon: const Icon(Icons.refresh_rounded),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  getCubit<FileTransferCubit>().putFile();
+                },
+                icon: const Icon(Icons.upload_rounded),
+                label: const Text('Upload'),
+              ),
+              if (selectedFile != null &&
+                  selectedFile!.type == UnisyncFile.Type.FILE)
+                TextButton.icon(
+                  onPressed: () {
+                    getCubit<FileTransferCubit>().getFiles(selectedFile!);
+                  },
+                  icon: const Icon(Icons.download_rounded),
+                  label: const Text('Download'),
+                ),
+            ],
     );
   }
 
   Widget buildBody(FileTransferState state) {
-    if (state.status == Status.loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-    if (state.status == Status.error) {
+    if (state.status == Status.idle) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.warning_rounded,
-              size: 64,
+            Text(
+              'File server has stopped!',
+              style: context.titleM,
             ),
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Please grant storage permission in your phone to continue!',
-              ),
-            ),
+            const SizedBox(height: 16),
             FilledButton(
               onPressed: () {
                 getCubit<FileTransferCubit>().start();
               },
-              child: const Text('Reload'),
+              child: const Text('Start server'),
             ),
           ],
         ),
+      );
+    }
+    if (state.status == Status.loading) {
+      return const LoadingView();
+    }
+    if (state.status == Status.error) {
+      return NoPermissionView(
+        onReload: () {
+          getCubit<FileTransferCubit>().start();
+        },
       );
     }
     return Column(

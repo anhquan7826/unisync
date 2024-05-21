@@ -5,12 +5,12 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/app/home/gallery/gallery.state.dart';
+import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/core/device.dart';
 import 'package:unisync/core/plugins/gallery/gallery.plugin.dart';
 import 'package:unisync/models/media/media.model.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
 import 'package:unisync/utils/extensions/list.ext.dart';
-import 'package:unisync/utils/logger.dart';
 import 'package:unisync/utils/push_notification.dart';
 
 class GalleryCubit extends Cubit<GalleryState> with BaseCubit {
@@ -21,11 +21,21 @@ class GalleryCubit extends Cubit<GalleryState> with BaseCubit {
   final Device device;
 
   Future<void> getGallery() async {
-    final gallery = await device.getPlugin<GalleryPlugin>().getGallery();
-    safeEmit(state.copyWith(
-      media: gallery.map((e) => (e, null)).toList(),
-    ));
-    _loadThumbnails();
+    try {
+      safeEmit(state.copyWith(
+        status: Status.loading,
+      ));
+      final gallery = await device.getPlugin<GalleryPlugin>().getGallery();
+      safeEmit(state.copyWith(
+        status: Status.loaded,
+        media: gallery.map((e) => (e, null)).toList(),
+      ));
+      _loadThumbnails();
+    } on Exception catch (e) {
+      safeEmit(state.copyWith(
+        status: Status.error,
+      ));
+    }
   }
 
   Future<void> _loadThumbnails() async {

@@ -71,7 +71,7 @@ class StoragePlugin extends UnisyncPlugin {
   }
 
   final _server = FileServer();
-  late final UnisyncSFTPClient _client;
+  UnisyncSFTPClient? _client;
 
   Future<void> startServer() {
     final c = completer();
@@ -88,7 +88,7 @@ class StoragePlugin extends UnisyncPlugin {
             username: username,
             password: password,
           );
-          _client.connect().whenComplete(() {
+          _client!.connect().whenComplete(() {
             complete(c, value: null);
           });
         } else if (event.header.status == DeviceMessageHeader.Status.ERROR) {
@@ -101,12 +101,13 @@ class StoragePlugin extends UnisyncPlugin {
     return future(c);
   }
 
-  Future<void> stopServer() async {
+  void stopServer() {
     sendRequest(_method.STOP_SERVER);
+    _client = null;
   }
 
   Future<List<UnisyncFile>> list(String path) async {
-    return (await _client.list(path)).map((e) {
+    return (await _client!.list(path)).map((e) {
       return UnisyncFile(
         name: e.filename,
         type: () {
@@ -125,8 +126,8 @@ class StoragePlugin extends UnisyncPlugin {
   }
 
   Future<void> put(String remoteDest, String localSource, {void Function(double)? onProgress}) =>
-      _client.put(remoteDest, localSource, onProgress: onProgress);
+      _client!.put(remoteDest, localSource, onProgress: onProgress);
 
   Future<void> get(String remoteSource, String localDest, {void Function(double)? onProgress}) =>
-      _client.get(remoteSource, localDest, onProgress: onProgress);
+      _client!.get(remoteSource, localDest, onProgress: onProgress);
 }

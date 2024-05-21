@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:unisync/app/home/gallery/gallery.cubit.dart';
 import 'package:unisync/app/home/gallery/gallery.state.dart';
+import 'package:unisync/components/enums/status.dart';
 import 'package:unisync/components/widgets/clickable.dart';
 import 'package:unisync/components/widgets/image.dart';
+import 'package:unisync/components/widgets/loading_view.dart';
+import 'package:unisync/components/widgets/no_permission_view.dart';
 import 'package:unisync/utils/extensions/state.ext.dart';
 
 class GalleryScreen extends StatefulWidget {
@@ -33,6 +36,14 @@ class _GalleryScreenState extends State<GalleryScreen>
       ),
       body: BlocBuilder<GalleryCubit, GalleryState>(
         builder: (context, state) {
+          if (state.status == Status.loading) {
+            return const LoadingView();
+          }
+          if (state.status == Status.error) {
+            return NoPermissionView(
+              onReload: getCubit<GalleryCubit>().getGallery,
+            );
+          }
           return GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 6,

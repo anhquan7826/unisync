@@ -9,8 +9,6 @@ import 'package:unisync/models/telephony/telephony.model.dart';
 import 'package:unisync/utils/extensions/cubit.ext.dart';
 import 'package:unisync/utils/extensions/iterable.ext.dart';
 import 'package:unisync/utils/extensions/list.ext.dart';
-import 'package:unisync/utils/extensions/scope.ext.dart';
-import 'package:unisync/utils/logger.dart';
 
 class MessagesCubit extends Cubit<MessagesState> with BaseCubit {
   MessagesCubit(this.device)
@@ -26,19 +24,25 @@ class MessagesCubit extends Cubit<MessagesState> with BaseCubit {
     safeEmit(state.copyWith(
       status: Status.loading,
     ));
-    final conversations = (await device
-            .getPlugin<TelephonyPlugin>()
-            .getAllConversations())
-        .map((e) {
-      return e.copyWith(
-        messages: [...e.messages]..sort((a, b) => a.timestamp - b.timestamp),
-      );
-    }).toList()
-      ..sort((a, b) => a.timestamp - b.timestamp);
-    safeEmit(state.copyWith(
-      status: Status.loaded,
-      conversations: conversations,
-    ));
+    try {
+      final conversations = (await device
+              .getPlugin<TelephonyPlugin>()
+              .getAllConversations())
+          .map((e) {
+        return e.copyWith(
+          messages: [...e.messages]..sort((a, b) => a.timestamp - b.timestamp),
+        );
+      }).toList()
+        ..sort((a, b) => a.timestamp - b.timestamp);
+      safeEmit(state.copyWith(
+        status: Status.loaded,
+        conversations: conversations,
+      ));
+    } on Exception catch (e) {
+      safeEmit(state.copyWith(
+        status: Status.error,
+      ));
+    }
   }
 
   void _listen() {
