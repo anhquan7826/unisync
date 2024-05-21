@@ -6,6 +6,7 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
+    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -46,6 +47,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Unisync"
         tools:targetApi="31">
+        <service
+            android:name=".core.plugins.ring_phone.RingPhoneService"
+            android:enabled="true"
+            android:exported="false" />
+
         <activity
             android:name=".ui.screen.home.remote_ssh.RemoteSSHActivity"
             android:exported="false" />
@@ -54,8 +60,8 @@
             android:name=".core.plugins.storage.SftpService"
             android:enabled="true"
             android:exported="false"
-            android:permission="android.permission.MANAGE_EXTERNAL_STORAGE"
-            android:foregroundServiceType="dataSync"/>
+            android:foregroundServiceType="dataSync"
+            android:permission="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
         <activity
             android:name=".ui.screen.sharing.SharingActivity"
@@ -88,7 +94,8 @@
             android:excludeFromRecents="true"
             android:exported="false"
             android:launchMode="singleInstance"
-            android:showOnLockScreen="true" />
+            android:showOnLockScreen="true"
+            android:turnScreenOn="true"/>
         <activity
             android:name=".ui.screen.home.file_transfer.FileTransferActivity"
             android:exported="false" />

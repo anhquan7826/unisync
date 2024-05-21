@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.NotificationCompat
 import com.anhquan.unisync.R
 import com.anhquan.unisync.UnisyncActivity
 import com.anhquan.unisync.ui.screen.find_my_phone.FindMyPhoneActivity
@@ -104,15 +105,13 @@ object NotificationUtil {
         return Notification.Builder(context, CHANNEL_ID_RING_PHONE)
             .setSmallIcon(R.drawable.phone_ring)
             .setContentTitle(context.getString(R.string.found_my_phone))
+            .setCategory(NotificationCompat.CATEGORY_CALL)
             .setAutoCancel(true)
             .setFullScreenIntent(
                 PendingIntent.getActivity(
                     context,
-                    1,
-                    Intent(context, FindMyPhoneActivity::class.java).apply {
-//                        addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    },
+                    5,
+                    Intent(context, FindMyPhoneActivity::class.java),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                 ), true
             )
