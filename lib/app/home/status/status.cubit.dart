@@ -41,6 +41,10 @@ class StatusCubit extends Cubit<StatusState> with BaseCubit {
     ));
   }
 
+  void reloadStatus() {
+    device.getPlugin<StatusPlugin>().sendStatusRequest();
+  }
+
   void ringMyPhone() {
     device.getPlugin<RingPhonePlugin>().ringMyPhone();
   }

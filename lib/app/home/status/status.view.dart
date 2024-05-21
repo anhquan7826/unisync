@@ -26,6 +26,17 @@ class _StatusScreenState extends State<StatusScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            onPressed: getCubit<StatusCubit>().reloadStatus,
+            icon: const Icon(Icons.replay),
+          ),
+        ],
+      ),
+      extendBodyBehindAppBar: true,
       body: BlocBuilder<StatusCubit, StatusState>(
         builder: (context, state) {
           return Stack(
