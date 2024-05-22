@@ -50,7 +50,10 @@
         <activity
             android:name=".core.plugins.clipboard.ClipboardTransparentActivity"
             android:exported="false"
-            android:theme="@style/Theme.Unisync.Transparent"/>
+            android:theme="@style/Theme.Unisync.Transparent"
+            android:configChanges="orientation|screenSize"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"/>
 
         <service
             android:name=".core.plugins.ring_phone.RingPhoneService"
