@@ -57,8 +57,7 @@ class StatusPlugin(
                 ) {
                     permissions.add(Manifest.permission.POST_NOTIFICATIONS)
                 }
-            }
-            if (ContextCompat.checkSelfPermission(
+            } else if (ContextCompat.checkSelfPermission(
                     context,
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 ) != PackageManager.PERMISSION_GRANTED

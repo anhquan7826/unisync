@@ -9,7 +9,7 @@
         <item name="android:textColorPrimary">@android:color/black</item>
     </style>
 
-    <style name="Theme.Unisync.Transparent" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Unisync.Transparent" parent="Theme.AppCompat.NoActionBar">
         <item name="android:background">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

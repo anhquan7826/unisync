@@ -193,11 +193,11 @@ class HomeActivity : ComponentActivity() {
                             )
                             Text(viewModel.thisDeviceInfo.name)
                         }
-                        IconButton(onClick = {
-                            renameDialog = true
-                        }) {
-                            Icon(painterResource(id = R.drawable.edit), contentDescription = null)
-                        }
+//                        IconButton(onClick = {
+//                            renameDialog = true
+//                        }) {
+//                            Icon(painterResource(id = R.drawable.edit), contentDescription = null)
+//                        }
                     }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

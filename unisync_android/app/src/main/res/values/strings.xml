@@ -55,4 +55,5 @@
     <string name="uploaded">Uploaded</string>
     <string name="uploading">Uploading...</string>
     <string name="found_it">Found it</string>
+    <string name="clipboard_sent">Clipboard sent!</string>
 </resources>

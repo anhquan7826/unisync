@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import com.anhquan.unisync.core.DeviceDiscovery
+import com.anhquan.unisync.core.plugins.clipboard.ClipboardTileService
 import com.anhquan.unisync.utils.NotificationUtil
 import com.anhquan.unisync.utils.infoLog
 
@@ -31,6 +32,7 @@ class UnisyncService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startService(Intent(this, ClipboardTileService::class.java))
         if (intent != null) {
             val command = intent.getStringExtra("command")
             when (command) {
@@ -41,8 +43,9 @@ class UnisyncService : Service() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        stopService(Intent(this, ClipboardTileService::class.java))
         deviceDiscovery.stop()
+        super.onDestroy()
         infoLog("${this::class.simpleName}: service destroyed.")
     }
 }

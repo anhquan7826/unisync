@@ -229,8 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildPairedDevices(HomeState state) {
-    Widget buildDevice(Device device,
-        {bool isSelected = false, void Function()? onTap}) {
+    Widget buildDevice(
+      Device device, {
+      bool isSelected = false,
+      void Function()? onTap,
+    }) {
       return Clickable(
         key: GlobalKey(),
         decoration: BoxDecoration(
@@ -311,33 +314,33 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Clickable(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          onTap: () {
-                            showDialog<String?>(
-                              context: context,
-                              builder: (context) {
-                                return _EditNameDialog(
-                                  previousName: state.myDevice?.name,
-                                );
-                              },
-                            ).then((value) {
-                              if (value != null) {
-                                getCubit<HomeCubit>().renameMyDevice(value);
-                              }
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(2),
-                            child: UImage.asset(
-                              R.vectors.edit,
-                              width: 14,
-                              height: 14,
-                            ),
-                          ),
-                        ),
+                        // Clickable(
+                        //   decoration: BoxDecoration(
+                        //     borderRadius: BorderRadius.circular(16),
+                        //   ),
+                        //   onTap: () {
+                        //     showDialog<String?>(
+                        //       context: context,
+                        //       builder: (context) {
+                        //         return _EditNameDialog(
+                        //           previousName: state.myDevice?.name,
+                        //         );
+                        //       },
+                        //     ).then((value) {
+                        //       if (value != null) {
+                        //         getCubit<HomeCubit>().renameMyDevice(value);
+                        //       }
+                        //     });
+                        //   },
+                        //   child: Padding(
+                        //     padding: const EdgeInsets.all(2),
+                        //     child: UImage.asset(
+                        //       R.vectors.edit,
+                        //       width: 14,
+                        //       height: 14,
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                 ],

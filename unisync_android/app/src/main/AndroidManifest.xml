@@ -6,7 +6,6 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
-    <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -35,6 +34,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <application
         android:name=".UnisyncApplication"
         android:allowBackup="false"
@@ -47,6 +47,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Unisync"
         tools:targetApi="31">
+        <activity
+            android:name=".core.plugins.clipboard.ClipboardTransparentActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Unisync.Transparent"/>
+
         <service
             android:name=".core.plugins.ring_phone.RingPhoneService"
             android:enabled="true"
@@ -62,6 +67,16 @@
             android:exported="false"
             android:foregroundServiceType="dataSync"
             android:permission="android.permission.MANAGE_EXTERNAL_STORAGE" />
+        <service
+            android:name=".core.plugins.clipboard.ClipboardTileService"
+            android:exported="true"
+            android:icon="@drawable/clipboards"
+            android:label="@string/send_clipboard"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name=".ui.screen.sharing.SharingActivity"
@@ -95,7 +110,7 @@
             android:exported="false"
             android:launchMode="singleInstance"
             android:showOnLockScreen="true"
-            android:turnScreenOn="true"/>
+            android:turnScreenOn="true" />
         <activity
             android:name=".ui.screen.home.file_transfer.FileTransferActivity"
             android:exported="false" />
