@@ -19,14 +19,14 @@ import com.anhquan.unisync.models.DeviceMessage
 import com.anhquan.unisync.utils.ConfigUtil
 import com.anhquan.unisync.utils.infoLog
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.subjects.PublishSubject
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class Device private constructor(
     val context: Context, val info: DeviceInfo
 ) : DeviceConnection.ConnectionListener {
     companion object {
         private val instances = mutableMapOf<DeviceInfo, Device>()
-        val instancesNotifier = PublishSubject.create<List<Device>>()
+        val instancesNotifier = BehaviorSubject.create<List<Device>>()
 
         fun of(context: Context, info: DeviceInfo): Device {
             if (instances.containsKey(info)) return instances[info]!!

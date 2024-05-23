@@ -2,10 +2,12 @@ package com.anhquan.unisync.core.plugins.ring_phone
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.IBinder
 import com.anhquan.unisync.R
 import com.anhquan.unisync.utils.NotificationUtil
@@ -38,12 +40,21 @@ class RingPhoneService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val notification = NotificationUtil.buildFindMyPhoneNotification(this)
-        startForeground(5, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(FOREGROUND_SERVICE_TYPE_SHORT_SERVICE, notification)
+        } else {
+            startForeground(1, notification)
+        }
         startPlaying()
         return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder?  = null
+
+    override fun onTimeout(startId: Int) {
+        super.onTimeout(startId)
+        stopSelf()
+    }
 
     override fun onDestroy() {
         stopPlaying()

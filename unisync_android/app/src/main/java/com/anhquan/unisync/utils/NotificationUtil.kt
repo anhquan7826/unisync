@@ -110,7 +110,7 @@ object NotificationUtil {
             .setFullScreenIntent(
                 PendingIntent.getActivity(
                     context,
-                    5,
+                    0,
                     Intent(context, FindMyPhoneActivity::class.java),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
                 ), true

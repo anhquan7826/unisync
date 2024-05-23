@@ -5,6 +5,7 @@ import android.app.WallpaperManager
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
+import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.anhquan.unisync.core.Device
@@ -57,12 +58,23 @@ class StatusPlugin(
                 ) {
                     permissions.add(Manifest.permission.POST_NOTIFICATIONS)
                 }
-            } else if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+                }
+            } else {
+                if (!Environment.isExternalStorageManager()) {
+                    permissions.add(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+                }
+                if (ContextCompat.checkSelfPermission(context,
+                    Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                    permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
+                }
             }
             return permissions
         }

@@ -37,7 +37,7 @@ fun UDialog(
 ) {
     AlertDialog(onDismissRequest = onDismiss) {
         Card(
-            shape = RoundedCornerShape(24.dp)
+            shape = RoundedCornerShape(24.dp),
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),

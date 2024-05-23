@@ -11,7 +11,6 @@ import com.anhquan.unisync.core.plugins.clipboard.ClipboardPlugin
 import com.anhquan.unisync.core.plugins.status.StatusPlugin
 import com.anhquan.unisync.core.plugins.volume.VolumePlugin
 import com.anhquan.unisync.utils.ConfigUtil
-import com.anhquan.unisync.utils.debugLog
 import com.anhquan.unisync.utils.execute
 import com.anhquan.unisync.utils.listen
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -27,7 +26,6 @@ class HomeViewModel : ViewModel(), Device.DeviceEventListener {
     var device: Device
         get() = _device
         set(value) {
-            debugLog("_device is set to $value")
             if (this::_device.isInitialized && _device == value) return
             volumeDisposable?.dispose()
             if (this::_device.isInitialized) {

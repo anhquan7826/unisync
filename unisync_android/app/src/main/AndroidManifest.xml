@@ -58,7 +58,8 @@
         <service
             android:name=".core.plugins.ring_phone.RingPhoneService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="shortService"/>
 
         <activity
             android:name=".ui.screen.home.remote_ssh.RemoteSSHActivity"
