@@ -100,7 +100,6 @@ class Device private constructor(
     }
 
     override fun onMessage(message: DeviceMessage, payload: DeviceConnection.Payload?) {
-        infoLog("${this::class.simpleName}@${info.name}: Message received${if (message.payload != null) " with payload" else ""}:\n$message")
         if (message.type == DeviceMessage.Type.PAIR) {
             pairingHandler.handle(message)
         } else if (pairingHandler.state == PairingHandler.PairState.PAIRED) {

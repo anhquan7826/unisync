@@ -56,4 +56,5 @@
     <string name="uploading">Uploading...</string>
     <string name="found_it">Found it</string>
     <string name="clipboard_sent">Clipboard sent!</string>
+    <string name="feature_is_not_available_yet">Feature is not available yet!</string>
 </resources>

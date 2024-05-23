@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:clipboard_watcher/clipboard_watcher.dart';
 import 'package:unisync/utils/constants/device_types.dart';
 import 'package:unisync/utils/id_gen.dart';
 import 'package:unisync/utils/push_notification.dart';
@@ -23,6 +24,7 @@ class MainProcess {
       );
     }
     await PushNotification.setup();
+    clipboardWatcher.start();
   }
 
   Future<void> start() async {

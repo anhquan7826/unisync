@@ -3,6 +3,7 @@ package com.anhquan.unisync.ui.screen.home.file_transfer
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import com.anhquan.unisync.R
 import com.anhquan.unisync.constants.Status
@@ -76,22 +77,39 @@ class FileTransferViewModel : ViewModel(), Device.DeviceEventListener {
         }
     }
 
-    @SuppressLint("Recycle")
+    @SuppressLint("Recycle", "Range")
     fun sendFile(context: Context, uri: Uri) {
-        device.getPlugin(StoragePlugin::class.java).sendFile(uri, _currentDir) {
-            NotificationUtil.apply {
-                showNotification(
-                    uri.hashCode(), buildProgressNotification(
-                        context,
-                        title = if (it == 1F) context.getString(R.string.uploaded) else context.getString(
-                            R.string.uploading
-                        ),
-                        text = "File",
-                        progress = it
-                    )
-                )
+        val stream = context.contentResolver.openInputStream(uri) ?: return
+        context.contentResolver.query(
+            uri,
+            arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
+            null, null, null,
+        )?.run {
+            if (moveToFirst()) {
+                val fileName = getString(getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                val fileSize = getLong(getColumnIndex(OpenableColumns.SIZE))
+                device.getPlugin(StoragePlugin::class.java).sendFile(
+                    fileName,
+                    fileSize,
+                    stream,
+                    _currentDir
+                ) {
+                    NotificationUtil.apply {
+                        showNotification(
+                            uri.hashCode(), buildProgressNotification(
+                                context,
+                                title = if (it == 1F) context.getString(R.string.uploaded) else context.getString(
+                                    R.string.uploading
+                                ),
+                                text = fileName,
+                                progress = it
+                            )
+                        )
+                    }
+                }
             }
         }
+
     }
 
     fun refresh() {

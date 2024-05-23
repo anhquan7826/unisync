@@ -90,7 +90,7 @@ payload: $payload
 
     data class DeviceMessagePayload(
         val port: Int = -1,
-        val size: Int,
+        val size: Long,
     ) {
         override fun toString(): String {
             return """

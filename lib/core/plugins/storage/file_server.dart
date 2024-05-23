@@ -49,13 +49,16 @@ class FileServer {
 
   Stream<Uint8List> read(String path) async* {
     final file = File(_actualPath(path));
+    final stat = file.statSync();
     final access = await file.open();
-    var size = await access.length();
+    final size = stat.size;
+    var byteRead = 0;
     try {
-      while (size > 0) {
-        final bytesToRead = size < 4096 ? size : 4096;
+      while (byteRead < size) {
+        final bytesToRead = (size - byteRead) < 4096 ? (size - byteRead) : 4096;
+        await access.setPosition(byteRead);
         yield await access.read(bytesToRead);
-        size -= bytesToRead;
+        byteRead += bytesToRead;
       }
     } finally {
       await access.close();

@@ -110,7 +110,7 @@ class NotificationPlugin(
                     "big_text" to if (text == bigText) null else bigText
                 ), payload = picture?.let { p ->
                     DeviceConnection.Payload(
-                        size = p.size, stream = p.inputStream()
+                        size = p.size.toLong(), stream = p.inputStream()
                     )
                 })
             })

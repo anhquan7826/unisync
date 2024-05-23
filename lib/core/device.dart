@@ -132,8 +132,6 @@ class Device with ConnectionListener {
     if (_pairingHandler.state == PairState.paired ||
         message.type == DeviceMessage.Type.PAIR) {
       connection?.send(message, payload, onProgress);
-      infoLog('Device@${info.name}: Message sent:');
-      infoLog(message.toJson());
     }
   }
 

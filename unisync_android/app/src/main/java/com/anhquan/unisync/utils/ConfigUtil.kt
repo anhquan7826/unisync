@@ -103,19 +103,25 @@ object ConfigUtil {
     }
 
     object Command {
-        fun addCommand(deviceId: String, command: String) {
-            database.deviceCommandDao().add(
+        fun addCommand(deviceId: String, command: String):Completable {
+            return database.deviceCommandDao().add(
                 DeviceCommandEntity(
                     deviceId = deviceId, command = command
                 )
             )
         }
 
-        fun getAllCommands(deviceId: String, callback: (List<String>) -> Unit) {
-            database.deviceCommandDao().get(deviceId).listen {
-                callback(it.map { entity ->
-                    entity.command
-                })
+        fun removeCommand(deviceId: String, command: String): Completable {
+            return database.deviceCommandDao().remove(
+                DeviceCommandEntity(
+                    deviceId, command
+                )
+            )
+        }
+
+        fun getAllCommands(deviceId: String): Single<List<String>> {
+            return database.deviceCommandDao().get(deviceId).map {
+                it.map { e -> e.command }
             }
         }
     }

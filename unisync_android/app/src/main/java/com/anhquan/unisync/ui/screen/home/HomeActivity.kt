@@ -3,6 +3,7 @@ package com.anhquan.unisync.ui.screen.home
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
@@ -68,7 +69,6 @@ import com.anhquan.unisync.ui.composables.SliderTile
 import com.anhquan.unisync.ui.composables.TitledButton
 import com.anhquan.unisync.ui.composables.UDialog
 import com.anhquan.unisync.ui.screen.home.file_transfer.FileTransferActivity
-import com.anhquan.unisync.ui.screen.home.remote_ssh.RemoteSSHActivity
 import com.anhquan.unisync.ui.screen.home.run_command.RunCommandActivity
 import com.anhquan.unisync.ui.screen.pair.PairActivity
 import com.anhquan.unisync.ui.theme.setView
@@ -384,6 +384,11 @@ class HomeActivity : ComponentActivity() {
                                     title = stringResource(R.string.send_clipboard),
                                 ) {
                                     viewModel.sendClipboard()
+                                    Toast.makeText(
+                                        this@HomeActivity,
+                                        getString(R.string.clipboard_sent),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                             item {
@@ -403,14 +408,19 @@ class HomeActivity : ComponentActivity() {
                                     icon = painterResource(id = R.drawable.ssh),
                                     title = stringResource(R.string.ssh),
                                 ) {
-                                    startActivity(
-                                        Intent(
-                                            this@HomeActivity,
-                                            RemoteSSHActivity::class.java
-                                        ).apply {
-                                            putExtra("device", gson.toJson(viewModel.device.info))
-                                        }
-                                    )
+                                    Toast.makeText(
+                                        this@HomeActivity,
+                                        getString(R.string.feature_is_not_available_yet),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+//                                    startActivity(
+//                                        Intent(
+//                                            this@HomeActivity,
+//                                            RemoteSSHActivity::class.java
+//                                        ).apply {
+//                                            putExtra("device", gson.toJson(viewModel.device.info))
+//                                        }
+//                                    )
                                 }
                             }
                         }

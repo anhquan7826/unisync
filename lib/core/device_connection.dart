@@ -57,23 +57,28 @@ class DeviceConnection {
     );
   }
 
-  Future<void> send(DeviceMessage message, [Payload? payload, void Function(double)? onProgress]) async {
+  Future<void> send(
+    DeviceMessage message, [
+    Payload? payload,
+    void Function(double)? onProgress,
+  ]) async {
     if (_isConnected) {
       if (payload != null) {
         final payloadServer = await ServerSocket.bind(
           InternetAddress.anyIPv4,
           0,
         );
-        _socket.writeln(
-          message
-              .copyWith(
-                  payload: DeviceMessagePayload(
-                port: payloadServer.port,
-                size: payload.size,
-              ))
-              .toJson()
-              .toJsonString(),
+        message = message.copyWith(
+          payload: DeviceMessagePayload(
+            port: payloadServer.port,
+            size: payload.size,
+          ),
         );
+        _socket.writeln(
+          message.toJson().toJsonString(),
+        );
+        infoLog('Message sent:');
+        infoLog(message.toJson());
         infoLog('Opening server socket for payload...');
         final payloadSocket = await payloadServer.first;
         infoLog('Payload socket server found a connection!');
@@ -93,6 +98,8 @@ class DeviceConnection {
         _socket.writeln(
           message.toJson().toJsonString(),
         );
+        infoLog('Message sent:');
+        infoLog(message.toJson());
       }
     }
   }

@@ -11,9 +11,7 @@ import '../../device.dart';
 class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
   ClipboardPlugin(Device device)
       : super(device, type: DeviceMessage.Type.CLIPBOARD) {
-    clipboardWatcher
-      ..addListener(this)
-      ..start();
+    clipboardWatcher.addListener(this);
   }
 
   static const _method = (CLIPBOARD_CHANGED: 'clipboard_changed',);
@@ -51,8 +49,6 @@ class ClipboardPlugin extends UnisyncPlugin with ClipboardListener {
   @override
   void dispose() {
     super.dispose();
-    clipboardWatcher
-      ..stop()
-      ..removeListener(this);
+    clipboardWatcher.removeListener(this);
   }
 }

@@ -1,17 +1,14 @@
 package com.anhquan.unisync.core.plugins.storage
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.os.IBinder
-import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.anhquan.unisync.core.Device
@@ -28,6 +25,7 @@ import io.reactivex.rxjava3.core.Single
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 
 class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.STORAGE),
     ServiceConnection {
@@ -121,32 +119,20 @@ class StoragePlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.S
         }
     }
 
-    @SuppressLint("Recycle", "Range")
-    fun sendFile(uri: Uri, destination: String, onProgress: (Float) -> Unit) {
-        val stream = context.contentResolver.openInputStream(uri) ?: return
-        context.contentResolver.query(
-            uri,
-            arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
-            null, null, null,
-        )?.run {
-            if (moveToFirst()) {
-                val fileName = getString(getColumnIndex(OpenableColumns.DISPLAY_NAME))
-                val fileSize = getLong(getColumnIndex(OpenableColumns.SIZE))
-                sendRequest(
-                    Method.SEND_FILE,
-                    mapOf(
-                        "destination" to destination,
-                        "name" to fileName,
-                        "size" to fileSize,
-                    ),
-                    DeviceConnection.Payload(
-                        stream,
-                        fileSize.toInt()
-                    ),
-                    onProgress
-                )
-            }
-        }
+    fun sendFile(fileName: String, fileSize: Long, fileStream: InputStream, destination: String, onProgress: (Float) -> Unit) {
+        sendRequest(
+            Method.SEND_FILE,
+            mapOf(
+                "destination" to destination,
+                "name" to fileName,
+                "size" to fileSize,
+            ),
+            DeviceConnection.Payload(
+                fileStream,
+                fileSize
+            ),
+            onProgress
+        )
     }
 
     override fun onDispose() {

@@ -155,7 +155,7 @@ class GalleryPlugin(device: Device) :
             val size = queryImage(id)?.size ?: return null
             val uri = ContentUris.withAppendedId(collectionUri, id);
             val inputStream = context.contentResolver.openInputStream(uri) ?: return null
-            return DeviceConnection.Payload(inputStream, size.toInt())
+            return DeviceConnection.Payload(inputStream, size)
         } catch (e: IOException) {
             e.printStackTrace()
             return null
@@ -167,7 +167,7 @@ class GalleryPlugin(device: Device) :
             val uri = ContentUris.withAppendedId(collectionUri, id)
             val bitmap = context.contentResolver.loadThumbnail(uri, Size(width, height), null)
             return convertBitmapToByteArray(bitmap)?.let {
-                DeviceConnection.Payload(it.inputStream(), it.size)
+                DeviceConnection.Payload(it.inputStream(), it.size.toLong())
             }
         } catch (e: IOException) {
             e.printStackTrace()

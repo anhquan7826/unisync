@@ -28,7 +28,7 @@ class DeviceConnection(
 
     data class Payload(
         val stream: InputStream,
-        val size: Int
+        val size: Long
     )
 
     private val reader: BufferedReader = socket.inputStream.bufferedReader()
@@ -64,6 +64,7 @@ class DeviceConnection(
             fromJson(
                 it, DeviceMessage::class.java
             )?.let { message ->
+                infoLog("Message received${if (message.payload != null) " with payload" else ""}:\n$message")
                 if (message.payload != null) {
                     getPayloadStream(
                         ipAddress,
@@ -115,12 +116,12 @@ class DeviceConnection(
                                 payloadServer.close()
                                 val payloadOutput = payloadSocket.getOutputStream()
                                 infoLog("Sending payload of size ${payload.size}...")
-                                var byteRead: Int
-                                var progress = 0
-                                var prevProgress = 0
+                                var byteRead: Long
+                                var progress = 0L
+                                var prevProgress = 0L
                                 do {
-                                    val buffer = ByteArray(min(payload.size - progress, 4096))
-                                    byteRead = payload.stream.read(buffer)
+                                    val buffer = ByteArray(min(payload.size - progress, 4096L).toInt())
+                                    byteRead = payload.stream.read(buffer).toLong()
                                     if (byteRead > 0) {
                                         payloadOutput.write(buffer)
                                         payloadOutput.flush()

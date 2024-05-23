@@ -92,7 +92,7 @@ class StatusPlugin(
                 wallpaper?.let { w ->
                     DeviceConnection.Payload(
                         w.inputStream(),
-                        w.size
+                        w.size.toLong()
                     )
                 }
             )
@@ -119,7 +119,7 @@ class StatusPlugin(
             wallpaper?.let {
                 DeviceConnection.Payload(
                     it.inputStream(),
-                    it.size
+                    it.size.toLong()
                 )
             }
         )

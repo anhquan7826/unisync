@@ -5,6 +5,7 @@ import com.anhquan.unisync.constants.Status
 import com.anhquan.unisync.core.Device
 import com.anhquan.unisync.core.plugins.run_command.RunCommandPlugin
 import com.anhquan.unisync.utils.ConfigUtil
+import com.anhquan.unisync.utils.execute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,7 +21,7 @@ class RunCommandViewModel : ViewModel() {
     val state = _state.asStateFlow()
 
     fun getAll() {
-        ConfigUtil.Command.getAllCommands(deviceId) { commands ->
+        ConfigUtil.Command.getAllCommands(deviceId).execute { commands ->
             _state.update {
                 it.copy(
                     status = Status.Loaded, commands = commands.toSet()
@@ -30,7 +31,7 @@ class RunCommandViewModel : ViewModel() {
     }
 
     fun add(command: String) {
-        ConfigUtil.Command.addCommand(deviceId, command)
+        ConfigUtil.Command.addCommand(deviceId, command).execute()
         _state.update {
             it.copy(
                 commands = it.commands.plus(command)
@@ -40,5 +41,14 @@ class RunCommandViewModel : ViewModel() {
 
     fun execute(command: String) {
         Device.of(deviceId).getPlugin(RunCommandPlugin::class.java).execute(command)
+    }
+
+    fun delete(command: String) {
+        ConfigUtil.Command.removeCommand(deviceId, command).execute()
+        _state.update {
+            it.copy(
+                commands = it.commands.minus(command)
+            )
+        }
     }
 }

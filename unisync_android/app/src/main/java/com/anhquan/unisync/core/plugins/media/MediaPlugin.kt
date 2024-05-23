@@ -161,7 +161,7 @@ class MediaPlugin(
                 MediaMetadata.METADATA_KEY_ALBUM_ART
             ) ?: it.getBitmap(MediaMetadata.METADATA_KEY_ART)
             val bytes = convertBitmapToByteArray(bitmap) ?: return@let null
-            DeviceConnection.Payload(bytes.inputStream(), bytes.size)
+            DeviceConnection.Payload(bytes.inputStream(), bytes.size.toLong())
         })
     }
 

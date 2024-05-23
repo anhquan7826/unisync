@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.anhquan.unisync.R
@@ -96,6 +97,16 @@ class RunCommandActivity : ComponentActivity() {
                         ListItem(
                             headlineContent = {
                                 Text(it)
+                            }, trailingContent = {
+                                IconButton(onClick = {
+                                    viewModel.delete(it)
+                                }) {
+                                    Icon(
+                                        painterResource(id = R.drawable.delete),
+                                        contentDescription = null,
+                                        tint = Color.Red
+                                    )
+                                }
                             },
                             modifier = Modifier.clickable {
                                 viewModel.execute(it)
