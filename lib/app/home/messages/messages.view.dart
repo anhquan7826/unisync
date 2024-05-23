@@ -267,7 +267,7 @@ class _MessagesScreenState extends State<MessagesScreen>
                     ? Colors.grey.withOpacity(0.5)
                     : Color(R.colors.main_color).withOpacity(0.25),
               ),
-              child: Text(m.content),
+              child: SelectableText(m.content),
             ),
           ),
           if (m.from != null) buildTimestamp(m.timestamp),
