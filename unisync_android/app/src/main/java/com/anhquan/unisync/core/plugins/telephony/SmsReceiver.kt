@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.provider.Telephony
 import com.anhquan.unisync.models.Conversation
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 
 class SmsReceiver : BroadcastReceiver() {
     interface SmsListener {
@@ -36,16 +37,23 @@ class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (Telephony.Sms.Intents.SMS_RECEIVED_ACTION == intent.action) {
-            // Extract SMS information from the Intent
             for (smsMessage in Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
                 val timestamp = smsMessage.timestampMillis
                 val content = smsMessage.messageBody
                 val senderNumber = smsMessage.displayOriginatingAddress
+                val util = PhoneNumberUtil.getInstance()
                 listeners.forEach {
                     it.onSmsReceived(
                         Conversation.Message(
                         timestamp = timestamp,
-                        from = senderNumber,
+                        from = senderNumber.let { n ->
+                            try {
+                                val parsed = util.parse(n, null)
+                                parsed.nationalNumber.toString()
+                            } catch (_: Exception) {
+                                n
+                            }
+                        },
                         content = content
                     ))
                 }

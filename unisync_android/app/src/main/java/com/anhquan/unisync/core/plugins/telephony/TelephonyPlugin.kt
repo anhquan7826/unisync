@@ -12,7 +12,9 @@ import com.anhquan.unisync.core.DeviceConnection
 import com.anhquan.unisync.core.plugins.UnisyncPlugin
 import com.anhquan.unisync.models.Conversation
 import com.anhquan.unisync.models.DeviceMessage
+import com.anhquan.unisync.utils.gson
 import com.anhquan.unisync.utils.toMap
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 
 class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type.TELEPHONY),
     SmsReceiver.SmsListener {
@@ -38,19 +40,23 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
         super.listen(header, data, payload)
         when (header.method) {
             Method.GET_MESSAGES -> {
+                val json = gson.toJson(mapOf(
+                    "conversations" to (getConversations() ?: listOf()).map {
+                        toMap(it)
+                    }.toList()
+                )).toByteArray(Charsets.UTF_8)
                 sendResponse(
                     Method.GET_MESSAGES,
-                    mapOf(
-                        "conversations" to (getConversations() ?: listOf()).map {
-                            toMap(it)
-                        }.toList()
+                    mapOf(),
+                    DeviceConnection.Payload(
+                        json.inputStream(),
+                        json.size.toLong(),
                     )
                 )
             }
             Method.SEND_MESSAGE -> {
-                val recipient = data["to"].toString()
+                val recipient = "0${data["to"].toString()}"
                 val content = data["content"].toString()
-                // todo: cache message
                 smsManager.sendTextMessage(recipient, null, content, null, null)
             }
             Method.GET_CONTACT -> {
@@ -82,10 +88,10 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
     }
 
     private fun getConversations(): List<Conversation>? {
+        val util = PhoneNumberUtil.getInstance()
         val cursor =
             context.contentResolver.query(Telephony.Sms.Inbox.CONTENT_URI, null, null, null, null)
                 ?: return null
-        // todo: add cached messages and sort
         val result = mutableListOf<Conversation>()
         cursor.apply {
             val timestampSentIndex = getColumnIndex(Telephony.Sms.Inbox.DATE_SENT)
@@ -94,7 +100,14 @@ class TelephonyPlugin(device: Device) : UnisyncPlugin(device, DeviceMessage.Type
             val bodyIndex = getColumnIndex(Telephony.Sms.Inbox.BODY)
             while (moveToNext()) {
                 val timestamp = getString(timestampSentIndex) ?: getString(timestampReceivedIndex)
-                val number = getString(numberIndex)
+                val number = getString(numberIndex).let { n ->
+                    try {
+                        val parsed = util.parse(n, null)
+                        parsed.nationalNumber.toString()
+                    } catch (_: Exception) {
+                        n
+                    }
+                }
                 val name = number?.let { phoneNumberLookup(it)["name"] }
                 val content = getString(bodyIndex)
 

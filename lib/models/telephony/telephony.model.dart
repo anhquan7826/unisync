@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 part 'telephony.model.freezed.dart';
 

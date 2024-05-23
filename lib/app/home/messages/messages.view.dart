@@ -119,7 +119,13 @@ class _MessagesScreenState extends State<MessagesScreen>
                   style: context.bodyM.copyWith(fontWeight: FontWeight.w600),
                 ),
               Text(
-                state.currentConversation!.number,
+                state.currentConversation!.number.let((it) {
+                  if (state.currentConversation!.name != null) {
+                    return '0$it';
+                  } else {
+                    return it;
+                  }
+                }),
                 style: (state.currentConversation!.name != null)
                     ? context.bodyS.copyWith(
                         color: Colors.grey,
@@ -295,7 +301,7 @@ class _MessagesScreenState extends State<MessagesScreen>
 }
 
 class _NewConversationDialog extends StatefulWidget {
-  const _NewConversationDialog({super.key});
+  const _NewConversationDialog();
 
   @override
   State<_NewConversationDialog> createState() => _NewConversationDialogState();
