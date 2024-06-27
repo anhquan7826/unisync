@@ -3,10 +3,11 @@
         {
             "name": "Linux",
             "includePath": [
+                "${workspaceFolder}/**",
                 "${default}",
-                "/usr/include/gtk-4.0",
-                "/usr/include/glib-2.0",
-                "/usr/**"
+                "/usr/include/**",
+                "/usr/lib/**",
+                "${workspaceFolder}"
             ],
             "defines": [],
             "cStandard": "c17",

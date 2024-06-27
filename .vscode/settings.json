@@ -1,5 +1,5 @@
 {
-    "cmake.sourceDirectory": "/home/anhquan7826/Repositories/unisync/linux",
+    "cmake.sourceDirectory": "/home/anhquan7826/Desktop/unisync/unisync_linux",
     "cmake.configureOnOpen": true,
     "C_Cpp.default.compilerPath": "/usr/bin/clang",
     "cSpell.words": [
