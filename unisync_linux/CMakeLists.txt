@@ -7,6 +7,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED gtk4)
 
 pkg_search_module(UUID REQUIRED uuid)
+pkg_search_module(JSONGLIB REQUIRED json-glib-1.0)
 
 file(GLOB_RECURSE SOURCE src/*.c)
 add_executable(unisync_linux ${SOURCE})

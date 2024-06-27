@@ -1,9 +1,9 @@
 #include "device-info.h"
 #include <uuid/uuid.h>
 
-#define PROP_DEVICE_ID 1
-#define PROP_DEVICE_NAME 2
-#define PROP_DEVICE_TYPE 3
+#define PROP_DEVICE_INFO_ID 1
+#define PROP_DEVICE_INFO_NAME 2
+#define PROP_DEVICE_INFO_TYPE 3
 
 static GParamSpec *device_id_pspec = NULL;
 static GParamSpec *device_name_pspec = NULL;
@@ -25,15 +25,15 @@ static void u_device_info_get_property(GObject *object, guint property_id, GValu
     UDeviceInfo *self = U_DEVICE_INFO(object);
     switch (property_id)
     {
-    case PROP_DEVICE_ID:
+    case PROP_DEVICE_INFO_ID:
         g_value_set_string(value, self->id);
         break;
 
-    case PROP_DEVICE_NAME:
+    case PROP_DEVICE_INFO_NAME:
         g_value_set_string(value, self->name);
         break;
 
-    case PROP_DEVICE_TYPE:
+    case PROP_DEVICE_INFO_TYPE:
         g_value_set_string(value, self->device_type);
         break;
 
@@ -48,15 +48,15 @@ static void u_device_info_set_property(GObject *object, guint property_id, const
     UDeviceInfo *self = U_DEVICE_INFO(object);
     switch (property_id)
     {
-    case PROP_DEVICE_ID:
+    case PROP_DEVICE_INFO_ID:
         self->id = g_value_dup_string(value);
         break;
 
-    case PROP_DEVICE_NAME:
+    case PROP_DEVICE_INFO_NAME:
         self->name = g_value_dup_string(value);
         break;
 
-    case PROP_DEVICE_TYPE:
+    case PROP_DEVICE_INFO_TYPE:
         self->device_type = g_value_dup_string(value);
         break;
 
@@ -83,9 +83,9 @@ static void u_device_info_class_init(UDeviceInfoClass *klass)
     device_id_pspec = g_param_spec_string("device_id", "id", "Device identification", generate_new_uuid(), G_PARAM_READWRITE);
     device_name_pspec = g_param_spec_string("device_name", "name", "Device name", "", G_PARAM_READWRITE);
     device_type_pspec = g_param_spec_string("device_type", "type", "Device type", DEVICE_TYPE_LINUX, G_PARAM_READWRITE);
-    g_object_class_install_property(object_class, PROP_DEVICE_ID, device_id_pspec);
-    g_object_class_install_property(object_class, PROP_DEVICE_NAME, device_name_pspec);
-    g_object_class_install_property(object_class, PROP_DEVICE_TYPE, device_type_pspec);
+    g_object_class_install_property(object_class, PROP_DEVICE_INFO_ID, device_id_pspec);
+    g_object_class_install_property(object_class, PROP_DEVICE_INFO_NAME, device_name_pspec);
+    g_object_class_install_property(object_class, PROP_DEVICE_INFO_TYPE, device_type_pspec);
 }
 
 static void u_device_info_init(UDeviceInfo *self) {}

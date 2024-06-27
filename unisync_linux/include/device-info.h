@@ -5,7 +5,7 @@
 #define DEVICE_TYPE_LINUX "linux"
 #define DEVICE_TYPE_WINDOWS "windows"
 
-#define U_TYPE_DEVICE_INFO (u_device_info_get_type ())
+#define U_TYPE_DEVICE_INFO u_device_info_get_type()
 G_DECLARE_FINAL_TYPE (UDeviceInfo, u_device_info, U, DEVICE_INFO, GObject)
 
 UDeviceInfo* u_device_info_new_with_values (const gchar* name, const gchar* type);
