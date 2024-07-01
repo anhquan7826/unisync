@@ -8,7 +8,7 @@ struct _UMessage
     const gchar *type;
     UMessageHeader *header;
     UMessagePayload *payload;
-    GHashTable *body;
+    JsonObject *body;
 };
 
 struct _UMessageHeader
@@ -80,6 +80,9 @@ static void u_message_get_property(GObject *object, guint property_id, GValue *v
     case PROP_MESSAGE_PAYLOAD:
         g_value_set_object(value, message->payload);
         break;
+    case PROP_MESSAGE_BODY:
+        g_value_set_object(value, message->body);
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
         break;
@@ -104,6 +107,9 @@ static void u_message_set_property(GObject *object, guint property_id, GValue *v
     case PROP_MESSAGE_PAYLOAD:
         message->payload = U_MESSAGE_PAYLOAD(g_value_get_object(value));
         break;
+    case PROP_MESSAGE_BODY:
+        message->body = g_value_get_object(value);
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
         break;
@@ -119,11 +125,12 @@ static void u_message_class_init(UMessageClass *klass)
     message_type_pspec = g_param_spec_string("type", "type", "Message type", NULL, G_PARAM_READWRITE);
     message_header_pspec = g_param_spec_object("header", "header", "Messager header", U_TYPE_MESSAGE_HEADER, G_PARAM_READWRITE);
     message_payload_pspec = g_param_spec_object("payload", "payload", "Message payload", U_TYPE_MESSAGE_PAYLOAD, G_PARAM_READWRITE);
-    message_body_pspec = g_param_spec_hash("body", "body", "Message body", G_TYPE_STRING, G_TYPE_VARIANT, G_PARAM_READABLE);
+    message_body_pspec = g_param_spec_object("body", "body", "Message body", JSON_TYPE_OBJECT, G_PARAM_READABLE);
     g_object_class_install_property(gobject_class, PROP_MESSAGE_TIME, message_time_pspec);
     g_object_class_install_property(gobject_class, PROP_MESSAGE_TYPE, message_type_pspec);
     g_object_class_install_property(gobject_class, PROP_MESSAGE_HEADER, message_header_pspec);
     g_object_class_install_property(gobject_class, PROP_MESSAGE_PAYLOAD, message_payload_pspec);
+    g_object_class_install_property(gobject_class, PROP_MESSAGE_BODY, message_body_pspec);
 }
 
 static void u_message_init(UMessage *message)
@@ -244,20 +251,88 @@ static void u_message_payload_class_init(UMessagePayloadClass *klass)
 static void u_message_payload_init(UMessagePayload *payload)
 {}
 
-UMessage *u_message_new_with_values(int time, const gchar *type, const gchar *body, UMessageHeader *header, UMessagePayload *payload)
+UMessage *u_message_new_with_values(int time, const gchar *type, JsonObject *body, UMessageHeader *header, UMessagePayload *payload)
 {
     UMessage *message = g_object_new(U_TYPE_MESSAGE, NULL);
     message->time = time;
+    message->type = type;
     message->header = header;
     message->payload = payload;
-    // TODO: Convert body into a GHashTable and store it in the message.
+    message->body = body;
     return message;
 }
 
-UMessageHeader u_message_header_new_with_values(const gchar *type, const gchar *method, const gchar *status);
+UMessageHeader *u_message_header_new_with_values(const gchar *type, const gchar *method, const gchar *status)
+{
+    UMessageHeader *header = g_object_new(U_TYPE_MESSAGE_HEADER, NULL);
+    header->type = type;
+    header->method = method;
+    header->status = status;
+    return header;
+}
 
-UMessagePayload u_message_payload_new_with_values(int port, int size);
+UMessagePayload *u_message_payload_new_with_values(int port, int size)
+{
+    UMessagePayload *payload = g_object_new(U_TYPE_MESSAGE_PAYLOAD, NULL);
+    payload->port = port;
+    payload->size = size;
+    return payload;
+}
 
-const char *u_message_to_json(UMessage *self);
+JsonObject *u_message_to_json(UMessage *self)
+{
+    JsonObject *object = json_object_new();
+    json_object_set_int_member(object, "time", self->time);
+    json_object_set_string_member(object, "type", self->type);
+    json_object_set_object_member(object, "header", u_message_header_to_json(self->header));
+    json_object_set_object_member(object, "payload", u_message_payload_to_json(self->payload));
+    json_object_set_object_member(object, "body", self->body);
+    return object;
+}
 
-UMessage *u_message_new_from_json(char *json);
+JsonObject *u_message_header_to_json(UMessageHeader *self)
+{
+    JsonObject *object = json_object_new();
+    json_object_set_string_member(object, "type", self->type);
+    json_object_set_string_member(object, "method", self->method);
+    json_object_set_string_member(object, "status", self->status);
+    return object;
+}
+
+JsonObject *u_message_payload_to_json(UMessagePayload *self)
+{
+    JsonObject *object = json_object_new();
+    json_object_set_int_member(object, "port", self->port);
+    json_object_set_int_member(object, "size", self->size);
+    return object;
+}
+
+void u_message_body_put_string_data(UMessage *self, const char *key, const char *value)
+{
+    json_object_set_string_member(self->body, key, value);
+}
+
+void u_message_body_put_int_data(UMessage *self, const char *key, int value)
+{
+    json_object_set_int_member(self->body, key, value);
+}
+
+void u_message_body_put_bool_data(UMessage *self, const char *key, gboolean value)
+{
+    json_object_set_boolean_member(self->body, key, value);
+}
+
+void u_message_body_put_double_data(UMessage *self, const char *key, double value)
+{
+    json_object_set_double_member(self->body, key, value);
+}
+
+void u_message_body_put_array_data(UMessage *self, const char *key, JsonArray *value)
+{
+    json_object_set_array_member(self->body, key, value);
+}
+
+void u_message_body_put_object_data(UMessage *self, const char *key, JsonObject *value)
+{
+    json_object_set_object_member(self->body, key, value);
+}

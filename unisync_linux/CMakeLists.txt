@@ -18,3 +18,6 @@ target_link_libraries(unisync_linux ${GTK_LIBRARIES})
 
 target_include_directories(unisync_linux PUBLIC ${UUID_INCLUDE_DIRS})
 target_link_libraries(unisync_linux ${UUID_LIBRARIES})
+
+target_include_directories(unisync_linux PUBLIC ${JSONGLIB_INCLUDE_DIRS})
+target_link_libraries(unisync_linux ${JSONGLIB_LIBRARIES})

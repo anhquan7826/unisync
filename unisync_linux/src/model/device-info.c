@@ -118,3 +118,4 @@ gchar* u_device_info_to_string(UDeviceInfo *self) {
         NULL
     ); 
 }
+
