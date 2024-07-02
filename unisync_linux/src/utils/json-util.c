@@ -15,7 +15,7 @@
 #define READER_FREE \
     json_reader_free(reader);
 
-void _util_json_print_foreach(
+static void _util_json_print_foreach(
     JsonObject  *object,
     const gchar *member_name,
     JsonNode    *member_node,

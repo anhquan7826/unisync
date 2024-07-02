@@ -8,6 +8,7 @@ pkg_check_modules(GTK REQUIRED gtk4)
 
 pkg_search_module(UUID REQUIRED uuid)
 pkg_search_module(JSONGLIB REQUIRED json-glib-1.0)
+pkg_search_module(AVAHI REQUIRED avahi-client)
 
 file(GLOB_RECURSE SOURCE src/*.c)
 add_executable(unisync_linux ${SOURCE})
@@ -21,3 +22,6 @@ target_link_libraries(unisync_linux ${UUID_LIBRARIES})
 
 target_include_directories(unisync_linux PUBLIC ${JSONGLIB_INCLUDE_DIRS})
 target_link_libraries(unisync_linux ${JSONGLIB_LIBRARIES})
+
+target_include_directories(unisync_linux PUBLIC ${AVAHI_INCLUDE_DIRS})
+target_link_libraries(unisync_linux ${AVAHI_LIBRARIES})

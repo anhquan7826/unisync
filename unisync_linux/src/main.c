@@ -2,9 +2,13 @@
 #include "device-info.h"
 #include "device-message.h"
 #include "json-util.h"
+#include "mdns.h"
 
 int main(int argc, char **argv)
 {
+    mdns_registration_new("unisync", "_unisync._tcp", "local", 50810);
+    sleep(10);
+    mdns_registration_free();
     JsonObject *object;
     object = json_object_new();
     json_object_set_string_member(object, "test", "hello world!");

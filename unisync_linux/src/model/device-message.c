@@ -32,34 +32,36 @@ G_DEFINE_TYPE(UMessage, u_message, G_TYPE_OBJECT)
 G_DEFINE_TYPE(UMessageHeader, u_message_header, G_TYPE_OBJECT)
 G_DEFINE_TYPE(UMessagePayload, u_message_payload, G_TYPE_OBJECT)
 
-#define PROP_MESSAGE_TIME 1
+enum {
+    PROP_MESSAGE_TIME,
+    PROP_MESSAGE_TYPE,
+    PROP_MESSAGE_HEADER,
+    PROP_MESSAGE_PAYLOAD,
+    PROP_MESSAGE_BODY,
+    N_PROP_MESSAGE
+};
 GParamSpec *message_time_pspec;
-
-#define PROP_MESSAGE_TYPE 2
 GParamSpec *message_type_pspec;
-
-#define PROP_MESSAGE_HEADER 3
 GParamSpec *message_header_pspec;
-
-#define PROP_MESSAGE_PAYLOAD 4
 GParamSpec *message_payload_pspec;
-
-#define PROP_MESSAGE_BODY 5
 GParamSpec *message_body_pspec;
 
-#define PROP_MESSAGE_HEADER_TYPE 1
+enum {
+    PROP_MESSAGE_HEADER_TYPE,
+    PROP_MESSAGE_HEADER_METHOD,
+    PROP_MESSAGE_HEADER_STATUS,
+    N_PROP_MESSAGE_HEADER
+};
 GParamSpec *message_header_type_pspec;
-
-#define PROP_MESSAGE_HEADER_METHOD 2
 GParamSpec *message_header_method_pspec;
-
-#define PROP_MESSAGE_HEADER_STATUS 3
 GParamSpec *message_header_status_pspec;
 
-#define PROP_MESSAGE_PAYLOAD_PORT 1
+enum {
+    PROP_MESSAGE_PAYLOAD_PORT,
+    PROP_MESSAGE_PAYLOAD_SIZE,
+    N_PROP_MESSAGE_PAYLOAD
+};
 GParamSpec *message_payload_port_pspec;
-
-#define PROP_MESSAGE_PAYLOAD_SIZE 2
 GParamSpec *message_payload_size_pspec;
 
 static void u_message_get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)

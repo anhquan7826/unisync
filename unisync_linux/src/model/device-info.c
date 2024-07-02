@@ -1,9 +1,12 @@
 #include "device-info.h"
 #include <uuid/uuid.h>
 
-#define PROP_DEVICE_INFO_ID 1
-#define PROP_DEVICE_INFO_NAME 2
-#define PROP_DEVICE_INFO_TYPE 3
+enum {
+    PROP_DEVICE_INFO_ID,
+    PROP_DEVICE_INFO_NAME,
+    PROP_DEVICE_INFO_TYPE,
+    N_PROP_DEVICE_INFO
+};
 
 static GParamSpec *device_id_pspec = NULL;
 static GParamSpec *device_name_pspec = NULL;
