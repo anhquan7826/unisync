@@ -10,7 +10,16 @@ pkg_search_module(UUID REQUIRED uuid)
 pkg_search_module(JSONGLIB REQUIRED json-glib-1.0)
 pkg_search_module(AVAHI REQUIRED avahi-client)
 
-file(GLOB_RECURSE SOURCE src/*.c)
+set(
+    SOURCE 
+    src/main.c
+    src/core/mdns.c
+    src/core/socket.c
+    src/core/unisync-process.c
+    src/model/device-info.c
+    src/model/device-message.c
+    src/utils/json-util.c
+)
 add_executable(unisync_linux ${SOURCE})
 target_include_directories(unisync_linux PRIVATE include/)
 

@@ -91,7 +91,7 @@ static void u_message_get_property(GObject *object, guint property_id, GValue *v
     }
 }
 
-static void u_message_set_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+static void u_message_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
     UMessage *message = U_MESSAGE(object);
 
@@ -118,11 +118,20 @@ static void u_message_set_property(GObject *object, guint property_id, GValue *v
     }
 }
 
+static void u_message_dispose(GObject *object) {
+    UMessage *self = U_MESSAGE(object);
+    g_object_unref(self->header);
+    g_object_unref(self->payload);
+    g_object_unref(self->body);
+    G_OBJECT_CLASS(u_message_parent_class)->dispose(object);
+}
+
 static void u_message_class_init(UMessageClass *klass)
 {
     GObjectClass *gobject_class = G_OBJECT_CLASS(klass);
     gobject_class->get_property = u_message_get_property;
     gobject_class->set_property = u_message_set_property;
+    gobject_class->dispose = u_message_dispose;
     message_time_pspec = g_param_spec_long("time", "time", "Message timestamp", 0, G_MAXLONG, 0, G_PARAM_READWRITE);
     message_type_pspec = g_param_spec_string("type", "type", "Message type", NULL, G_PARAM_READWRITE);
     message_header_pspec = g_param_spec_object("header", "header", "Messager header", U_TYPE_MESSAGE_HEADER, G_PARAM_READWRITE);
@@ -162,7 +171,7 @@ static void u_message_header_get_property(GObject *object, guint property_id, GV
     }
 }
 
-static void u_message_header_set_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+static void u_message_header_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
     UMessageHeader *header = U_MESSAGE_HEADER(object);
 
@@ -221,7 +230,7 @@ static void u_message_payload_get_property(GObject *object, guint property_id, G
     }
 }
 
-static void u_message_payload_set_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec)
+static void u_message_payload_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec)
 {
     UMessagePayload *payload = U_MESSAGE_PAYLOAD(object);
 
