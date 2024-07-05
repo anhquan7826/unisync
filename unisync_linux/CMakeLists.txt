@@ -19,6 +19,7 @@ set(
     src/model/device-info.c
     src/model/device-message.c
     src/utils/json-util.c
+    src/utils/socket-util.c
 )
 add_executable(unisync_linux ${SOURCE})
 target_include_directories(unisync_linux PRIVATE include/)

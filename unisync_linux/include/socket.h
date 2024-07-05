@@ -1,6 +1,6 @@
 #pragma once
 #include <gio/gio.h>
 
-typedef void (*OnNewSocketCallback) (GSocket *);
+typedef void (*OnNewSocketCallback) (GSocketConnection *);
 
 void socket_server_init(OnNewSocketCallback cb);
