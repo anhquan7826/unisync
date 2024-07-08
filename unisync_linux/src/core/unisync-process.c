@@ -7,17 +7,38 @@ static GThread *process_thread;
 
 static void on_stream_data(const gchar* data)
 {
-    g_print("%s", data);
+    g_print("%s\n", data);
+}
+
+static void on_stream_close(gpointer data)
+{
+    g_print("Connection closed");
+}
+
+static gpointer listen_std_in(gpointer data) 
+{
+    GSocketConnection *socket = G_SOCKET_CONNECTION(data);
+    GDataOutputStream *out_stream = util_socket_get_output_stream(socket);
+    char input[1024];
+    GError *error = NULL;
+    while (TRUE)
+    {
+        printf("> ");
+        fgets(input, sizeof(input), stdin);
+        input[strcspn(input, "\n")] = 0;
+        g_data_output_stream_put_string(out_stream, input, NULL, &error);
+        if (error)
+        {
+            g_printerr("Cannot write to output stream:\n%s\n", error->message);
+            error = NULL;
+        }
+    }
 }
 
 static void on_new_socket_connection(GSocketConnection *socket)
 {
-    GSocketAddress *socket_address = g_socket_connection_get_remote_address(socket, NULL);
-    gchar *address = g_socket_connectable_to_string(G_SOCKET_CONNECTABLE(socket_address));
-    g_print("Connected: %s\n", address);
-    g_free(address);
-    g_object_unref(socket_address);
-    util_socket_read_input_stream(socket, on_stream_data);
+    util_socket_read_input_stream(socket, on_stream_data, on_stream_close, NULL);
+    GThread *thread = g_thread_new("stdin", listen_std_in, socket);
 }
 
 static gpointer start(gpointer data)

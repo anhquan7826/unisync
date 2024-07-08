@@ -9,7 +9,7 @@ void socket_server_init(OnNewSocketCallback cb)
     socket = g_socket_listener_new();
     g_print("Server socket created. Binding...\n");
     GSocketAddress *socket_address = g_inet_socket_address_new(
-        g_inet_address_new_loopback(G_SOCKET_FAMILY_IPV4),
+        g_inet_address_new_any(G_SOCKET_FAMILY_IPV4),
         50112
     );
     g_socket_listener_add_address(
@@ -31,8 +31,13 @@ void socket_server_init(OnNewSocketCallback cb)
         GSocketConnection *new_socket = g_socket_listener_accept(socket, NULL, NULL, &error);
         if (error) {
             g_printerr("Error: Cannot accept socket connection:\n%s\n", error->message);
-            exit(1);
+            continue;
         }
+        GSocketAddress *socket_address = g_socket_connection_get_remote_address(new_socket, NULL);
+        gchar *address = g_socket_connectable_to_string(G_SOCKET_CONNECTABLE(socket_address));
+        g_print("Connected: %s\n", address);
+        g_object_unref(socket_address);
+        g_free(address);
         cb(new_socket);
     }
 }
