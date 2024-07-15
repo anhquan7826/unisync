@@ -1,0 +1,26 @@
+<node>
+    <interface name="com.anhquan.UnisyncDbus1.Device">
+        <method name="GetConnectedDevices">
+            <arg name="devices" direction="out" type="as"></arg>
+        </method>
+        <method name="GetPairedDevices">
+            <arg name="devices" direction="out" type="as"></arg>
+        </method>
+        <method name="GetPairStatus">
+            <arg name="id" direction="in" type="s"></arg>
+            <arg name="state" direction="out" type="s"></arg>
+        </method>
+        <method name="AcceptPair">
+            <arg name="id" direction="in" type="s"></arg>
+            <arg name="result" direction="out" type="b"></arg>
+        </method>
+        <method name="RejectPair">
+            <arg name="id" direction="in" type="s"></arg>
+            <arg name="result" direction="out" type="b"></arg>
+        </method>
+        <method name="Unpair">
+            <arg name="id" direction="in" type="s"></arg>
+            <arg name="result" direction="out" type="b"></arg>
+        </method>
+    </interface>
+</node>
